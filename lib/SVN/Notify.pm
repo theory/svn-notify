@@ -933,7 +933,7 @@ sub output_metadata {
       "Revision: $self->{revision}\n",
       "Author:   $self->{user}\n",
       "Date:     $self->{date}\n";
-    printf $out "ViewCVS:  $self->{viewcvs_url}", $self->{revision}
+    printf $out "ViewCVS:  $self->{viewcvs_url}\n", $self->{revision}
       if $self->{viewcvs_url};
     print $out "\n";
     return $self;
