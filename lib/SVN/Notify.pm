@@ -3,7 +3,7 @@ package SVN::Notify;
 # $Id$
 
 use strict;
-$SVN::Notify::VERSION = '2.0';
+$SVN::Notify::VERSION = '2.0_1';
 
 # This hash will be used in several of the functions below.
 my %map = ( U => 'Modified Files',
