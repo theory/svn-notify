@@ -10,10 +10,11 @@ my $build = Module::Build->new(
     create_makefile_pl => 'passthrough',
     add_to_cleanup     => ['t/data/output.txt'],
     script_files       => [ 'bin/svnnotify' ],
-    requires           => { Getopt::Long   => 0,
+    requires           => { Getopt::Long   => 0 },
+    recommends         => { POD::Usage     => 0 },
+    build_requires     => { Test::Simple => '0.17',
                             HTML::Entities => 0,
                           },
-    recommends         => { File::Spec     => 0 },
 );
 $build->create_build_script;
 

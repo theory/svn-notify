@@ -20,3 +20,4 @@ t/data/info/111.txt
 t/data/info/222.txt
 t/pod-coverage.t
 t/pod.t
+t/script.t

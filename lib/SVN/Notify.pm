@@ -155,7 +155,7 @@ sub prepare_contents {
 
 ##############################################################################
 
-sub notify {
+sub send {
     my $self = shift;
     return $self unless $self->{to};
     open(SENDMAIL, "|$self->{sendmail} -oi -t")
@@ -387,6 +387,14 @@ In F<post-commit>:
   svnnotify --repos-path "$1" --rev "$2" \
     --to-cx-regex i10n@example.com=I10N [options]
 
+In a custom script:
+
+  use SVN::Notify;
+
+  my $notifier = SVN::Notify->new(%params);
+  $notifier->prepare;
+  $notifier->send;
+
 =head1 Description
 
 This program may be used for sending email messages for Subversion repository
@@ -398,13 +406,31 @@ C<with_diff> and C<attach_diff> options below.
 
 =head1 Prerequisites
 
+=over
+
+=item Getopt::Long
+
 This script requires L<Getopt::Long|Getopt::Long>, which is included with
 Perl.
 
+=back
+
 =head1 Corequisites
 
+=over
+
+=item Pod::Usage
+
+For calling F<svnnotify> with the C<--help> or C<--man> options, or when it
+fails to process the command-line options, usage output will be triggered by
+L<Pod::Usage|Pod::Usage>, which has been included with Perl since 5.6.0.
+
+=item HTML::Entities
+
 For sending HTML formatted email, this script requires
-L<HTML::Entities|HTML::Entities>.
+L<HTML::Entities|HTML::Entities>, which is available from CPAN.
+
+=back
 
 =head1 OPTIONS
 

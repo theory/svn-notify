@@ -1,7 +1,12 @@
 SVN/Notify version 2.0
 ======================
 
-Subversion activity notification.
+This program may be used for sending email messages for Subversion repository
+activity. There are a number of different modes supported. A list of all the
+files affected by the commit will be assembled and listed in the single
+message. An additional option allows for diffs to be calculated for the recent
+changes, and either appended to the message or added as an attachment. Yet
+another option allows the messages to be sent in HTML format.
 
 INSTALLATION
 
@@ -21,7 +26,18 @@ Or, if you don't have Module::Build installed, type the following:
 
 DEPENDENCIES
 
-This module requires no modules or libraries not already included with Perl.
+SVN::Notify has the following dependencies:
+
+    * Getopt::Long
+        This module is included with Perl.
+
+    * Pod::Usage
+        For calling "svnnotify" with the "--help" or "--man" options, or when
+        it fails to process the command-line options, usage output will be
+        triggered by Pod::Usage, has been included with Perl since 5.6.0.
+
+    * HTML::Entities
+        This module is required for sending HTML-formatted notifications.
 
 COPYRIGHT AND LICENCE
 

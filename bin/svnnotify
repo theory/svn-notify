@@ -41,7 +41,12 @@ GetOptions(
     "version|v"          => \$opts{version},
 ) or require Pod::Usage && Pod::Usage::pod2usage(2);
 
-print "svnnotify ", SVN::Notify->VERSION, $/, exit if delete $opts{version};
+if (delete $opts{version}) {
+    require SVN::Notify;
+    print "svnnotify ", SVN::Notify->VERSION, $/;
+    exit;
+}
+
 require Pod::Usage && Pod::Usage::pod2usage(1) if delete $opts{help};
 require Pod::Usage && Pod::Usage::pod2usage(-exitstatus => 0, -verbose => 2)
   if delete$opts{man};
@@ -49,7 +54,7 @@ require Pod::Usage && Pod::Usage::pod2usage(-exitstatus => 0, -verbose => 2)
 require SVN::Notify;
 my $notifier = SVN::Notify->new(%opts);
 $notifier->prepare;
-$notifier->notify;
+$notifier->send;
 
 1;
 __END__
@@ -68,10 +73,7 @@ Fake-out Pod::Usage
 
 =end comment
 
-In F<post-commit>:
-
-  svnnotify --repos-path "$1" --rev "$2" --to developers@example.com [options]
-  svnnotify --repos-path "$1" --rev "$2" --to-cx-regex i10n@example.com=I10N [options]
+  svnnotify --repos-path "$1" --rev "$2" [options]
 
 =head1 Options
 
@@ -85,9 +87,9 @@ In F<post-commit>:
                                directories affected by the commit. Required
                                unless --to.
   -l --svnlook SVNLOOK         Location of the svnlook executable. Defaults
-                               to "svnlook".
+                               to "/usr/local/bin/svnlook".
   -s --sendmail SENDMAIL       Location of the sendmail executable. Defaults
-                               to "sendmail".
+                               to "/usr/sbin/sendmail".
   -d --with-diff               Include the diff in the message.
   -a --attach-diff             Attach the diff to the message.
   -R --reply-to ADDRESS        Address for use in the Reply-To header.
@@ -95,9 +97,9 @@ In F<post-commit>:
   -C --subject-cx              Include the context of the commit in the
                                subject.
   -i --max-sub-length LENGTH   Maximum size of the subject line.
-  -D --user-domain DOMAIN      Domain name to append to t username to complete
-                               the email addres in the From header.
-  -A --format FORMAT           Format, "text" or "html". Defaults to "text".
+  -D --user-domain DOMAIN      Domain name to append to the username to
+                               complete the email address in the From header.
+  -A --format FORMAT           Format: "text" or "html". Defaults to "text".
   -U --viewcvs-url URL         Include links to specified ViewCVS URL.
   -V --verbose                 Verbose mode.
   -h --help                    Print this usage statement and exit.

@@ -30,7 +30,7 @@ ok( $notifier->prepare_recipients, 'prepare recipients' );
 ok( $notifier->prepare_contents, 'prepare contents' );
 ok( $notifier->prepare_files, 'prepare files');
 ok( $notifier->prepare_subject, 'prepare subject');
-ok( $notifier->notify, "Notify" );
+ok( $notifier->send, "Notify" );
 
 # Get the output.
 my $email = get_output();
@@ -76,7 +76,7 @@ ok( $notifier = SVN::Notify->new(%args, format => 'html'),
     "Construct new HTML notifier" );
 isa_ok($notifier, 'SVN::Notify');
 ok( $notifier->prepare, "Single method call prepare" );
-ok( $notifier->notify, "HTML notify" );
+ok( $notifier->send, "HTML notify" );
 
 # Get the output.
 $email = get_output();
@@ -121,7 +121,7 @@ ok( $notifier = SVN::Notify->new(%args, with_diff => 1),
     "Construct new diff notifier" );
 isa_ok($notifier, 'SVN::Notify');
 ok( $notifier->prepare, "Single method call prepare" );
-ok( $notifier->notify, "Diff notify" );
+ok( $notifier->send, "Diff notify" );
 
 # Get the output.
 $email = get_output();
@@ -154,7 +154,7 @@ ok( $notifier = SVN::Notify->new(%args, attach_diff => 1),
     "Construct new attach diff notifier" );
 isa_ok($notifier, 'SVN::Notify');
 ok( $notifier->prepare, "Single method call prepare" );
-ok( $notifier->notify, "Attach diff notify" );
+ok( $notifier->send, "Attach diff notify" );
 
 # Get the output.
 $email = get_output();
@@ -188,7 +188,7 @@ ok( $notifier = SVN::Notify->new(%args, format => 'html', with_diff => 1),
     "Construct new HTML diff notifier" );
 isa_ok($notifier, 'SVN::Notify');
 ok( $notifier->prepare, "Single method call prepare" );
-ok( $notifier->notify, "HTML diff notify" );
+ok( $notifier->send, "HTML diff notify" );
 
 # Get the output.
 $email = get_output();
@@ -222,7 +222,7 @@ ok( $notifier = SVN::Notify->new(%args, format => 'html', attach_diff => 1),
     "Construct new HTML attach diff notifier" );
 isa_ok($notifier, 'SVN::Notify');
 ok( $notifier->prepare, "Single method call prepare" );
-ok( $notifier->notify, "Attach HTML attach diff notify" );
+ok( $notifier->send, "Attach HTML attach diff notify" );
 
 # Get the output.
 $email = get_output();
@@ -261,7 +261,7 @@ ok( $notifier = SVN::Notify->new(%args, to_regex_map => {
 }), "Construct new regex_map notifier" );
 isa_ok($notifier, 'SVN::Notify');
 ok( $notifier->prepare, "Prepare to_regex_map" );
-ok( $notifier->notify, "Notify to_regex_map" );
+ok( $notifier->send, "Notify to_regex_map" );
 
 # Check the output.
 $email = get_output();
@@ -276,7 +276,7 @@ ok( $notifier = SVN::Notify->new(%args, reply_to => 'me@example.com'),
     "Construct new reply_to notifier" );
 isa_ok($notifier, 'SVN::Notify');
 ok( $notifier->prepare, "Prepare reply_to" );
-ok( $notifier->notify, "Notify reply_to" );
+ok( $notifier->send, "Notify reply_to" );
 
 # Check the output.
 $email = get_output();
@@ -289,7 +289,7 @@ ok( $notifier = SVN::Notify->new(%args, subject_prefix => '[Commits]'),
     "Construct new subject_prefix notifier" );
 isa_ok($notifier, 'SVN::Notify');
 ok( $notifier->prepare, "Prepare subject_prefix" );
-ok( $notifier->notify, "Notify subject_prefix" );
+ok( $notifier->send, "Notify subject_prefix" );
 
 # Check the output.
 $email = get_output();
@@ -303,7 +303,7 @@ ok( $notifier = SVN::Notify->new(%args, subject_cx => 1),
     "Construct new subject_cx notifier" );
 isa_ok($notifier, 'SVN::Notify');
 ok( $notifier->prepare, "Prepare subject_cx" );
-ok( $notifier->notify, "Notify subject_cx" );
+ok( $notifier->send, "Notify subject_cx" );
 
 # Check the output.
 $email = get_output();
@@ -317,7 +317,7 @@ ok( $notifier = SVN::Notify->new(%args, revision => '222', subject_cx => 1),
     "Construct new subject_cx file notifier" );
 isa_ok($notifier, 'SVN::Notify');
 ok( $notifier->prepare, "Prepare subject_cx file" );
-ok( $notifier->notify, "Notify subject_cx file" );
+ok( $notifier->send, "Notify subject_cx file" );
 
 # Check the output.
 $email = get_output();
@@ -331,7 +331,7 @@ ok( $notifier = SVN::Notify->new(%args, max_sub_length => 10),
     "Construct new max_sub_length notifier" );
 isa_ok($notifier, 'SVN::Notify');
 ok( $notifier->prepare, "Prepare max_sub_length" );
-ok( $notifier->notify, "Notify max_sub_length" );
+ok( $notifier->send, "Notify max_sub_length" );
 
 # Check the output.
 $email = get_output();
@@ -345,7 +345,7 @@ ok( $notifier = SVN::Notify->new(%args, user_domain => 'example.net'),
     "Construct new user_domain notifier" );
 isa_ok($notifier, 'SVN::Notify');
 ok( $notifier->prepare, "Prepare user_domain" );
-ok( $notifier->notify, "Notify user_domain" );
+ok( $notifier->send, "Notify user_domain" );
 
 # Check the output.
 $email = get_output();
@@ -358,7 +358,7 @@ ok( $notifier = SVN::Notify->new(%args, viewcvs_url => 'http://svn.example.com/'
     "Construct new view_cvs_url notifier" );
 isa_ok($notifier, 'SVN::Notify');
 ok( $notifier->prepare, "Prepare view_cvs_url" );
-ok( $notifier->notify, "Notify view_cvs_url" );
+ok( $notifier->send, "Notify view_cvs_url" );
 
 # Check the output.
 $email = get_output();
@@ -376,7 +376,7 @@ ok( $notifier = SVN::Notify->new(%args,
     "Construct new HTML view_cvs_url notifier" );
 isa_ok($notifier, 'SVN::Notify');
 ok( $notifier->prepare, "Prepare HTML view_cvs_url" );
-ok( $notifier->notify, "Notify HTML view_cvs_url" );
+ok( $notifier->send, "Notify HTML view_cvs_url" );
 
 # Check the output.
 $email = get_output();
