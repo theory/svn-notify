@@ -391,7 +391,7 @@ sub register_attributes {
             $OPTS{$attrs[-1]} = $opt;
         }
     }
-    _accessors(@attrs);
+    $class->_accessors(@attrs);
 }
 
 ##############################################################################
@@ -1051,15 +1051,24 @@ sub _dump_diff {
 
 ##############################################################################
 
-_accessors(qw(repos_path revision to to_regex_map from user_domain svnlook
-              sendmail charset language with_diff attach_diff reply_to
-              subject_prefix subject_cx max_sub_length viewcvs_url verbose
-              boundary user date message message_size subject files));
+__PACKAGE__->_accessors(qw(repos_path revision to to_regex_map from
+                           user_domain svnlook sendmail charset language
+                           with_diff attach_diff reply_to subject_prefix
+                           subject_cx max_sub_length viewcvs_url verbose
+                           boundary user date message message_size subject
+                           files));
+
+##############################################################################
+# This method is used to create accessors for the list of attributes passed to
+# it. It creates them both for SVN::Notify (just above) and for all subclasses
+# in register_attributes().
+##############################################################################
 
 sub _accessors {
+    my $class = shift;
     for my $attr (@_) {
         no strict 'refs';
-        *{$attr} = sub {
+        *{"$class\::$attr"} = sub {
             my $self = shift;
             return $self->{$attr} unless @_;
             $self->{$attr} = shift;
