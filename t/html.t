@@ -8,8 +8,10 @@ use File::Spec::Functions;
 
 if ($^O eq 'MSWin32') {
     plan skip_all => "SVN::Notify::HTML not yet supported on Win32";
-} else {
+} elsif (eval { require HTML::Entities }) {
     plan tests => 92;
+} else {
+    plan skip_all => "SVN::Notify::HTML requires HTML::Entities";
 }
 
 BEGIN { use_ok('SVN::Notify::HTML') }

@@ -11,10 +11,8 @@ my $build = Module::Build->new(
     add_to_cleanup     => ['t/data/output.txt'],
     script_files       => [ 'bin/svnnotify' ],
     requires           => { Getopt::Long   => 0 },
-    recommends         => { POD::Usage     => 0,
-                            HTML::Entities => 0,
-                          },
-    build_requires     => { Test::Simple => '0.17',
+    build_requires     => { Test::Simple => '0.17' },
+    recommends         => { Pod::Usage     => 0,
                             HTML::Entities => 0,
                           },
 );
