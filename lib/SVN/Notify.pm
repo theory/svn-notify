@@ -29,35 +29,13 @@ Use the class in a custom script:
 
 =head1 Description
 
-This program may be used for sending email messages for Subversion repository
-activity. There are a number of different modes supported. A list of all the
-files affected by the commit will be assembled and listed in the single
-message. An additional option allows for diffs to be calculated for the recent
-changes, and either appended to the message or added as an attachment. See the
+This class may be used for sending email messages for Subversion repository
+activity. There are a number of different modes supported, and SVN::Notify is
+fully subclassable, to easily add new functionality. By default, A list of all
+the files affected by the commit will be assembled and listed in a single
+message. An additional option allows diffs to be calculated for the changes
+and either appended to the message or added as an attachment. See the
 C<with_diff> and C<attach_diff> options below.
-
-=head1 Prerequisites
-
-=over
-
-=item Getopt::Long
-
-The F<svnnotify> script requires L<Getopt::Long|Getopt::Long>, which is
-included with Perl.
-
-=back
-
-=head1 Corequisites
-
-=over
-
-=item Pod::Usage
-
-For calling F<svnnotify> with the C<--help> or C<--man> options, or when it
-fails to process the command-line options, usage output will be triggered by
-L<Pod::Usage|Pod::Usage>, which has been included with Perl since 5.6.0.
-
-=back
 
 =head1 Usage
 
@@ -667,7 +645,7 @@ It is thus essentially a shortcut for:
     if ($notifier->{with_diff}) {
         if ($notifier->{attach_diff}) {
             $notifier->end_body($out);
-            $notifier->attach_diff($out);
+            $notifier->output_attached_diff($out);
         } else {
             $notifier->output_diff($out);
             $notifier->end_body($out);
@@ -691,7 +669,7 @@ sub output {
     if ($self->{with_diff}) {
         if ($self->{attach_diff}) {
             $self->end_body($out);
-            $self->attach_diff($out);
+            $self->output_attached_diff($out);
         } else {
             $self->output_diff($out);
             $self->end_body($out);
@@ -851,7 +829,7 @@ sub output_file_lists {
   $notifier->end_body($file_handle);
 
 Closes out the body of the email. Designed to be called when the body of the
-message is complete, and before any call to C<attach_diff()>.
+message is complete, and before any call to C<output_attached_diff()>.
 
 =cut
 
@@ -881,16 +859,16 @@ sub output_diff {
 
 ##############################################################################
 
-=head3 attach_diff
+=head3 output_attached_diff
 
-  $notifier->attach_diff($file_handle);
+  $notifier->output_attached_diff($file_handle);
 
 Sends the output of C<svnlook diff> to the specified file handle as an
 attachment for inclusion in the notification message.
 
 =cut
 
-sub attach_diff {
+sub output_attached_diff {
     my ($self, $out) = @_;
     $self->_dbpnt( "Attaching diff") if $self->{verbose} > 2;
     print $out "\n--$self->{boundary}\n",
@@ -909,7 +887,7 @@ sub attach_diff {
 
 Outputs the final part of the message,. In this case, that means only a
 boundary if the C<attach_diff> parameter is true. Designed to be called after
-any call to C<attach_diff()>.
+any call to C<output_attached_diff()>.
 
 =cut
 
@@ -921,8 +899,8 @@ sub end_message {
 
 ##############################################################################
 # This method actually dumps the output of C<svnlook diff>. It's a separate
-# method because attach_diff() and output_diff() do essentially the same
-# thing, so they can both call it.
+# method because output_attached_diff() and output_diff() do essentially the
+# same thing, so they can both call it.
 ##############################################################################
 
 sub _dump_diff {
@@ -990,6 +968,16 @@ sub _dbpnt { print __PACKAGE__, ": $_[1]\n" }
 
 1;
 __END__
+
+=head2 See Also
+
+=over
+
+=item L<SVN::Notify::HTML|SVN::Notify::HTML>
+
+Subclasses SVN::Notify.
+
+=back
 
 =head1 Bugs
 

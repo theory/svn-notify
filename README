@@ -1,12 +1,13 @@
-SVN/Notify version 2.01
+SVN/Notify version 2.10
 =======================
 
-This program may be used for sending email messages for Subversion repository
-activity. There are a number of different modes supported. A list of all the
-files affected by the commit will be assembled and listed in the single
-message. An additional option allows for diffs to be calculated for the recent
-changes, and either appended to the message or added as an attachment. Yet
-another option allows the messages to be sent in HTML format.
+This class may be used for sending email messages for Subversion repository
+activity. There are a number of different modes supported, and SVN::Notify is
+fully subclassable, to easily add new functionality. By default, A list of all
+the files affected by the commit will be assembled and listed in a single
+message. An additional option allows diffs to be calculated for the changes
+and either appended to the message or added as an attachment. The included
+subclass, SVN::Notify::HTML, allows the messages to be sent in HTML format.
 
 INSTALLATION
 
@@ -37,7 +38,8 @@ SVN::Notify has the following dependencies:
         triggered by Pod::Usage, has been included with Perl since 5.6.0.
 
     * HTML::Entities
-        This module is required for sending HTML-formatted notifications.
+        This module is required for sending HTML-formatted notifications
+        with SVN::Notify::HTML.
 
 COPYRIGHT AND LICENCE
 
