@@ -13,7 +13,6 @@ t/bin/testsendmail
 t/bin/testsendmail.bat
 t/bin/testsvnlook
 t/bin/testsvnlook.bat
-t/colordiff.t
 t/data/changed/111.txt
 t/data/changed/222.txt
 t/data/diff/111.txt
@@ -23,6 +22,7 @@ t/data/info/111.txt
 t/data/info/222.txt
 t/errors.t
 t/html.t
+t/htmlcolordiff.t
 t/pod-coverage.t
 t/pod.t
 t/script.t
