@@ -478,6 +478,24 @@ environment variable if this is not the location of F<sendmail> on your box.
 Report all bugs via the CPAN Request Tracker at
 L<http://rt.cpan.org/NoAuth/Bugs.html?Dist=SVN-Notify>.
 
+=head1 To Do
+
+=over
+
+=item *
+
+Add tests for verbose modes.
+
+=item *
+
+Add charset option.
+
+=item *
+
+Documentation.
+
+=back
+
 =head1 Author
 
 David Wheeler <david@kineticode.com>
