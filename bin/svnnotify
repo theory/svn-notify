@@ -27,6 +27,7 @@ GetOptions(
     "user-domain|D=s"    => \$opts{user_domain},
     "svnlook|l=s"        => \$opts{svnlook},
     "sendmail|s=s"       => \$opts{sendmail},
+    "charset|c=s"        => \$opts{charset},
     "with-diff|d"        => \$opts{with_diff},
     "attach-diff|a"      => \$opts{attach_diff},
     "reply-to|R=s"       => \$opts{reply_to},
@@ -92,6 +93,8 @@ Fake-out Pod::Usage
                                to "/usr/local/bin/svnlook".
   -s --sendmail SENDMAIL       Location of the sendmail executable. Defaults
                                to "/usr/sbin/sendmail".
+  -c --charset CHARSET         The character set of the log message and the
+                               repository files.
   -d --with-diff               Include the diff in the message.
   -a --attach-diff             Attach the diff to the message.
   -R --reply-to ADDRESS        Address for use in the Reply-To header.

@@ -9,7 +9,7 @@ use File::Spec::Functions;
 if ($^O eq 'MSWin32') {
     plan skip_all => "SVN::Notify not yet supported on Win32";
 } else {
-    plan tests => 145;
+    plan tests => 150;
 }
 
 BEGIN { use_ok('SVN::Notify') }
@@ -408,6 +408,20 @@ $email = get_output();
 like( $email,
       qr{  \<li\>\<a href="http://svn\.example\.com/trunk/Class-Meta/lib/Class/Meta\.pm"\>trunk/Class-Meta/lib/Class/Meta\.pm\</a\> \(\<a href="http://svn\.example\.com/trunk/Class-Meta/lib/Class/Meta\.pm\?r1=110\&amp;r2=111"\>Diff\</a\>\)\</li\>\n},
   "Check for HTML URL" );
+
+##############################################################################
+# Try charset.
+##############################################################################
+ok( $notifier = SVN::Notify->new(%args, charset => 'ISO-8859-1'),
+    "Construct new charset notifier" );
+isa_ok($notifier, 'SVN::Notify');
+ok( $notifier->prepare, "Prepare charset" );
+ok( $notifier->send, "Notify charset" );
+
+# Check the output.
+$email = get_output();
+like( $email, qr{Content-Type: text/plain; charset=ISO-8859-1\n},
+      'Check Content-Type charset' );
 
 
 ##############################################################################

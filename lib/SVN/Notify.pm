@@ -208,6 +208,15 @@ environment variable if this is not the location of F<sendmail> on your box.
 The same caveats as applied to the location of the F<svnlook> executable
 apply here.
 
+=item charset
+
+  svnnotify --charset UTF-8
+  svnnotify -c Big5
+
+The character set typically used on the repository for log messages, file
+names, and file contents. Used to specify the character set in the email
+Content-Type headers. Defaults to UTF-8.
+
 =item with_diff
 
   svnnotify --with-diff
@@ -324,6 +333,7 @@ sub new {
     $params{format}    ||= 'text';
     $params{with_diff} ||= $params{attach_diff};
     $params{verbose}   ||= 0;
+    $params{charset}   ||= 'UTF-8';
 
     # Append slash to viewcvs_url, if necessary.
     $params{viewcvs_url} .= '/'
@@ -423,6 +433,7 @@ sub prepare_recipients {
         }
         # Grab the context if it's needed for the subject.
         if ($self->{subject_cx}) {
+            # XXX Do we need to set utf8 here?
             my $l = length;
             ($len, $cx) = ($l, $_) unless defined $len && $len < $l;
             _dbpnt qq{Context is "$cx"} if $self->{verbose} > 1;
@@ -605,7 +616,7 @@ sub send {
     }
 
     # Output content-type and encoding headers.
-    print SENDMAIL "Content-Type: $ctype; charset=UTF-8\n",
+    print SENDMAIL "Content-Type: $ctype; charset=$self->{charset}\n",
       "Content-Transfer-Encoding: 8bit\n\n";
 
     # Output the message.
@@ -764,7 +775,7 @@ sub output_diff {
           . sprintf '-%04s-%02s-%02sT%02s-%02s-%02sZ.diff', @gm[5,4,3,2,1,0];
         print $out "--$self->{attach_diff}\n",
           "Content-Disposition: attachment; filename=$file\n",
-          "Content-Type: text/plain; charset=UTF-8\n",
+          "Content-Type: text/plain; charset=$self->{charset}\n",
           "Content-Transfer-Encoding: 8bit\n\n";
     }
 
@@ -841,14 +852,6 @@ L<http://rt.cpan.org/NoAuth/Bugs.html?Dist=SVN-Notify>.
 =item *
 
 Add tests for verbose modes.
-
-=item *
-
-Add charset option.
-
-=item *
-
-Add specific support for utf8?
 
 =item *
 
