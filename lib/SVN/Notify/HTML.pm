@@ -11,9 +11,6 @@ $SVN::Notify::HTML::VERSION = '2.31';
 
 __PACKAGE__->register_attributes(
     linkize      => 'linkize',
-    rt_url       => "rt-url=s",
-    bugzilla_url => "bugzilla-url=s",
-    jira_url     => "jira-url=s",
 );
 
 =head1 Name
@@ -82,33 +79,6 @@ additional parameters:
 A boolean attribute to specify whether or not to "linkize" the SVN log
 message--that is, to turn any URLs or email addresses in the log message into
 links.
-
-=item rt_url
-
-  svnnotify --rt-url 'http://rt.cpan.org/NoAuth/Bugs.html?id=%s'
-
-The URL of a Request Tracker (RT) server. If passed in, any strings in the log
-message of the form "Ticket # 12" or "ticket 6" or even "Ticket#1066" will be
-turned into links to the RT server. The URL must have the "%s" format where
-the RT ticket ID should be put into the URL.
-
-=item bugzilla_url
-
-  svnnotify --bugzilla-url 'http://bugzilla.mozilla.org/show_bug.cgi?id=%s'
-
-The URL of a Bugzilla server. If passed in, any strings in the log message of
-the form "Bug # 12" or "bug 6" or even "Bug#1066" will be turned into links to
-the Bugzilla server. The URL must have the "%s" format where the Bugzilla Bug
-ID should be put into the URL.
-
-=item jira_url
-
-  svnnotify --jira-url 'http://jira.atlassian.com/secure/ViewIssue.jspa?key=%s'
-
-The URL of a JIRA server. If passed in, any strings in the log message that
-appear to be JIRA keys (such as "JRA-1234") will be turned into links to the
-JIRA server. The URL must have the "%s" format where the Jira key should be
-put into the URL.
 
 =back
 

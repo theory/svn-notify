@@ -9,7 +9,7 @@ use File::Spec::Functions;
 if ($^O eq 'MSWin32') {
     plan skip_all => "SVN::Notify not yet supported on Win32";
 } else {
-    plan tests => 122;
+    plan tests => 135;
 }
 
 BEGIN { use_ok('SVN::Notify') }
@@ -320,6 +320,44 @@ ok( $notifier->execute, "Notify charset" );
 $email = get_output();
 like( $email, qr{Content-Type: text/plain; charset=ISO-8859-1\n},
       'Check Content-Type charset' );
+
+##############################################################################
+# Try Bug tracking URLs.
+##############################################################################
+ok( $notifier = SVN::Notify->new(
+    %args,
+    revision => 222,
+    viewcvs_url  => 'http://viewsvn.bricolage.cc/?rev=%s&view=rev',
+    rt_url       => 'http://rt.cpan.org/NoAuth/Bugs.html?id=%s',
+    bugzilla_url => 'http://bugzilla.mozilla.org/show_bug.cgi?id=%s',
+    jira_url     => 'http://jira.atlassian.com/secure/ViewIssue.jspa?key=%s',
+),
+    "Construct new URL notifier" );
+isa_ok($notifier, 'SVN::Notify');
+ok( $notifier->prepare, "Prepare URL" );
+ok( $notifier->execute, "Notify URL" );
+
+$email = get_output();
+
+# Check for application URLs.
+like( $email, qr|ViewCVS:\s+http://viewsvn\.bricolage\.cc/\?rev=222\&view=rev\n|,
+      'Check for main ViewCVS URL');
+like($email, qr/ViewCVS Links:\n/, 'Check for ViewCVS URLs label' );
+like($email,
+     qr{    http://viewsvn\.bricolage\.cc/\?rev=606&view=rev\n},
+     "Check for log mesage ViewCVS URL");
+like($email, qr/RT Links:\n/, 'Check for ViewCVS URLs label' );
+like($email,
+     qr{    http://rt\.cpan\.org/NoAuth/Bugs\.html\?id=4321\n},
+     "Check for RT URL");
+like($email, qr/Bugzilla Links:\n/, 'Check for ViewCVS URLs label' );
+like( $email,
+      qr{   http://bugzilla\.mozilla\.org/show_bug\.cgi\?id=709\n},
+      "Check for Bugzilla URL" );
+like($email, qr/JIRA Links:\n/, 'Check for ViewCVS URLs label' );
+like( $email,
+      qr{    http://jira\.atlassian\.com/secure/ViewIssue\.jspa\?key=TST-1608\n},
+      "Check for Jira URL" );
 
 ##############################################################################
 # Functions.

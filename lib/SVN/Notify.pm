@@ -280,6 +280,36 @@ link to the ViewCVS URL corresponding to the current revision number. The URL
 must have the "%s" format where the Subversion revision number should be put
 into the URL.
 
+=item rt_url
+
+  svnnotify --rt-url 'http://rt.cpan.org/NoAuth/Bugs.html?id=%s'
+  svnnotify -T 'http://rt.perl.org/NoAuth/Bugs.html?id=%s'
+
+The URL of a Request Tracker (RT) server. If passed in, any strings in the log
+message of the form "Ticket # 12" or "ticket 6" or even "Ticket#1066" will be
+turned into links to the RT server. The URL must have the "%s" format where
+the RT ticket ID should be put into the URL.
+
+=item bugzilla_url
+
+  svnnotify --bugzilla-url 'http://bugzilla.mozilla.org/show_bug.cgi?id=%s'
+  svnnotify -B 'http://bugs.bricolage.cc/show_bug.cgi?id=%s'
+
+The URL of a Bugzilla server. If passed in, any strings in the log message of
+the form "Bug # 12" or "bug 6" or even "Bug#1066" will be turned into links to
+the Bugzilla server. The URL must have the "%s" format where the Bugzilla Bug
+ID should be put into the URL.
+
+=item jira_url
+
+  svnnotify --jira-url 'http://jira.atlassian.com/secure/ViewIssue.jspa?key=%s'
+  svnnotify -J 'http://nagoya.apache.org/jira/secure/ViewIssue.jspa?key=%s'
+
+The URL of a JIRA server. If passed in, any strings in the log message that
+appear to be JIRA keys (such as "JRA-1234") will be turned into links to the
+JIRA server. The URL must have the "%s" format where the Jira key should be
+put into the URL.
+
 =item verbose
 
   svnnotify --verbose -V
@@ -440,6 +470,9 @@ sub get_options {
         "max-sub-length|i=i" => \$opts->{max_sub_length},
         "handler|H=s"        => \$opts->{handler},
         "viewcvs-url|U=s"    => \$opts->{viewcvs_url},
+        "rt-url|T=s"         => \$opts->{rt_url},
+        "bugzilla-url|B=s"   => \$opts->{bugzilla_url},
+        "jira-url|J=s"       => \$opts->{jira_url},
         "verbose|V+"         => \$opts->{verbose},
         "help|h"             => \$opts->{help},
         "man|m"              => \$opts->{man},
@@ -919,8 +952,41 @@ Outputs the commit log message, as well as the label "Log Message".
 sub output_log_message {
     my ($self, $out) = @_;
     $self->_dbpnt( "Outputting log message") if $self->{verbose} > 1;
-    print $out "Log Message:\n-----------\n",
-      join("\n", @{$self->{message}}), "\n";
+    my $msg = join "\n", @{$self->{message}};
+    print $out "Log Message:\n-----------\n$msg\n";
+
+    # Make ViewCVS links.
+    if (my $url = $self->viewcvs_url) {
+        if (my @matches = $msg =~ /\b(?:rev(?:ision)?\s*#?\s*(\d+))\b/ig) {
+            print $out "\nViewCVS Links:\n-------------\n";
+            printf $out "    $url\n", $_ for @matches;
+        }
+    }
+
+    # Make Bugzilla links.
+    if (my $url = $self->bugzilla_url) {
+        if (my @matches = $msg =~ /\b(?:bug\s*#?\s*(\d+))\b/ig) {
+            print $out "\nBugzilla Links:\n--------------\n";
+            printf $out "    $url\n", $_ for @matches;
+        }
+    }
+
+    # Make RT links.
+    if (my $url = $self->rt_url) {
+        if (my @matches = $msg =~ /\b(?:(?:rt-)?ticket:?\s*#?\s*(\d+))\b/ig) {
+            print $out "\nRT Links:\n--------\n";
+            printf $out "    $url\n", $_ for @matches;
+        }
+    }
+
+    # Make JIRA links.
+    if (my $url = $self->jira_url) {
+        if (my @matches = $msg =~ /\b([A-Z]+-\d+)\b/g) {
+            print $out "\nJIRA Links:\n----------\n";
+            printf $out "    $url\n", $_ for @matches;
+        }
+    }
+
     return $self;
 }
 
@@ -1054,9 +1120,9 @@ sub _dump_diff {
 __PACKAGE__->_accessors(qw(repos_path revision to to_regex_map from
                            user_domain svnlook sendmail charset language
                            with_diff attach_diff reply_to subject_prefix
-                           subject_cx max_sub_length viewcvs_url verbose
-                           boundary user date message message_size subject
-                           files));
+                           subject_cx max_sub_length viewcvs_url rt_url
+                           bugzilla_url jira_url verbose boundary user date
+                           message message_size subject files));
 
 ##############################################################################
 # This method is used to create accessors for the list of attributes passed to
@@ -1335,10 +1401,6 @@ L<http://rt.cpan.org/NoAuth/Bugs.html?Dist=SVN-Notify>.
 =head1 To Do
 
 =over
-
-=item *
-
-Copy URL matching to Notify.pm.
 
 =item *
 

@@ -29,6 +29,9 @@ my %params = (
     max_sub_length => undef,
     handler        => undef,
     viewcvs_url    => undef,
+    rt_url         => undef,
+    bugzilla_url   => undef,
+    jira_url       => undef,
     verbose        => undef,
     help           => undef,
     man            => undef,
@@ -48,9 +51,7 @@ is_deeply($opts, \%params, "Check results");
 
 $params{bugzilla_url} = 'url';
 $params{handler} = 'HTML';
-for (qw(jira_url rt_url linkize)) {
-    $params{$_} = undef;
-}
+$params{linkize} = undef;
 
 # Use the --handler option to load the HTML subclass and make sure that
 # its options are properly parsed out of @ARGV.

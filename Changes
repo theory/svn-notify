@@ -28,6 +28,9 @@ Revision history for Perl extension SVN::Notify
       - Added labels to the HTML::ColorDiff diff file sections to indicate
         the type of change ("Modified", "Added", "Deleted", or "Property
         changes").
+      - Moved the "rt_url", "bugzilla_url", and "jira_url" parameters from
+        SVN::Notify::HTML to SVN::Notify, where they are used to add URLs
+        to the text version of log messages.
 
 2.30  2004-10-19T05:20:02
       - Added "register_attributes()" class method so that subclasses can
