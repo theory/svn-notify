@@ -12,14 +12,10 @@ my %map = ( U => 'Modified Files',
             _ => 'Property Changed');
 
 sub new {
-    my $class = shift;
-    my %opts = (
-        svnlook    => 'svnlook',
-        sendmail   => 'sendmail',
-        repos_path => '',
-        output     => 'plain_text',
-        @_
-    );
+    my ($class, %opts) = @_;
+    $opts{svnlook} ||= 'svnlook';
+    $opts{sendmail} ||= 'sendmail';
+    $opts{format} ||= 'text';
     $opts{with_diff} ||= $opts{attach_diff};
     $opts{viewcvs_url} .= '/'
       if $opts{viewcvs_url} && $opts{viewcvs_url} !~ m{/$};
@@ -172,7 +168,7 @@ sub notify {
       "Subject: $self->{subject}\n";
     print SENDMAIL "Reply-To: $self->{reply_to}\n" if $self->{reply_to};
     print SENDMAIL "X-Mailer: " . ref($self) . " " . $self->VERSION .
-                   ", http://search.cpan.org/dist/activitymail/\n";
+                   ", http://search.cpan.org/dist/SVN-Notify/\n";
 
     # Determine the content-type.
     my $ctype = $self->{format} eq 'text'
@@ -246,7 +242,7 @@ sub output_as_html {
     my $files = $self->{files} or return $self;
     foreach my $type (qw(U A D _)) {
         # Skip it if there's nothing to report.
-        next unless @{ $files->{$type} };
+        next unless $files->{$type};
 
         # Identify the action.
         print $out "<h3>$map{$type}</h3>\n<ul>\n";
@@ -367,7 +363,7 @@ sub _pipe {
 # program won't actually die. XXX But don't we want it to die with SVN?
 ##############################################################################
 
-sub mydie { print "######## activitymail error: $_[0]"; exit }
+sub mydie { print "######## SVN::Notify error: $_[0]"; exit }
 
 ##############################################################################
 # This function prints debug messages. The reason it's a separate function is
@@ -375,7 +371,7 @@ sub mydie { print "######## activitymail error: $_[0]"; exit }
 # commits.
 ##############################################################################
 
-sub dbpnt { print "\n" if $_[1]; print "@@@@@@@@ activitymail debug: $_[0]" }
+sub dbpnt { print "\n" if $_[1]; print "@@@@@@@@ SVN::Notify debug: $_[0]" }
 
 =head1 Name
 
