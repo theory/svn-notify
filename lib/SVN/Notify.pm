@@ -860,15 +860,10 @@ L<http://rt.cpan.org/NoAuth/Bugs.html?Dist=SVN-Notify>.
 
 =item *
 
-Check required values in svnnotify.
-
-=item *
-
-Add tests for verbose modes.
-
-=item *
-
-Port to Win32.
+Port to Win32. I think it just needs to use Win32::Process to manage
+communication with F<svnlook> and F<sendmail>, and maybe some file name
+conversions with the C<viewcvs_url> parameter. See comments in the source
+code.
 
 =back
 
