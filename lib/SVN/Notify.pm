@@ -3,7 +3,7 @@ package SVN::Notify;
 # $Id$
 
 use strict;
-$SVN::Notify::VERSION = '2.01';
+$SVN::Notify::VERSION = '2.10';
 
 =head1 Name
 
@@ -25,7 +25,7 @@ Use the class in a custom script:
 
   my $notifier = SVN::Notify->new(%params);
   $notifier->prepare;
-  $notifier->send;
+  $notifier->execute;
 
 =head1 Description
 
@@ -42,8 +42,8 @@ C<with_diff> and C<attach_diff> options below.
 
 =item Getopt::Long
 
-This script requires L<Getopt::Long|Getopt::Long>, which is included with
-Perl.
+The F<svnnotify> script requires L<Getopt::Long|Getopt::Long>, which is
+included with Perl.
 
 =back
 
@@ -56,11 +56,6 @@ Perl.
 For calling F<svnnotify> with the C<--help> or C<--man> options, or when it
 fails to process the command-line options, usage output will be triggered by
 L<Pod::Usage|Pod::Usage>, which has been included with Perl since 5.6.0.
-
-=item HTML::Entities
-
-For sending HTML formatted email, this script requires
-L<HTML::Entities|HTML::Entities>, which is available from CPAN.
 
 =back
 
@@ -80,8 +75,6 @@ my %map = ( U => 'Modified Files',
             A => 'Added Files',
             D => 'Removed Files',
             _ => 'Property Changed');
-
-sub _dbpnt($) { print __PACKAGE__, ": $_[0]\n" }
 
 ##############################################################################
 
@@ -279,6 +272,17 @@ shorter. This could potentially be quite long. To prevent the subject from
 being over a certain number of characters, specify a maximum length here, and
 SVN::Notify will truncate the subject to the last word under that length.
 
+=item handler
+
+  svnnotify --handler HTML
+  svnnotify -H HTML
+
+Specify the subclass of SVN::Notify to be constructed and returned, and
+therefore to handle the notification. Of course you can just use a subclass
+directly, but this parameter is designed to make it easy to just use
+C<< SVN::Notify->new >> without worrying about loading subclasses, such as
+in F<svnnotify>.
+
 =item format
 
   svnnotify --format text
@@ -288,17 +292,16 @@ The format of the notification email. Two formats are supported, "text" and
 "html". If "html" is specified, HTML::Entities B<must> be installed to ensure
 that the log message, file names, and diff are properly escaped.
 
+B<Note:> This parameter is deprecated and will be removed in the next release.
+Use C<handler>, instead.
+
 =item viewcvs_url
 
   svnnotify --viewcvs-url http://svn.example.com/viewcvs/
   svnnotify -U http://viewcvs.example.net/
 
-If a URL is specified for this parameter, then it will be used to create links
-to the files affected by the commit on the relevant Website. The URL is
-assumed to be the base URL for a ViewCVS script; the file name of the affected
-file will simply be appended to it. For modified files, the link will be to
-the ViewCVS diff output for the commit on that file, although in HTML mode
-both links will be specified.
+If a URL is specified for this parameter, then it will be used to create a
+linnk to the ViewCVS URL corresponding to the current revision number.
 
 =item verbose
 
@@ -318,8 +321,16 @@ three times.
 sub new {
     my ($class, %params) = @_;
 
+    # Delegate to a subclass if requested.
+    if (my $handler = delete $params{handler}) {
+        my $class = __PACKAGE__ . "::$handler";
+        eval "require $class" or die $@;
+        return $class->new(%params);
+    }
+
     # Check for required parameters.
-    _dbpnt "Checking required parameters to new()" if $params{verbose};
+    $class->_dbpnt( "Checking required parameters to new()")
+      if $params{verbose};
     die qq{Missing required "repos_path" parameter}
       unless $params{repos_path};
     die qq{Missing required "revision" parameter}
@@ -330,19 +341,51 @@ sub new {
     # Set up default values.
     $params{svnlook}   ||= $ENV{SVNLOOK}  || '/usr/local/bin/svnlook';
     $params{sendmail}  ||= $ENV{SENDMAIL} || '/usr/sbin/sendmail';
-    $params{format}    ||= 'text';
     $params{with_diff} ||= $params{attach_diff};
     $params{verbose}   ||= 0;
     $params{charset}   ||= 'UTF-8';
 
-    # Append slash to viewcvs_url, if necessary.
-    $params{viewcvs_url} .= '/'
-      if $params{viewcvs_url} && $params{viewcvs_url} !~ m{/$};
-
     # Make it so!
-    _dbpnt "Instantiating $class object" if $params{verbose};
+    $class->_dbpnt( "Instantiating $class object") if $params{verbose};
     return bless \%params, $class;
 }
+
+##############################################################################
+
+=head2 Class Methods
+
+=head3 content_type
+
+  my $content_type = SVN::Notify->content_type;
+
+Returns the content type of the notification message, "text/plain". Used to
+set the Content-Type header for the message.
+
+=cut
+
+sub content_type { 'text/plain' }
+
+##############################################################################
+
+=head3 file_label_map
+
+  my $map = SVN::Notify->file_label_map;
+
+Returns a hash reference of the labels to be used for the lists of files. A
+hash reference of file lists is stored in the C<files> attribute after
+C<prepare_files()> has been called. The hash keys in that list correspond to
+Subversion status codes, and these are mapped to their appropriate labels by
+the hash reference returned by this method:
+
+  { U => 'Modified Files',
+    A => 'Added Files',
+    D => 'Removed Files',
+    _ => 'Property Changed'
+  }
+
+=cut
+
+sub file_label_map { \%map }
 
 ##############################################################################
 
@@ -358,10 +401,10 @@ Prepares the SVN::Notify object, collecting all the data it needs in
 preparation for sending the notification email. Really it's just a shortcut
 for:
 
-  $self->prepare_recipients;
-  $self->prepare_contents;
-  $self->prepare_files;
-  $self->prepare_subject;
+  $notifier->prepare_recipients;
+  $notifier->prepare_contents;
+  $notifier->prepare_files;
+  $notifier->prepare_subject;
 
 Only it returns after the call to C<prepare_recipients()> if there are no
 recipients (that is, as when recipients are specified solely by the
@@ -399,15 +442,15 @@ context.
 
 sub prepare_recipients {
     my $self = shift;
-    _dbpnt "Preparing recipients list" if $self->{verbose};
+    $self->_dbpnt( "Preparing recipients list") if $self->{verbose};
     return $self unless $self->{to_regex_map} || $self->{subject_cx};
     my @to = $self->{to} ? ($self->{to}) : ();
     my $regexen = delete $self->{to_regex_map};
     if ($regexen) {
-        _dbpnt "Compiling regex_map regular expressions"
+        $self->_dbpnt( "Compiling regex_map regular expressions")
           if $self->{verbose} > 1;
         for (values %$regexen) {
-            _dbpnt qq{Compiling "$_"} if $self->{verbose} > 2;
+            $self->_dbpnt( qq{Compiling "$_"}) if $self->{verbose} > 2;
             # Remove initial slash and compile.
             s|^\^[/\\]|^|;
             $_ = qr/$_/;
@@ -426,7 +469,7 @@ sub prepare_recipients {
         while (my ($email, $rx) = each %$regexen) {
             # If the directory matches the regex, save the email.
             if (/$rx/) {
-                _dbpnt qq{"$_" matched $rx} if $self->{verbose} > 2;
+                $self->_dbpnt( qq{"$_" matched $rx}) if $self->{verbose} > 2;
                 push @to, $email;
                 delete $regexen->{$email};
             }
@@ -436,13 +479,13 @@ sub prepare_recipients {
             # XXX Do we need to set utf8 here?
             my $l = length;
             ($len, $cx) = ($l, $_) unless defined $len && $len < $l;
-            _dbpnt qq{Context is "$cx"} if $self->{verbose} > 1;
+            $self->_dbpnt( qq{Context is "$cx"}) if $self->{verbose} > 1;
         }
     }
     close $fh or warn "Child process exited: $?\n";
     $self->{to} = join ', ', @to;
     $self->{cx} = $cx;
-    _dbpnt qq{Recipients: "$self->{to}"} if $self->{verbose} > 1;
+    $self->_dbpnt( qq{Recipients: "$self->{to}"}) if $self->{verbose} > 1;
     return $self;
 }
 
@@ -460,7 +503,7 @@ be used in the email) and the log message.
 
 sub prepare_contents {
     my $self = shift;
-    _dbpnt "Preparing contents" if $self->{verbose};
+    $self->_dbpnt( "Preparing contents") if $self->{verbose};
     my $lines = $self->_read_pipe($self->{svnlook}, 'info', $self->{repos_path},
                                   '-r', $self->{revision});
     $self->{user} = shift @$lines;
@@ -474,8 +517,8 @@ sub prepare_contents {
           . ($self->{user_domain} ? "\@$self->{user_domain}" : '');
     }
     if ($self->{verbose} > 1) {
-        _dbpnt "From: $self->{from}";
-        _dbpnt "Message: @$lines";
+        $self->_dbpnt( "From: $self->{from}");
+        $self->_dbpnt( "Message: @$lines");
     }
     return $self;
 }
@@ -500,7 +543,7 @@ context to be used in the subject line of the commit email.
 
 sub prepare_files {
     my $self = shift;
-    _dbpnt "Preparing file lists" if $self->{verbose};
+    $self->_dbpnt( "Preparing file lists") if $self->{verbose};
     my %files;
     my $fh = $self->_pipe('-|', $self->{svnlook}, 'changed',
                           $self->{repos_path}, '-r', $self->{revision});
@@ -510,7 +553,7 @@ sub prepare_files {
     do {
         s/[\n\r]+$//;
         if (s/^(.)(.)\s+//) {
-            _dbpnt "$1 => $_" if $self->{verbose} > 2;
+            $self->_dbpnt( "$1 => $_") if $self->{verbose} > 2;
             push @{$files{$1}}, $_;
             push @{$files{_}}, $_ if $2 ne ' ' && $1 ne '_';
         }
@@ -520,7 +563,8 @@ sub prepare_files {
         # There's only one file; it's the context.
         $cx =~ s/[\n\r]+$//;
         ($self->{cx} = $cx) =~ s/^..\s+//;
-        _dbpnt qq{File context is "$self->{cx}"} if $self->{verbose} > 1;
+        $self->_dbpnt( qq{File context is "$self->{cx}"})
+          if $self->{verbose} > 1;
     }
     # Wait till we get here to close the file handle, otherwise $. gets reset
     # to 0!
@@ -548,7 +592,7 @@ the maximum length specified by the C<max_sub_length> parameter.
 
 sub prepare_subject {
     my $self = shift;
-    _dbpnt "Preparing subject" if $self->{verbose};
+    $self->_dbpnt( "Preparing subject") if $self->{verbose};
 
     # Start with the optional message and revision number..
     $self->{subject} .=
@@ -569,40 +613,94 @@ sub prepare_subject {
       if $self->{max_sub_length}
       && length $self->{subject} > $self->{max_sub_length};
 
-    _dbpnt qq{Subject is "$self->{subject}"} if $self->{verbose};
+    $self->_dbpnt( qq{Subject is "$self->{subject}"}) if $self->{verbose};
     return $self;
 }
 
 ##############################################################################
 
-=head3 send
+=head3 execute
 
-  $notifier->send;
+  $notifier->execute;
 
-Sends the notification message. This involves opening a connection to
-F<sendmail>, sending the appropriate headers, calling the appropriate
-formatting method (See L</"output_as_text"> and L</"output_as_html"> below),
-and then closing the connection so that sendmail can send the email.
+Sends the notification message. This involves opening a file handle to
+F<sendmail> and passing it to C<output()>. This is the main method used to
+send notifications or execute any other actions in response to Subversion
+activity.
 
 =cut
 
-sub send {
+sub execute {
     my $self = shift;
-    _dbpnt "Sending message" if $self->{verbose};
+    $self->_dbpnt( "Sending message") if $self->{verbose};
     return $self unless $self->{to};
 
     # Safe pipe to sendmail. See perlipc(1).
     my $out = $self->_pipe('|-', $self->{sendmail}, '-oi', '-t');
 
-    # Output the headers.
-    $self->output_headers($out);
     # Output the message.
-    my $method = "output_as_$self->{format}";
-    $self->$method($out);
+    $self->output($out);
 
-    print $out "--$self->{boundary}--\n" if $self->{attach_diff};
     close $out or warn "Child process exited: $?\n";
-    _dbpnt "Message sent" if $self->{verbose};
+    $self->_dbpnt( "Message sent") if $self->{verbose};
+    return $self;
+}
+
+##############################################################################
+
+=head3 output
+
+  $notifier->output($file_handle);
+
+Called internally by C<execute()> to output a complete email message. The file
+handle passed is a piped connection to F<sendmail>, so that C<output()> and
+its related methods can print directly to sendmail.
+
+Really C<output()> is a simple wrapper around a number of other method calls.
+It is thus essentially a shortcut for:
+
+    $notifier->output_headers($out);
+    $notifier->output_content_type($out);
+    $notifier->start_body($out);
+    $notifier->output_log_message($out);
+    $notifier->output_file_lists($out);
+    if ($notifier->{with_diff}) {
+        if ($notifier->{attach_diff}) {
+            $notifier->end_body($out);
+            $notifier->attach_diff($out);
+        } else {
+            $notifier->output_diff($out);
+            $notifier->end_body($out);
+        }
+    } else {
+        $notifier->end_body($out);
+    }
+    $notifier->end_message($out);
+
+=cut
+
+sub output {
+    my ($self, $out) = @_;
+    $self->_dbpnt( "Outputting notification message") if $self->{verbose} > 1;
+
+    $self->output_headers($out);
+    $self->output_content_type($out);
+    $self->start_body($out);
+    $self->output_log_message($out);
+    $self->output_file_lists($out);
+    if ($self->{with_diff}) {
+        if ($self->{attach_diff}) {
+            $self->end_body($out);
+            $self->attach_diff($out);
+        } else {
+            $self->output_diff($out);
+            $self->end_body($out);
+        }
+    } else {
+        $self->end_body($out);
+    }
+    $self->end_message($out);
+
     return $self;
 }
 
@@ -612,14 +710,16 @@ sub send {
 
   $notifier->output_headers($file_handle);
 
-Called internally by C<send> to output the headers for the notification
-message. If the C<attach_diff> parameter was set to true, then a boundary
-string will be generated and the Content-Type set to "multipart/mixed".
+Outputs the headers for the notification message. If the C<attach_diff>
+parameter was set to true, then a boundary string will be generated and the
+Content-Type set to "multipart/mixed" and stored as the C<boundary>
+attribute.
 
 =cut
 
 sub output_headers {
     my ($self, $out) = @_;
+    $self->_dbpnt( "Outputting headers") if $self->{verbose} > 2;
     print $out
       "MIME-Version: 1.0\n",
       "From: $self->{from}\n",
@@ -629,11 +729,6 @@ sub output_headers {
     print $out "X-Mailer: SVN::Notify " . $self->VERSION .
       ": http://search.cpan.org/dist/SVN-Notify/\n";
 
-    # Determine the content-type.
-    my $ctype = $self->{format} eq 'text'
-      ? 'text/plain'
-      :  "text/$self->{format}";
-
     # Output the content type.
     if ($self->{attach_diff}) {
         # We need a boundary string.
@@ -641,11 +736,32 @@ sub output_headers {
           ('.', '/', 0..9, 'A'..'Z', 'a'..'z')[rand 64, rand 64];
         $self->{boundary} = crypt($self->{subject}, $salt);
         print $out
-          qq{Content-Type: multipart/mixed; boundary="$self->{boundary}"\n},
-          "--$self->{boundary}\n";
+          qq{Content-Type: multipart/mixed; boundary="$self->{boundary}"\n\n};
     }
 
-    # Output content-type and encoding headers.
+    return $self;
+}
+
+##############################################################################
+
+=head3 output_content_type
+
+  $notifier->output_content_type($file_handle);
+
+Outputs the content type and transfer encoding headers. These demarcate the
+body of the message. This method outputs the content type returned by
+C<content_type()>, the character set specified by the C<charset> attribute,
+and a Content-Transfer-Encoding of "8bit". Subclasses can either rely on this
+functionality or override this method to provide their own content type
+headers.
+
+=cut
+
+sub output_content_type {
+    my ($self, $out) = @_;
+    $self->_dbpnt( "Outputting content type") if $self->{verbose} > 2;
+    my $ctype = $self->content_type;
+    print $out "--$self->{boundary}\n" if $self->{attach_diff};
     print $out "Content-Type: $ctype; charset=$self->{charset}\n",
       "Content-Transfer-Encoding: 8bit\n\n";
     return $self;
@@ -653,117 +769,96 @@ sub output_headers {
 
 ##############################################################################
 
-=head3 output_as_text
+=head3 start_body
 
-  $notifier->output_as_text($file_handle);
+  $notifier->start_body($file_handle);
 
-Called internally by C<send> to output a text version of the commit email. The
-file handle passed is a piped connection to F<sendmail>, so that
-C<output_as_text()> can print directly to sendmail. C<output_as_text()> also
-appends or attaches a diff if the C<with_diff> or C<attach_diff> parameter to
-C<new()> specified a true value.
+This method starts the body of the notification message. It outputs the
+metadata of the commit, including the revision number, author (user), and date
+of the revision. If the C<viewcvs_url> attribute has been set, then the
+appropriate URL for the revision will also be output.
 
 =cut
 
-sub output_as_text {
+sub start_body {
     my ($self, $out) = @_;
-    _dbpnt "Outputting text message" if $self->{verbose} > 1;
+    print $out "\n",
+      "Revision: $self->{revision}\n",
+      "Author:   $self->{user}\n",
+      "Date:     $self->{date}\n";
+    print $out
+      "ViewCVS:  $self->{viewcvs_url}?rev=$self->{revision}&view=rev\n"
+      if $self->{viewcvs_url};
+    print $out "\n";
 
-    print $out "Log Message:\n-----------\n",
-      join("\n", @{$self->{message}}), "\n";
-
-    # Create the lines that will go underneath the above in the message.
-    my %dash = ( map { $_ => '-' x length($map{$_}) } keys %map );
-
-    my $files = $self->{files} or return $self;
-    foreach my $type (qw(U A D _)) {
-        # Skip it if there's nothing to report.
-        next unless $files->{$type};
-
-        # Identify the action.
-        print $out "\n$map{$type}:\n$dash{$type}\n";
-        if ($self->{viewcvs_url}) {
-            # Append the ViewCVS URL to each file.
-            my $append = $type eq 'U'
-              ? "?r1=" . ($self->{revision} - 1) . "&r2=$self->{revision}"
-              : '';
-            for (@{ $files->{$type} }) {
-                # XXX Do we need to convert the directory separators on Win32?
-                print $out "    $_\n",
-                           "       $self->{viewcvs_url}$_$append\n";
-            }
-        } else {
-            # Just output each file.
-            print $out "    $_\n" for @{ $files->{$type} };
-        }
-    }
-
-    $self->output_diff($out) if $self->{with_diff};
     return $self;
 }
 
 ##############################################################################
 
-=head3 output_as_html
+=head3 output_log_message
 
-  $notifier->output_as_html($file_handle);
+  $notifier->output_log_message($file_handle);
 
-Called internally by C<send> to output an HTML version of the commit
-email. The file handle passed is a piped connection to F<sendmail>, so that
-C<output_as_html()> can print directly to sendmail. C<output_as_html()> also
-appends or attaches a diff if the C<with_diff> or C<attach_diff> parameter to
-C<new()> specified a true value.
+Outputs the commit log message, as well as the label "Log Message".
 
 =cut
 
-sub output_as_html {
+sub output_log_message {
     my ($self, $out) = @_;
-    _dbpnt "Outputting HTML message" if $self->{verbose} > 1;
+    $self->_dbpnt( "Outputting log message") if $self->{verbose} > 1;
+    print $out "Log Message:\n-----------\n",
+      join("\n", @{$self->{message}}), "\n";
+    return $self;
+}
 
-    require HTML::Entities;
-    print $out "<body>\n<h3>Log Message</h3>\n<pre>",
-      HTML::Entities::encode_entities(join("\n", @{$self->{message}})),
-      "</pre>\n\n";
+##############################################################################
 
+=head3 output_file_lists
+
+  $notifier->output_log_message($file_handle);
+
+Outputs the lists of modified, added, and deleted files, as well as the list
+of files for which properties were changed. The labels used for each group are
+pulled in from the C<file_label_map()> class method.
+
+=cut
+
+sub output_file_lists {
+    my ($self, $out) = @_;
     my $files = $self->{files} or return $self;
+    $self->_dbpnt( "Outputting file lists") if $self->{verbose} > 1;
+    my $map = $self->file_label_map;
+    # Create the lines that will go underneath the above in the message.
+    my %dash = ( map { $_ => '-' x length($map->{$_}) } keys %$map );
+
     foreach my $type (qw(U A D _)) {
         # Skip it if there's nothing to report.
         next unless $files->{$type};
+        $self->_dbpnt( "  Outputting $map->{$type} file list")
+          if $self->{verbose} > 2;
 
-        # Identify the action.
-        print $out "<h3>$map{$type}</h3>\n<ul>\n";
-        if ($self->{viewcvs_url}) {
-            my $prev = $self->{revision} - 1;
-            # Make each file name a link.
-            for (@{ $files->{$type} }) {
-                my $file = HTML::Entities::encode_entities($_);
-                # XXX Do we need to convert the directory separators on Win32?
-                print $out qq{  <li><a href="$self->{viewcvs_url}$file">},
-                  qq{$file</a>};
-                # Add a diff link for modified files.
-                print $out qq{ (<a href="$self->{viewcvs_url}$file\?},
-                  qq{r1=$prev&amp;r2=$self->{revision}">Diff</a>)}
-                  if $type eq 'U';
-                print $out "</li>\n"
-            }
-        } else {
-            # Just output each file.
-            print $out "  <li>" . HTML::Entities::encode_entities($_)
-              . "</li>\n"
-              for @{ $files->{$type} };
-        }
-        print $out "</ul>\n\n";
+        # Identify the action and output each file.
+        print $out "\n$map->{$type}:\n$dash{$type}\n";
+        print $out "    $_\n" for @{ $files->{$type} };
     }
-    if ($self->{with_diff}) {
-        unless ($self->{attach_diff}) {
-            print $out "<pre>";
-            $self->output_diff($out);
-            print $out "</pre>\n";
-        } else {
-            $self->output_diff($out);
-        }
-    }
+}
 
+##############################################################################
+
+=head3 end_body
+
+  $notifier->end_body($file_handle);
+
+Closes out the body of the email. Designed to be called when the body of the
+message is complete, and before any call to C<attach_diff()>.
+
+=cut
+
+sub end_body {
+    my ($self, $out) = @_;
+    $self->_dbpnt( "Ending body") if $self->{verbose} > 2;
+    print $out "\n\n";
     return $self;
 }
 
@@ -773,46 +868,72 @@ sub output_as_html {
 
   $notifier->output_diff($file_handle);
 
-Called internally by C<output_as_text()> and C<output_as_html()> to send the
-output of C<svnlook diff> to the specified file handle. That file handle is
-an open pipe to sendmail.
-
-C<output_diff()> is also aware of whether the format of the notification email
-is text or HTML, so that it can properly escape the diff for HTML email when
-the C<attach_diff> parameter to C<new()> has a false value.
+Sends the output of C<svnlook diff> to the specified file handle for inclusion
+in the notification message.
 
 =cut
 
 sub output_diff {
     my ($self, $out) = @_;
-    _dbpnt "Outputting diff" if $self->{verbose} > 1;
+    $self->_dbpnt( "Outputting diff") if $self->{verbose} > 1;
+    $self->_dump_diff($out);
+}
 
-    # Output the content type headers.
-    print $out "\n";
-    if ($self->{attach_diff}) {
-        _dbpnt "Attaching diff" if $self->{verbose} > 2;
-        my $file = "";
-        print $out "--$self->{boundary}\n",
-          "Content-Disposition: attachment; filename=",
-          "r$self->{revision}-$self->{user}.diff\n",
-          "Content-Type: text/plain; charset=$self->{charset}\n",
-          "Content-Transfer-Encoding: 8bit\n\n";
-    }
+##############################################################################
 
+=head3 attach_diff
+
+  $notifier->attach_diff($file_handle);
+
+Sends the output of C<svnlook diff> to the specified file handle as an
+attachment for inclusion in the notification message.
+
+=cut
+
+sub attach_diff {
+    my ($self, $out) = @_;
+    $self->_dbpnt( "Attaching diff") if $self->{verbose} > 2;
+    print $out "\n--$self->{boundary}\n",
+      "Content-Disposition: attachment; filename=",
+      "r$self->{revision}-$self->{user}.diff\n",
+      "Content-Type: text/plain; charset=$self->{charset}\n",
+      "Content-Transfer-Encoding: 8bit\n\n";
+    $self->_dump_diff($out);
+}
+
+##############################################################################
+
+=head3 end_message
+
+  $notifier->end_message($file_handle);
+
+Outputs the final part of the message,. In this case, that means only a
+boundary if the C<attach_diff> parameter is true. Designed to be called after
+any call to C<attach_diff()>.
+
+=cut
+
+sub end_message {
+    my ($self, $out) = @_;
+    print $out "--$self->{boundary}--\n" if $self->{attach_diff};
+    return $self;
+}
+
+##############################################################################
+# This method actually dumps the output of C<svnlook diff>. It's a separate
+# method because attach_diff() and output_diff() do essentially the same
+# thing, so they can both call it.
+##############################################################################
+
+sub _dump_diff {
+    my ($self, $out) = @_;
     # Get the diff and output it.
     my $diff = $self->_pipe('-|', $self->{svnlook}, 'diff',
                             $self->{repos_path}, '-r', $self->{revision});
 
-    if ($self->{format} eq 'text' || $self->{attach_diff}) {
-        while (<$diff>) {
-            s/[\n\r]+$//;
-            print $out "$_\n";
-        }
-    } else {
-        while (<$diff>) {
-            s/[\n\r]+$//;
-            print $out HTML::Entities::encode($_), "\n";
-        }
+    while (<$diff>) {
+        s/[\n\r]+$//;
+        print $out "$_\n";
     }
     close $diff or warn "Child process exited: $?\n";
     return $self;
@@ -821,12 +942,14 @@ sub output_diff {
 ##############################################################################
 # This method forks off a process to execute an external program and any
 # associated arguments and returns a file handle that can be read from to
-# fetch the output of the external program, or written to.
+# fetch the output of the external program, or written to. Pass "-|" as the
+# sole argument to read from another process (such as svnlook), and pass "|-"
+# to write to another process (such as sendmail).
 ##############################################################################
 
 sub _pipe {
     my ($self, $mode) = (shift, shift);
-    _dbpnt "Piping execution of '" . join("', '", @_) . "'"
+    $self->_dbpnt( "Piping execution of '" . join("', '", @_) . "'")
       if $self->{verbose};
     # Safer version of backtick (see perlipc(1)).
     # XXX Use Win32::Process on Win32? This doesn't seem to work as-is on Win32.
@@ -859,6 +982,12 @@ sub _read_pipe {
     return \@lines;
 }
 
+##############################################################################
+# This method is used for debugging output in various verbose modes.
+##############################################################################
+
+sub _dbpnt { print __PACKAGE__, ": $_[1]\n" }
+
 1;
 __END__
 
@@ -874,8 +1003,7 @@ L<http://rt.cpan.org/NoAuth/Bugs.html?Dist=SVN-Notify>.
 =item *
 
 Port to Win32. I think it just needs to use Win32::Process to manage
-communication with F<svnlook> and F<sendmail>, and maybe some file name
-conversions with the C<viewcvs_url> parameter. See comments in the source
+communication with F<svnlook> and F<sendmail>. See comments in the source
 code.
 
 =back

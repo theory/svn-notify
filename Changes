@@ -1,11 +1,30 @@
 Revision history for Perl extension SVN::Notify
 
-2.01
+2.10
+      - Added many new methods to break up the various activities of
+        assembling a notification message. This will make subclassing
+        easier.
+      - Moved all HTML notification functionality into a new subclass,
+        SVN::Notify::HTML.
+      - Added new "handler" parameter to new() and "--handler" option to
+        svnnotify to specify what subclass should handle sending the
+        notification. Just specify the name of a subclass, such as "HTML"
+        for SVN::Notify::HTML. This replaces the "format" parameter, which
+        is now deprecated.
       - Added code to Build.PL to set the shebang line in the test
         scripts. Reported by Robert Spier.
       - Changed name of attached diff file to be named for the revision
         and the committer, rather than the committer and the date.
         Suggested by Robert Spier.
+      - Added Author, Date, and Revision information to the top of each
+        message.
+      - The ViewCVS URL is no longer output for each file. A single link
+        for the entire revision number is put at the top of the email,
+        instead. ViewCVS Revision URL syntax pointed out by Peter
+        Valdemar Morch.
+      - Changed the C<send()> method to C<execute()> to better reflect
+        its generalized use as the method that executes actions in
+        response to Subversion activity.
 
 2.00  2004-10-04T05:09:17
       - First release, ported from activitymail 1.11, but completely

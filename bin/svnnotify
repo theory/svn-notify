@@ -35,6 +35,7 @@ GetOptions(
     "subject-cx|C"       => \$opts{subject_cx},
     "max-sub-length|i=i" => \$opts{max_sub_length},
     "format|F=s"         => \$opts{format},
+    "handler|H=s"        => \$opts{handler},
     "viewcvs-url|U=s"    => \$opts{viewcvs_url},
     "verbose|V+"         => \$opts{verbose},
     "help|h"             => \$opts{help},
@@ -60,10 +61,16 @@ die qq{Missing required "--revision" parameter\n}
 die qq{Missing required "--to" or "--to_regex_map" parameter\n}
   unless $opts{to} || $opts{to_regex_map};
 
+# Backwards compatability to 2.00. What was I thinking?
+if (my $format = delete $opts{format}) {
+    warn "the --format option is deprecated. Use --handler instead.\n";
+    $opts{handler} = 'HTML' unless $opts{handler} || $format ne 'html';
+}
+
 require SVN::Notify;
 my $notifier = SVN::Notify->new(%opts);
 $notifier->prepare;
-$notifier->send;
+$notifier->execute;
 
 1;
 __END__
@@ -110,7 +117,7 @@ Fake-out Pod::Usage
   -C --subject-cx              Include the context of the commit in the
                                subject.
   -i --max-sub-length LENGTH   Maximum size of the subject line.
-  -A --format FORMAT           Format: "text" or "html". Defaults to "text".
+  -H --handler HANDLER         The notification handler, such as "HTML".
   -U --viewcvs-url URL         Include links to specified ViewCVS URL.
   -V --verbose                 Incremental verbose mode.
   -h --help                    Print this usage statement and exit.
