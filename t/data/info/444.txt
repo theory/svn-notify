@@ -1,0 +1,33 @@
+theory
+2004-04-20 01:33:35 -0700 (Tue, 20 Apr 2004)
+1375
+There are a number of things to try. First, we have an email address,
+recipient@example.com. The period should not be a part of the link.
+Next, we have a URL: http://www.kineticode.com/! The exclamation point
+(or full stop) should not be a part of the link, either. We can also
+have complex URLs, like http://www.example.com/my.pl?one=1&two=2&f=w**t.
+Again, the period should not be a part of the link.
+
+We might have a few RT links, too. For example, If I mention Ticket # 6,
+it will be a link. Likewise, if I decide to, I can  go ahead with Ticket
+12, where I have no # and the string is divided over two lines. But
+sticket 69 won't match. Jesse also wants RT-Ticket: #23 to work.
+
+Of course, we have our mainstay, ViewCVS, which will refer to SVN numbers
+such as Revision 6000. And just like the others, we can make it rev
+6001. It's not only divided over two lines, but the "ivision" part is
+optional! But not grev 200, because there is no word boundary.
+
+Next there's Bugzilla. We just say Bug # 1234 or bug 8, but not humbug 3.
+Again, we can go ahead and push this puppy to the limits, and write Bug
+#4321, where we again have the string split over two lines.
+
+And finally we have JIRA links. Here I just say TST-1234. But JIRA-
+4321 won't match, because it needs to be a single string. Likewise,
+a string with studlyCAPS-1234 won't match.
+
+And finally, for the diff, there is a modified file, a modified file
+with a property set, a file with just a property set, a deleted file,
+and an added file.
+
+Enjoy!

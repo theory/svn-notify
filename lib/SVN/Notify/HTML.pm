@@ -114,16 +114,6 @@ put into the URL.
 
 =cut
 
-sub new {
-    my $self = shift->SUPER::new(@_);
-    # Escape URLs.
-    for (qw(viewcvs bugzilla jira rt)) {
-        $self->{"$_\_url"} = encode_entities($self->{"$_\_url"})
-          if $self->{"$_\_url"};
-    }
-    return $self;
-}
-
 ##############################################################################
 
 =head2 Class Methods
@@ -215,6 +205,7 @@ sub output_metadata {
 
     my $rev = $self->revision;
     if (my $url = $self->viewcvs_url) {
+        $url = encode_entities($url);
         # Make the revision number a URL.
         printf $out qq{<a href="$url">$rev</a>}, $rev;
     } else {
@@ -266,22 +257,26 @@ sub output_log_message {
 
     # Make ViewCVS links.
     if (my $url = $self->viewcvs_url) {
-        $msg =~ s|(revision\s*#?\s*(\d+))|sprintf qq{<a href="$url">$1</a>}, $2|ige;
+        $url = encode_entities($url);
+        $msg =~ s|\b(rev(?:ision)?\s*#?\s*(\d+))\b|sprintf qq{<a href="$url">$1</a>}, $2|ige;
     }
 
     # Make Bugzilla links.
     if (my $url = $self->bugzilla_url) {
-        $msg =~ s|(bug\s*#?\s*(\d+))|sprintf qq{<a href="$url">$1</a>}, $2|ige;
+        $url = encode_entities($url);
+        $msg =~ s|\b(bug\s*#?\s*(\d+))\b|sprintf qq{<a href="$url">$1</a>}, $2|ige;
     }
 
     # Make RT links.
     if (my $url = $self->rt_url) {
-        $msg =~ s|(ticket\s*#?\s*(\d+))|sprintf qq{<a href="$url">$1</a>}, $2|ige;
+        $url = encode_entities($url);
+        $msg =~ s|\b((?:rt-)?ticket:?\s*#?\s*(\d+))\b|sprintf qq{<a href="$url">$1</a>}, $2|ige;
     }
 
     # Make JIRA links.
     if (my $url = $self->jira_url) {
-        $msg =~ s|([A-Z]+-\d+)|sprintf qq{<a href="$url">$1</a>}, $1|ge;
+        $url = encode_entities($url);
+        $msg =~ s|\b([A-Z]+-\d+)\b|sprintf qq{<a href="$url">$1</a>}, $1|ge;
     }
 
     # Print it out and return.

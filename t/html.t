@@ -9,7 +9,7 @@ use File::Spec::Functions;
 if ($^O eq 'MSWin32') {
     plan skip_all => "SVN::Notify::HTML not yet supported on Win32";
 } elsif (eval { require HTML::Entities }) {
-    plan tests => 135;
+    plan tests => 159;
 } else {
     plan skip_all => "SVN::Notify::HTML requires HTML::Entities";
 }
@@ -350,6 +350,91 @@ like( $email,
 like( $email,
       qr{<a href="http://jira\.atlassian\.com/secure/ViewIssue\.jspa\?key=TST-1608">TST-1608</a>},
       "Check for Jira URL" );
+
+##############################################################################
+# Major linkize and Bug tracking URLs, as well as complex diff.
+##############################################################################
+ok( $notifier = SVN::Notify::HTML->new(
+    %args,
+    with_diff    => 1,
+    revision     => 444,
+    viewcvs_url  => 'http://viewsvn.bricolage.cc/?rev=%s&view=rev',
+    rt_url       => 'http://rt.cpan.org/NoAuth/Bugs.html?id=%s',
+    bugzilla_url => 'http://bugzilla.mozilla.org/show_bug.cgi?id=%s',
+    jira_url     => 'http://jira.atlassian.com/secure/ViewIssue.jspa?key=%s',
+),
+    "Construct new complext notifier" );
+isa_ok($notifier, 'SVN::Notify::HTML');
+isa_ok($notifier, 'SVN::Notify');
+ok( $notifier->prepare, "Prepare complex example" );
+ok( $notifier->execute, "Notify complex example" );
+
+$email = get_output();
+
+# Make sure multiple lines are still multiple!
+like($email, qr/link\.\n\nWe/, "Check for multiple lines" );
+
+# Check linkize results.
+like($email, qr|<a href="mailto:recipient\@example\.com">recipient\@example\.com</a>\.|,
+     "Check for linked email address");
+like($email, qr{<a href="http://www\.kineticode\.com/">http://www\.kineticode\.com/</a>\!},
+     "Check for linked URL" );
+like($email,
+     qr{<a href="http://www\.example\.com/my\.pl\?one=1&amp;two=2&amp;f=w\*\*t">http://www\.example\.com/my\.pl\?one=1&amp;two=2&amp;f=w\*\*t</a>\.},
+     "Check for fancy linked URL" );
+
+# Check for RT URLs.
+like($email,
+     qr{<a href="http://rt\.cpan\.org/NoAuth/Bugs\.html\?id=6">Ticket # 6</a>,},
+     "Check for first RT URL");
+like($email,
+     qr{<a href="http://rt\.cpan\.org/NoAuth/Bugs\.html\?id=12">Ticket\n12</a>,},
+     "Check for split RT URL");
+unlike($email,
+     qr{<a href="http://rt\.cpan\.org/NoAuth/Bugs\.html\?id=69">ticket 69</a>},
+     "Check for no Ticket 69 URL");
+like($email,
+     qr{<a href="http://rt\.cpan\.org/NoAuth/Bugs\.html\?id=23">RT-Ticket: #23</a>},
+     "Check for Jesse RT URL");
+
+# Check for ViewCVS URLs.
+like( $email,
+      qr|<dt>Revision</dt>\s+<dd><a href="http://viewsvn\.bricolage\.cc/\?rev=444\&amp;view=rev">444</a></dd>\n|,
+      'Check for main ViewCVS URL');
+like($email,
+     qr{<a href="http://viewsvn\.bricolage\.cc/\?rev=6000&amp;view=rev">Revision 6000</a>\.},
+     "Check for first log mesage ViewCVS URL");
+like($email,
+     qr{<a href="http://viewsvn\.bricolage\.cc/\?rev=6001&amp;view=rev">rev\n6001</a>\.},
+     "Check for split line log mesage ViewCVS URL");
+unlike($email,
+       qr{<a href="http://viewsvn\.bricolage\.cc/\?rev=200&amp;view=rev">rev 200</a>,},
+       "Check for no grev 200 ViewCVS URL");
+
+# Check for Bugzilla URLs.
+like( $email,
+      qr{<a href="http://bugzilla\.mozilla\.org/show_bug\.cgi\?id=1234">Bug # 1234</a>},
+      "Check for first Bugzilla URL" );
+like( $email,
+      qr{<a href="http://bugzilla\.mozilla\.org/show_bug\.cgi\?id=8">bug 8</a>,},
+      "Check for second Bugzilla URL" );
+unlike( $email,
+      qr{<a href="http://bugzilla\.mozilla\.org/show_bug\.cgi\?id=3">bug 3</a>\.},
+      "Check for no humbug URL" );
+like( $email,
+      qr{<a href="http://bugzilla\.mozilla\.org/show_bug\.cgi\?id=4321">Bug\n#4321</a>},
+      "Check for split line Bugzilla URL" );
+
+# Check for JIRA URLs.
+like( $email,
+      qr{<a href="http://jira\.atlassian\.com/secure/ViewIssue\.jspa\?key=TST-1234">TST-1234</a>\.},
+      "Check for Jira URL" );
+unlike( $email,
+      qr{<a href="http://jira\.atlassian\.com/secure/ViewIssue\.jspa\?key=JRA-\n4321">JRA-\n4321-1234</a>},
+      "Check for no split line Jira URL" );
+unlike( $email,
+      qr{<a href="http://jira\.atlassian\.com/secure/ViewIssue\.jspa\?key=studlyCAPS-1234">studlyCAPS-1234</a>\.},
+      "Check for no studlyCAPS Jira URL" );
 
 ##############################################################################
 # Functions.

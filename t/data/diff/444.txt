@@ -1,0 +1,143 @@
+Modified: trunk/SVN-Notify/Changes
+===================================================================
+--- trunk/SVN-Notify/Changes    2004-10-19 17:27:17 UTC (rev 753)
++++ trunk/SVN-Notify/Changes    2004-10-19 17:29:10 UTC (rev 754)
+@@ -4,7 +4,7 @@
+       - Fixed accessor generation so that accessors created for the
+         attributes passed to "register_attributes()" but a subclass are
+         created in the subclass' package instead of in SVN::Notify.
+-      - Changed parsing for Jira keys to use any set of capital letters
++      - Changed parsing for JIRA keys to use any set of capital letters
+         followed by a dash and then a number, rather than the literal
+         string "JIRA-" followed by a number. Reported by Garrett Rooney.
+ 
+
+Modified: trunk/SVN-Notify/lib/SVN/Notify/HTML.pm
+===================================================================
+--- trunk/SVN-Notify/lib/SVN/Notify/HTML.pm     2004-10-19 17:27:17 UTC (rev 753)
++++ trunk/SVN-Notify/lib/SVN/Notify/HTML.pm     2004-10-19 17:29:10 UTC (rev 754)
+@@ -105,9 +105,9 @@
+ 
+   svnnotify --jira-url 'http://jira.atlassian.com/secure/ViewIssue.jspa?key=%s'
+ 
+-The URL of a Jira server. If passed in, any strings in the log message that
+-appear to be Jira keys (such as "JRA-1234") will be turned into links to the
+-Jira server. The URL must have the "%s" format where the Jira key should be
++The URL of a JIRA server. If passed in, any strings in the log message that
++appear to be JIRA keys (such as "JRA-1234") will be turned into links to the
++JIRA server. The URL must have the "%s" format where the Jira key should be
+ put into the URL.
+ 
+ =back
+
+
+Property changes on: trunk/SVN-Notify/lib/SVN/Notify/HTML.pm
+___________________________________________________________________
+Name: svn:keywords
+   + Id
+
+
+Deleted: trunk/SVN-Notify/t/colordiff.t
+===================================================================
+--- trunk/SVN-Notify/t/colordiff.t      2004-10-09 19:55:37 UTC (rev 727)
++++ trunk/SVN-Notify/t/colordiff.t      2004-10-09 20:02:47 UTC (rev 728)
+@@ -1,17 +0,0 @@
+-#!perl -w
+-
+-# $Id$
+-
+-use strict;
+-use Test::More;
+-use File::Spec::Functions;
+-
+-if ($^O eq 'MSWin32') {
+-    plan skip_all => "SVN::Notify::HTML::ColorDiff not yet supported on Win32";
+-} elsif (eval { require HTML::Entities }) {
+-    plan tests => 103;
+-} else {
+-    plan skip_all => "SVN::Notify::HTML::ColorDiff requires HTML::Entities";
+-}
+-
+-BEGIN { use_ok('SVN::Notify::HTML::ColorDiff') }
+
+Deleted: trunk/SVN-Notify/t/data/bin/sendmail.exe
+===================================================================
+(Binary files differ)
+
+Property changes on: trunk/SVN-Notify/t/data/diff/444.txt
+___________________________________________________________________
+Name: svn:keywords
+   + Id
+
+
+Added: trunk/SVN-Notify/t/options.t
+===================================================================
+--- trunk/SVN-Notify/t/options.t        2004-10-17 03:49:56 UTC (rev 747)
++++ trunk/SVN-Notify/t/options.t        2004-10-19 03:36:42 UTC (rev 748)
+@@ -0,0 +1,59 @@
++#!perl -w
++
++# $Id$
++
++use strict;
++use Test::More tests => 5;
++
++BEGIN {use_ok 'SVN::Notify' };
++
++my %testopts = (
++    '--repos-path' => 'foo',
++    '--revision'   => '2',
++    '--svnlook'    => 'svnlook',
++    '--sendmail'   => 'sendmail',
++    '--to'         => 'test@example.com',
++);
++
++my %params = (
++    to_regex_map   => undef,
++    from           => undef,
++    user_domain    => undef,
++    charset        => undef,
++    language       => undef,
++    with_diff      => undef,
++    attach_diff    => undef,
++    reply_to       => undef,
++    subject_prefix => undef,
++    subject_cx     => undef,
++    max_sub_length => undef,
++    handler        => undef,
++    viewcvs_url    => undef,
++    verbose        => undef,
++    help           => undef,
++    man            => undef,
++    version        => undef,
++);
++
++while (my ($k, $v) = each %testopts) {
++    $k =~ s/^--//;
++    $k =~ s/-/_/g;
++    $params{$k} = $v;
++}
++
++# Make sure that the default options work.
++local @ARGV = %testopts;
++ok my $opts = SVN::Notify->get_options, "Get SVN::Notify options";
++is_deeply($opts, \%params, "Check results");
++
++$params{bugzilla_url} = 'url';
++$params{handler} = 'HTML';
++for (qw(jira_url rt_url linkize)) {
++    $params{$_} = undef;
++}
++
++# Use the --handler option to load the HTML subclass and make sure that
++# its options are properly parsed out of @ARGV.
++@ARGV = (%testopts, '--bugzilla-url' => 'url', '--handler' => 'HTML');
++ok $opts = SVN::Notify->get_options, "Get SVN::Notify + HTML options";
++is_deeply($opts, \%params, "Check new results");
+
+
+Property changes on: trunk/SVN-Notify/t/options.t
+___________________________________________________________________
+Name: svn:keywords
+   + Id
+

@@ -7,9 +7,22 @@ Revision history for Perl extension SVN::Notify
       - Changed parsing for JIRA keys to use any set of capital letters
         followed by a dash and then a number, rather than the literal
         string "JIRA-" followed by a number. Reported by Garrett Rooney.
+      - Modified the regular expression patterns for the RT, Bugzilla,
+        RT, and ViewCVS links to properly match on word boundaries, so
+        that strings like "humbug 12" don't match.
+      - Modified the ViewCVS link regular expression pattern so that it
+        matches strings like "rev 12" as well as "revision 12".
+      - Modified the RT link regular expression pattern so that it
+        matches strings like "RT-Ticket: 23" as well as "Ticket 1234".
+        Suggested by Jesse Vincent.
+      - Added complicated example to try to show off all of the major
+        features. I will keep this up-to-date going forward in order to
+        post sample output on the Web.
+      - Fixed the parsing of log messages so that empty lines are no
+        longer eliminated.
 
 2.30  2004-10-19T05:20:02
-      - Added "register_attributes()" class method so that subclases can
+      - Added "register_attributes()" class method so that subclasses can
         easily specify their own attributes and the corresponding command-
         line options. This method will also create accessors for such
         attributes.
@@ -28,7 +41,7 @@ Revision history for Perl extension SVN::Notify
       - Changed the "viewcvs_url" attribute to require an "%s" format
         for the placement of the revision number to match the way the
         new URL attributes work. As an interim measure, SVN::Notify will
-        append what it has always appeneded and emit a warning if there is
+        append what it has always appended and emit a warning if there is
         no "%s" in the "viewcvs_url" string.
       - Fixed SVN::Notify::HTML::ColorDiff so that it does not output two
         separate sections for a single file that was both modified (or

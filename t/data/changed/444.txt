@@ -1,0 +1,6 @@
+U   trunk/SVN-Notify/Changes
+UU  trunk/SVN-Notify/lib/SVN/Notify/HTML.pm
+D   trunk/SVN-Notify/t/colordiff.t
+D   trunk/SVN-Notify/t/data/bin/sendmail.exe
+_U  trunk/SVN-Notify/t/data/diff/444.txt
+A   trunk/SVN-Notify/t/options.t

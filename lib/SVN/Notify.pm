@@ -1303,7 +1303,7 @@ sub _pipe {
 sub _read_pipe {
     my $self = shift;
     my $fh = $self->_pipe('-|', @_);
-    local $/; my @lines = split /[\r\n]+/, <$fh>;
+    local $/; my @lines = split /(?:\r\n|\r|\n)/, <$fh>;
     close $fh or warn "Child process exited: $?\n";
     return \@lines;
 }

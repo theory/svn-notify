@@ -1,0 +1,5 @@
+trunk/SVN-Notify/
+trunk/SVN-Notify/lib/SVN/Notify/
+trunk/SVN-Notify/t/
+trunk/SVN-Notify/t/data/bin/
+trunk/SVN-Notify/t/data/diff/
