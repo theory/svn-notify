@@ -1404,8 +1404,7 @@ Subclasses SVN::Notify.
 
 =head1 Bugs
 
-Report all bugs via the CPAN Request Tracker at
-L<http://rt.cpan.org/NoAuth/Bugs.html?Dist=SVN-Notify>.
+Please send bug reports to <bug-svn-notify@rt.cpan.org>.
 
 =head1 To Do
 
