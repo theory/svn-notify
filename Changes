@@ -27,6 +27,7 @@ Revision history for Perl extension SVN::Notify
         response to Subversion activity.
       - The tests no longer require HTML::Entities to run. The HTML
         email tests will be skipped if it is not installed.
+      - Added accessor methods for the attributes of SVN::Notify.
 
 2.00  2004-10-04T05:09:17
       - First release, ported from activitymail 1.11, but completely

@@ -9,7 +9,7 @@ use File::Spec::Functions;
 if ($^O eq 'MSWin32') {
     plan skip_all => "SVN::Notify not yet supported on Win32";
 } else {
-    plan tests => 96;
+    plan tests => 119;
 }
 
 BEGIN { use_ok('SVN::Notify') }
@@ -34,6 +34,39 @@ ok( $notifier->prepare_recipients, 'prepare recipients' );
 ok( $notifier->prepare_contents, 'prepare contents' );
 ok( $notifier->prepare_files, 'prepare files');
 ok( $notifier->prepare_subject, 'prepare subject');
+
+# Make sure the attributes work.
+is($notifier->repos_path, $args{repos_path}, "Check repos_path accessor" );
+is($notifier->revision, $args{revision}, "Check revision accessor" );
+is($notifier->to, $args{to}, "Check to accessor" );
+is($notifier->to_regex_map, $args{to_regex_map},
+   "Check to_regex_map accessor" );
+is($notifier->from, 'theory', "Check from accessor" );
+is($notifier->user_domain, $args{user_domain},
+   "Check user_domain accessor" );
+is($notifier->svnlook, $args{svnlook}, "Check svnlook accessor" );
+is($notifier->sendmail, $args{sendmail}, "Check sendmail accessor" );
+is($notifier->charset, 'UTF-8', "Check charset accessor" );
+is($notifier->with_diff, $args{with_diff}, "Check with_diff accessor" );
+is($notifier->attach_diff, $args{attach_diff}, "Check attach_diff accessor" );
+is($notifier->reply_to, $args{reply_to}, "Check reply_to accessor" );
+is($notifier->subject_prefix, $args{subject_prefix},
+   "Check subject_prefix accessor" );
+is($notifier->subject_cx, $args{subject_cx}, "Check subject_cx accessor" );
+is($notifier->max_sub_length, $args{max_sub_length},
+   "Check max_sub_length accessor" );
+is($notifier->viewcvs_url, $args{viewcvs_url}, "Check viewcvs_url accessor" );
+is($notifier->verbose, 0, "Check verbose accessor" );
+is($notifier->user, 'theory', "Check user accessor" );
+is($notifier->date, '2004-04-20 01:33:35 -0700 (Tue, 20 Apr 2004)',
+   "Check date accessor" );
+is($notifier->message_size, 103, "Check message_size accessor" );
+isa_ok($notifier->message, 'ARRAY', "Check message accessor" );
+isa_ok($notifier->files, 'HASH', "Check files accessor" );
+is($notifier->subject, '[111] Did this, that, and the other.',
+   "Check subject accessor" );
+
+# Send the notification.
 ok( $notifier->execute, "Notify" );
 
 # Get the output.

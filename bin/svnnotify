@@ -96,7 +96,7 @@ Fake-out Pod::Usage
   -p --repos-path PATH         Path to the Subversion repository. Required.
   -r --revision REVISION       Commit revision number. Required.
   -t --to ADDRESS              The notification destination email address.
-                               Required unless --to-cx-regex.
+                               Required unless --to-regex-map.
   -x --to-regex-map TO=REGEX   A mapping between a destination email address
                                and a regular expresion to match against the
                                directories affected by the commit. Required
