@@ -62,7 +62,7 @@ for my $tag (qw(html head body dl)) {
 # Make sure we have styles and the appropriate div.
 like( $email, qr|<style type="text/css">|, "Check for <style> tag" );
 like( $email, qr/<\/style>/, "Check for </style> tag" );
-like( $email, qr/pre {font-size:125%;}/, "Check for style" );
+like( $email, qr/#msg dl {background:#ccccff;}/, "Check for style" );
 like( $email, qr/<div id="msg">/, "Check for msg div" );
 
 # Make sure we have headers for each of the four kinds of changes.

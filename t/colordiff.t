@@ -9,7 +9,7 @@ use File::Spec::Functions;
 if ($^O eq 'MSWin32') {
     plan skip_all => "SVN::Notify::HTML::ColorDiff not yet supported on Win32";
 } elsif (eval { require HTML::Entities }) {
-    plan tests => 102;
+    plan tests => 103;
 } else {
     plan skip_all => "SVN::Notify::HTML::ColorDiff requires HTML::Entities";
 }
@@ -63,7 +63,7 @@ for my $tag (qw(html head body dl)) {
 # Make sure we have styles and the appropriate div.
 like( $email, qr|<style type="text/css">|, "Check for <style> tag" );
 like( $email, qr/<\/style>/, "Check for </style> tag" );
-like( $email, qr/pre {font-size:125%;}/, "Check for style" );
+like( $email, qr/#patch .add {background:#ddffdd;}/, "Check for style" );
 like( $email, qr/<div id="msg">/, "Check for msg div" );
 
 # Make sure we have headers for each of the four kinds of changes.
@@ -145,7 +145,9 @@ is( scalar @{[$email =~ m{Content-Transfer-Encoding: 8bit\n}g]}, 1,
 
 # Make sure that the diff is included and escaped.
 like( $email, qr/<div id="patch">/, "Check for patch div" );
-like( $email, qr{<h3><a id="trunk/Params-CallbackRequest/Changes">trunk/Params-CallbackRequest/Changes</a> \(600 => 601\)</h3>},
+like( $email, qr{<a id="trunk/Params-CallbackRequest/Changes"></a>\n},
+      "Check for file div ID");
+like( $email, qr{<h3>trunk/Params-CallbackRequest/Changes \(600 => 601\)</h3>},
       "Check for diff file header" );
 
 # Make sure that it's not attached.

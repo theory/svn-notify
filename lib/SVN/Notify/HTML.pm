@@ -6,7 +6,7 @@ use strict;
 use HTML::Entities;
 use SVN::Notify ();
 
-$SVN::Notify::HTML::VERSION = '2.11';
+$SVN::Notify::HTML::VERSION = '2.20';
 @SVN::Notify::HTML::ISA = qw(SVN::Notify);
 
 =head1 Name
@@ -84,7 +84,7 @@ sub start_body {
     my ($self, $out) = @_;
     print $out qq{<html>\n<head><style type="text/css"><!--\n};
     $self->output_css($out);
-    print $out qq{\n--></style>\n</head>\n<body>\n\n<div id="msg">\n};
+    print $out qq{--></style>\n</head>\n<body>\n\n<div id="msg">\n};
     return $self;
 }
 
@@ -103,17 +103,16 @@ appropriate C<< <style> >> tags.
 sub output_css {
     my ($self, $out) = @_;
     print $out
-      qq(sans-serif;font-size:85%;}\n),
-      qq(pre {font-size:125%;}\n),
+      qq(body {background:#ffffff;font-family:Verdana,Helvetica,Arial,sans-serif;}\n),
       qq(h3 {margin:15px 0;padding:0;line-height:0;}\n),
       qq(#msg {margin: 0 0 2em 0;}\n),
       qq(#msg dl, #msg ul, #msg pre {padding:1em;border:1px dashed black;),
-        qq(margin: 10px 0 30px 0;}),
-      qq(#msg dl {background:#ccccff;}),
-      qq(#msg pre {background:#ffffcc;}),
-      qq(#msg ul {background:#cc99ff;list-style:none;}),
-      qq(#msg dt {font-weight:bold;float:left;width: 6em;}),
-      qq(#msg dt:after { content:':';});
+        qq(margin: 10px 0 30px 0;}\n),
+      qq(#msg dl {background:#ccccff;}\n),
+      qq(#msg pre {background:#ffffcc;}\n),
+      qq(#msg ul {background:#cc99ff;list-style:none;}\n),
+      qq(#msg dt {font-weight:bold;float:left;width: 6em;}\n),
+      qq(#msg dt:after { content:':';}\n);
     return $self;
 }
 
