@@ -1,6 +1,6 @@
 Revision history for Perl extension SVN::Notify
 
-2.10
+2.10  2004-10-07T06:18:59
       - Added many new methods to break up the various activities of
         assembling a notification message. This will make subclassing
         easier.
