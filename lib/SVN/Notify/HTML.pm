@@ -6,7 +6,7 @@ use strict;
 use HTML::Entities;
 use SVN::Notify ();
 
-$SVN::Notify::HTML::VERSION = '2.42';
+$SVN::Notify::HTML::VERSION = '2.43';
 @SVN::Notify::HTML::ISA = qw(SVN::Notify);
 
 __PACKAGE__->register_attributes(
