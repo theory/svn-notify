@@ -104,14 +104,9 @@ In F<post-commit>:
   -m --man                     Print the complete documentation and exit.
   -v --version                 Print the version number and exit.
 
-=head1 Description
+=head1 See Also
 
-=head1 Option Details
-
-=head1 Bugs
-
-Report all bugs via the CPAN Request Tracker at
-L<http://rt.cpan.org/NoAuth/Bugs.html?Dist=SVN-Notify>.
+See L<SVN::Notify|SVN::Notify> for the complete documentation.
 
 =head1 Author
 

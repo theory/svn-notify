@@ -1,0 +1,22 @@
+bin/svnnotify
+Build.PL
+Changes
+lib/SVN/Notify.pm
+Makefile.PL
+MANIFEST			This list of files
+META.yml
+README
+t/base.t
+t/bin/testsendmail
+t/bin/testsendmail.bat
+t/bin/testsvnlook
+t/bin/testsvnlook.bat
+t/data/changed/111.txt
+t/data/changed/222.txt
+t/data/diff/111.txt
+t/data/dirs-changed/111.txt
+t/data/dirs-changed/222.txt
+t/data/info/111.txt
+t/data/info/222.txt
+t/pod-coverage.t
+t/pod.t

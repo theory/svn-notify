@@ -5,5 +5,5 @@
 \.bak$
 ^MANIFEST\.SKIP$
 ^SVN-Notify
-.svn
-output.txt
+\.svn
+output\.txt
