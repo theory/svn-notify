@@ -492,7 +492,7 @@ the list of modified files (if a single commit both modified a file and set a
 property on it).
 
 If the C<subject_cx> parameter was specified and a single file was affected by
-the commit, then C<prepare_files()> will also specifythat file name as the
+the commit, then C<prepare_files()> will also specify that file name as the
 context to be used in the subject line of the commit email.
 
 =cut
@@ -537,7 +537,7 @@ those methods potentially sets up the context for use in the the subject
 line. The subject may have a prefix defined by the C<subject_prefix> parameter
 to C<new()>, it has the revision number, it might have the context if the
 C<subject_cx> specified a true value, and it will have the first sentence or
-line of the commit, whichever is shofter. The subject may then be truncated to
+line of the commit, whichever is shorter. The subject may then be truncated to
 the maximum length specified by the C<max_sub_length> parameter.
 
 =cut
@@ -754,7 +754,7 @@ output of C<svnlook diff> to the specified file handle. That file handle is
 an open pipe to sendmail.
 
 C<output_diff()> is also aware of whether the format of the notification email
-is text or HTML, so that it can properly escape the diff for HTML emaill when
+is text or HTML, so that it can properly escape the diff for HTML email when
 the C<attach_diff> parameter to C<new()> has a false value.
 
 =cut
@@ -799,7 +799,7 @@ sub output_diff {
 }
 
 ##############################################################################
-# This function forks off a process to execute an external program and any
+# This method forks off a process to execute an external program and any
 # associated arguments and returns a file handle that can be read to fetch
 # the output of the external program.
 ##############################################################################
@@ -826,7 +826,8 @@ sub _pipe {
 ##############################################################################
 # This method passes its arguments to _pipe(), but then fetches each line
 # off output from the returned file handle, safely strips out and replaces any
-# newlines and carriage returns, and returns an array refernce of those lines.
+# newlines and carriage returns, and returns an array reference of those
+# lines.
 ##############################################################################
 
 sub _read_pipe {
