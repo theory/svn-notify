@@ -11,14 +11,24 @@ my %map = ( U => 'Modified Files',
             D => 'Removed Files',
             _ => 'Property Changed');
 
+##############################################################################
+# This function prints debug messages. The reason it's a separate function is
+# that it prepends a string to the message so that it'll stand out during
+# commits.
+##############################################################################
+
+sub dbpnt($) { print __PACKAGE__, ": $_[0]\n" }
+
 sub new {
     my ($class, %opts) = @_;
     $opts{svnlook}   ||= $ENV{SVNLOOK}  || '/usr/local/bin/svnlook';
     $opts{sendmail}  ||= $ENV{SENDMAIL} || '/usr/sbin/sendmail';
     $opts{format}    ||= 'text';
     $opts{with_diff} ||= $opts{attach_diff};
+    $opts{verbose}   ||= 0;
     $opts{viewcvs_url} .= '/'
       if $opts{viewcvs_url} && $opts{viewcvs_url} !~ m{/$};
+    dbpnt "Instantiating $class object" if $opts{verbose};
     return bless \%opts, $class;
 }
 
@@ -37,11 +47,15 @@ sub prepare {
 
 sub prepare_recipients {
     my $self = shift;
+    dbpnt "Preparing recipients list" if $self->{verbose};
     return $self unless $self->{to_regex_map} || $self->{subject_cx};
     my @to = $self->{to} ? ($self->{to}) : ();
     my $regexen = delete $self->{to_regex_map};
     if ($regexen) {
+        dbpnt "Compiling regex_map regular expressions"
+          if $self->{verbose} > 1;
         for (values %$regexen) {
+            dbpnt qq{Compiling "$_"} if $self->{verbose} > 2;
             # Remove initial slash and compile.
             s|^\^[/\\]|^|;
             $_ = qr/$_/;
@@ -60,6 +74,7 @@ sub prepare_recipients {
         while (my ($email, $rx) = each %$regexen) {
             # If the directory matches the regex, save the email.
             if (/$rx/) {
+                dbpnt qq{"$_" matched $rx} if $self->{verbose} > 2;
                 push @to, $email;
                 delete $regexen->{$email};
             }
@@ -68,10 +83,12 @@ sub prepare_recipients {
         if ($self->{subject_cx}) {
             my $l = length;
             ($len, $cx) = ($l, $_) unless defined $len && $len < $l;
+            dbpnt qq{Context is "$cx"} if $self->{verbose} > 1;
         }
     }
     $self->{to} = join ', ', @to;
     $self->{cx} = $cx;
+    dbpnt qq{Recipients: "$self->{to}"} if $self->{verbose} > 1;
     return $self;
 }
 
@@ -79,6 +96,7 @@ sub prepare_recipients {
 
 sub prepare_files {
     my $self = shift;
+    dbpnt "Preparing file lists" if $self->{verbose};
     my %files;
     my $fh = $self->_pipe($self->{svnlook}, 'changed', $self->{repos_path},
                           '-r', $self->{revision});
@@ -88,6 +106,7 @@ sub prepare_files {
     do {
         s/[\n\r]+$//;
         if (s/^(.)(.)\s+//) {
+            dbpnt "$1 => $_" if $self->{verbose} > 2;
             push @{$files{$1}}, $_;
             push @{$files{_}}, $_ if $2 ne ' ' && $1 ne '_';
         }
@@ -97,6 +116,7 @@ sub prepare_files {
         # There's only one file; it's the context.
         $cx =~ s/[\n\r]+$//;
         ($self->{cx} = $cx) =~ s/^..\s+//;
+        dbpnt qq{Directory context is "$self->{cx}"} if $self->{verbose} > 1;
     }
     $self->{files} = \%files;
     return $self;
@@ -112,6 +132,7 @@ sub prepare_files {
 
 sub prepare_subject {
     my $self = shift;
+    dbpnt "Preparing subject" if $self->{verbose};
 
     # Start with the optional message and revision number..
     $self->{subject} .=
@@ -131,6 +152,8 @@ sub prepare_subject {
     $self->{subject} =~ s/^(.{0,$self->{max_sub_length}})\s+.*$/$1/m
       if $self->{max_sub_length}
       && length $self->{subject} > $self->{max_sub_length};
+
+    dbpnt qq{Subject is "$self->{subject}"} if $self->{verbose};
     return $self;
 }
 
@@ -138,6 +161,7 @@ sub prepare_subject {
 
 sub prepare_contents {
     my $self = shift;
+    dbpnt "Preparing contents" if $self->{verbose};
     my $lines = $self->_read_pipe($self->{svnlook}, 'info', $self->{repos_path},
                                   '-r', $self->{revision});
     $self->{user} = shift @$lines;
@@ -150,6 +174,10 @@ sub prepare_contents {
         $self->{from} = $self->{user}
           . ($self->{user_domain} ? "\@$self->{user_domain}" : '');
     }
+    if ($self->{verbose} > 1) {
+        dbpnt "From: $self->{from}";
+        dbpnt "Message: @$lines";
+    }
     return $self;
 }
 
@@ -157,9 +185,11 @@ sub prepare_contents {
 
 sub send {
     my $self = shift;
+    dbpnt "Sending message" if $self->{verbose};
     return $self unless $self->{to};
+
     open(SENDMAIL, "|$self->{sendmail} -oi -t")
-      or mydie("Cannot fork for $self->{sendmail}: $!\n");
+      or die "Cannot fork for $self->{sendmail}: $!\n";
     # Output the headers.
     print SENDMAIL
       "MIME-Version: 1.0\n",
@@ -196,10 +226,14 @@ sub send {
 
     print SENDMAIL "--$self->{attach_diff}--\n" if $self->{attach_diff};
     close SENDMAIL;
+    dbpnt "Message sent" if $self->{verbose};
+    return $self;
 }
 
 sub output_as_text {
     my ($self, $out) = @_;
+    dbpnt "Outputting text message" if $self->{verbose} > 1;
+
     print $out "Log Message:\n-----------\n",
       join("\n", @{$self->{message}}), "\n";
 
@@ -234,6 +268,8 @@ sub output_as_text {
 
 sub output_as_html {
     my ($self, $out) = @_;
+    dbpnt "Outputting HTML message" if $self->{verbose} > 1;
+
     require HTML::Entities;
     print $out "<body>\n<h3>Log Message</h3>\n<pre>",
       HTML::Entities::encode_entities(join("\n", @{$self->{message}})),
@@ -280,9 +316,12 @@ sub output_as_html {
 
 sub output_diff {
     my ($self, $out) = @_;
+    dbpnt "Outputting diff" if $self->{verbose} > 1;
+
     # Output the content type headers.
     print $out "\n";
     if ($self->{attach_diff}) {
+        dbpnt "Attaching diff" if $self->{verbose} > 2;
         # Get the date (UTC).
         my @gm = gmtime;
         $gm[5] += 1900;
@@ -341,37 +380,21 @@ sub _read_pipe {
 
 sub _pipe {
     my $self = shift;
-
+    dbpnt "Piping execution of '" . join("', '", @_) . "'"
+      if $self->{verbose};
     # Safer version of backtick (see perlipc(1)).
     my $pid = open(PIPE, '-|');
-    mydie("Cannot fork: $!") unless defined $pid;
+    die "Cannot fork: $!\n" unless defined $pid;
 
     if ($pid) {
         # Parent process. Return the file handle.
         return \*PIPE;
     } else {
         # Child process. Execute the commands.
-        exec(@_) or mydie("Can't exec $_[0]: $!");
+        exec(@_) or die "Cannot exec $_[0]: $!\n";
         # Not reached.
     }
 }
-
-##############################################################################
-# This function takes an error message for its argument, prints it, and exits.
-# The reason it's a separate function is that it prepends a string to the
-# error message so that it'll stand out during commits, and so that the
-# program won't actually die. XXX But don't we want it to die with SVN?
-##############################################################################
-
-sub mydie { print "######## SVN::Notify error: $_[0]"; exit }
-
-##############################################################################
-# This function prints debug messages. The reason it's a separate function is
-# that it prepends a string to the message so that it'll stand out during
-# commits.
-##############################################################################
-
-sub dbpnt { print "\n" if $_[1]; print "@@@@@@@@ SVN::Notify debug: $_[0]" }
 
 =head1 Name
 

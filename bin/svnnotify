@@ -101,7 +101,7 @@ Fake-out Pod::Usage
                                complete the email address in the From header.
   -A --format FORMAT           Format: "text" or "html". Defaults to "text".
   -U --viewcvs-url URL         Include links to specified ViewCVS URL.
-  -V --verbose                 Verbose mode.
+  -V --verbose                 Incremental verbose mode.
   -h --help                    Print this usage statement and exit.
   -m --man                     Print the complete documentation and exit.
   -v --version                 Print the version number and exit.
