@@ -1,6 +1,6 @@
 Revision history for Perl extension SVN::Notify
 
-2.22
+2.22  2004-10-15T06:12:46
       - Fixed diff parsing in SVN::Notitfy::HTML and
         SVN::Notitfy::HTML::ColoDiff to recognize added and deleted files.
       - Added links to files for which properties were set down into
