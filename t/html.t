@@ -9,7 +9,7 @@ use File::Spec::Functions;
 if ($^O eq 'MSWin32') {
     plan skip_all => "SVN::Notify::HTML not yet supported on Win32";
 } elsif (eval { require HTML::Entities }) {
-    plan tests => 102;
+    plan tests => 103;
 } else {
     plan skip_all => "SVN::Notify::HTML requires HTML::Entities";
 }
@@ -161,6 +161,9 @@ like( $email,
 like( $email,
       qr|<a id="trunkParamsCallbackRequestChanges">Modified: trunk/Params-CallbackRequest/Changes</a>\n|,
       "Check for file name anchor id" );
+like( $email,
+      qr|<a id="trunkParamsCallbackRequestlibParamsCallbackpm">Added: trunk/Params-CallbackRequest/lib/Params/Callback\.pm</a>\n|,
+      "Check for added file name anchor id" );
 
 ##############################################################################
 # Attach diff.

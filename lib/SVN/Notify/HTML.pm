@@ -257,10 +257,11 @@ sub output_diff {
     print $out qq{</div>\n<div id="patch"><pre>\n};
     while (<$diff>) {
         s/[\n\r]+$//;
-        if (/^Modified: (.*)/) {
-            my $file = encode_entities($1);
+        if (/^(Modified|Added|Deleted): (.*)/) {
+            my $action = $1;
+            my $file = encode_entities($2);
             (my $id = $file) =~ s/[^\w_]//g;
-            print $out qq{<a id="$id">Modified: $file</a>\n"};
+            print $out qq{<a id="$id">$action: $file</a>\n"};
         }
         print $out encode_entities($_), "\n";
     }
