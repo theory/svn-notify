@@ -1,6 +1,6 @@
 --- #YAML:1.0
 name: SVN-Notify
-version: 2.30
+version: 2.40
 author:
   - David Wheeler <david@kineticode.com>
 abstract: Subversion activity notification
@@ -17,11 +17,11 @@ build_requires:
 provides:
   SVN::Notify:
     file: lib/SVN/Notify.pm
-    version: 2.30
+    version: 2.40
   SVN::Notify::HTML:
     file: lib/SVN/Notify/HTML.pm
-    version: 2.30
+    version: 2.40
   SVN::Notify::HTML::ColorDiff:
     file: lib/SVN/Notify/HTML/ColorDiff.pm
-    version: 2.30
+    version: 2.40
 generated_by: Module::Build version 0.26

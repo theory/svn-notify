@@ -1,6 +1,6 @@
 Revision history for Perl extension SVN::Notify
 
-2.31
+2.40  2004-10-21T19:49:40
       - Fixed accessor generation so that accessors created for the
         attributes passed to "register_attributes()" but a subclass are
         created in the subclass' package instead of in SVN::Notify.
