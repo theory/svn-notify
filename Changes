@@ -1,6 +1,11 @@
 Revision history for Perl extension SVN::Notify
 
-2.0
+2.00
       - First release, ported from activitymail 1.11, but completely
         rewritten, with a new script interface and a separate class
         that manages everything.
+      - Added "to_cx_regex" parameter to control the recipients based
+        on how regular expressions match directory names.
+      - Added "charset" parameter.
+      - Added "user_domain" parameter.
+      - Added "sendmail" parameter.
