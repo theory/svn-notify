@@ -89,7 +89,7 @@ sub start_body {
       qq{<head><style type="text/css"><!--\n};
     $self->output_css($out);
     print $out qq{--></style>\n<title>}, encode_entities($self->subject),
-      qq{</head>\n<body>\n\n<div id="msg">\n};
+      qq{</title>\n</head>\n<body>\n\n<div id="msg">\n};
     return $self;
 }
 
