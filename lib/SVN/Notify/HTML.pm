@@ -105,9 +105,9 @@ ID should be put into the URL.
 
   svnnotify --jira-url 'http://jira.atlassian.com/secure/ViewIssue.jspa?key=%s'
 
-The URL of a Jira server. If passed in, any strings in the log message that
-appear to be Jira keys (such as "JRA-1234") will be turned into links to the
-Jira server. The URL must have the "%s" format where the Jira key should be
+The URL of a JIRA server. If passed in, any strings in the log message that
+appear to be JIRA keys (such as "JRA-1234") will be turned into links to the
+JIRA server. The URL must have the "%s" format where the Jira key should be
 put into the URL.
 
 =back

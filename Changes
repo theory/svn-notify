@@ -4,7 +4,7 @@ Revision history for Perl extension SVN::Notify
       - Fixed accessor generation so that accessors created for the
         attributes passed to "register_attributes()" but a subclass are
         created in the subclass' package instead of in SVN::Notify.
-      - Changed parsing for Jira keys to use any set of capital letters
+      - Changed parsing for JIRA keys to use any set of capital letters
         followed by a dash and then a number, rather than the literal
         string "JIRA-" followed by a number. Reported by Garrett Rooney.
 
