@@ -88,7 +88,7 @@ sub start_body {
       qq{<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">\n},
       qq{<head><style type="text/css"><!--\n};
     $self->output_css($out);
-    print $out qq{--></style>\n<title>}, encode_entities($self->{subject}),
+    print $out qq{--></style>\n<title>}, encode_entities($self->subject),
       qq{</head>\n<body>\n\n<div id="msg">\n};
     return $self;
 }
@@ -138,18 +138,18 @@ sub output_metadata {
     my ($self, $out) = @_;
     print $out "<dl>\n<dt>Revision</dt> <dd>";
 
-    if ($self->{viewcvs_url}) {
+    my $rev = $self->revision;
+    if (my $url = $self->viewcvs_url) {
         # Make the revision number a URL.
-        print $out qq{<a href="$self->{viewcvs_url}?rev=$self->{revision}},
-          qq{&amp;view=rev">$self->{revision}</a>};
+        print $out qq{<a href="$url?rev=$rev&amp;view=rev">$rev</a>};
     } else {
         # Just output the revision number.
-        print $out $self->{revision};
+        print $out $rev;
     }
 
     print $out "</dd>\n",
-      "<dt>Author</dt> <dd>", encode_entities($self->{user}), "</dd>\n",
-      "<dt>Date</dt> <dd>", encode_entities($self->{date}), "</dd>\n",
+      "<dt>Author</dt> <dd>", encode_entities($self->user), "</dd>\n",
+      "<dt>Date</dt> <dd>", encode_entities($self->date), "</dd>\n",
       "</dl>\n\n";
 
     return $self;
@@ -168,9 +168,9 @@ Message" in C<< <h3> >> tags.
 
 sub output_log_message {
     my ($self, $out) = @_;
-    $self->_dbpnt( "Outputting log message as HTML") if $self->{verbose} > 1;
+    $self->_dbpnt( "Outputting log message as HTML") if $self->verbose > 1;
     print $out "<h3>Log Message</h3>\n<pre>",
-      HTML::Entities::encode_entities(join("\n", @{$self->{message}})),
+      HTML::Entities::encode_entities(join("\n", @{$self->message})),
       "</pre>\n\n";
     return $self;
 }
@@ -190,7 +190,7 @@ output in C<< <h3> >> tags.
 
 sub output_file_lists {
     my ($self, $out) = @_;
-    my $files = $self->{files} or return $self;
+    my $files = $self->files or return $self;
     my $map = $self->file_label_map;
     # Create the lines that will go underneath the above in the message.
     my %dash = ( map { $_ => '-' x length($map->{$_}) } keys %$map );
@@ -201,7 +201,7 @@ sub output_file_lists {
 
         # Identify the action and output each file.
         print $out "<h3>$map->{$type}</h3>\n<ul>\n";
-        if ($self->{with_diff} && !$self->{attach_diff} && $type ne '_') {
+        if ($self->with_diff && !$self->attach_diff && $type ne '_') {
             for (@{ $files->{$type} }) {
                 my $file = encode_entities($_);
                 # Strip out letters illegal for IDs.
@@ -230,8 +230,8 @@ complete, and before any call to C<output_attached_diff()>.
 
 sub end_body {
     my ($self, $out) = @_;
-    $self->_dbpnt( "Ending body") if $self->{verbose} > 2;
-    print $out "\n</div>" unless $self->{with_diff} && !$self->{attach_diff};
+    $self->_dbpnt( "Ending body") if $self->verbose > 2;
+    print $out "\n</div>" unless $self->with_diff && !$self->attach_diff;
     print $out "\n</body>\n</html>\n";
     return $self;
 }
@@ -240,21 +240,19 @@ sub end_body {
 
 =head3 output_diff
 
-  $notifier->output_diff($file_handle);
+  $notifier->output_diff($out_file_handle, $diff_file_handle);
 
 Sends the output of C<svnlook diff> to the specified file handle for inclusion
 in the notification message. The diff is output between C<< <pre> >> tags, and
-Each line of the diff file is escaped by C<HTML::Entities::encode_entities>.
+Each line of the diff file is escaped by C<HTML::Entities::encode_entities()>.
+The diff data will be read from C<$diff_file_handle> and printed to
+C<$out_file_handle>.
 
 =cut
 
 sub output_diff {
-    my ($self, $out) = @_;
-    $self->_dbpnt( "Outputting HTML diff") if $self->{verbose} > 1;
-
-    # Get the diff and output it.
-    my $diff = $self->_pipe('-|', $self->{svnlook}, 'diff',
-                            $self->{repos_path}, '-r', $self->{revision});
+    my ($self, $out, $diff) = @_;
+    $self->_dbpnt( "Outputting HTML diff") if $self->verbose > 1;
 
     print $out qq{</div>\n<div id="patch"><pre>\n};
     while (<$diff>) {

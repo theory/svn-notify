@@ -2,6 +2,11 @@ Revision history for Perl extension SVN::Notify
 
 2.21
       - Tweaked HTML to make it all XHTML 1.1 compliant.
+      - Switched to using attribute accessors instead of direct hash
+        access in the subclasses to serve as a better example for others.
+      - Changed the diff output methods to accept the diff input file
+        handle as the second argument, so that it is created in only
+        one place.
 
 2.20  2004-10-09T20:01:28
       - Subclassing Module::Build in Build.PL to move and set the shebang

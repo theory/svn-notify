@@ -81,22 +81,18 @@ sub output_css {
 
 =head3 output_diff
 
-  $notifier->output_diff($file_handle);
+  $notifier->output_diff($out_file_handle, $diff_file_handle);
 
-Sends the output of C<svnlook diff> to the specified file handle for inclusion
-in the notification message. The diff is output with nice colorized HTML
-markup. Each line of the diff file is escaped by
-C<HTML::Entities::encode_entities>.
+Reads the diff data from C<$diff_file_handle> and prints it to
+C<$out_file_handle> for inclusion in the notification message. The diff is
+output with nice colorized HTML markup. Each line of the diff file is escaped
+by C<HTML::Entities::encode_entities()>.
 
 =cut
 
 sub output_diff {
-    my ($self, $out) = @_;
-    $self->_dbpnt( "Outputting colorized HTML diff") if $self->{verbose} > 1;
-
-    # Get the diff and output it.
-    my $diff = $self->_pipe('-|', $self->{svnlook}, 'diff',
-                            $self->{repos_path}, '-r', $self->{revision});
+    my ($self, $out, $diff) = @_;
+    $self->_dbpnt( "Outputting colorized HTML diff") if $self->verbose > 1;
 
     my $in_div;
     my $in_span = '';
@@ -188,7 +184,7 @@ L<http://www.badgers-in-foil.co.uk/projects/cvsspam/example.html>.
 =item *
 
 Add links to ToDo stuff to the top of the email, as pulled in from the
-diff. This might be tricky, since the diff is currently output I<afte> the
+diff. This might be tricky, since the diff is currently output I<after> the
 message body.
 
 =back

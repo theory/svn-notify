@@ -679,11 +679,14 @@ sub output {
     $self->output_log_message($out);
     $self->output_file_lists($out);
     if ($self->{with_diff}) {
+        # Get a handle on the diff output.
+        my $diff = $self->_pipe('-|', $self->{svnlook}, 'diff',
+                                $self->{repos_path}, '-r', $self->{revision});
         if ($self->{attach_diff}) {
             $self->end_body($out);
-            $self->output_attached_diff($out);
+            $self->output_attached_diff($out, $diff);
         } else {
-            $self->output_diff($out);
+            $self->output_diff($out, $diff);
             $self->end_body($out);
         }
     } else {
@@ -870,39 +873,39 @@ sub end_body {
 
 =head3 output_diff
 
-  $notifier->output_diff($file_handle);
+  $notifier->output_diff($out_file_handle, $diff_file_handle);
 
-Sends the output of C<svnlook diff> to the specified file handle for inclusion
-in the notification message.
+Reads diff data from C<$diff_file_handle> and outputs it to to
+C<$out_file_handle>.
 
 =cut
 
 sub output_diff {
-    my ($self, $out) = @_;
+    my $self = shift;
     $self->_dbpnt( "Outputting diff") if $self->{verbose} > 1;
-    $self->_dump_diff($out);
+    $self->_dump_diff(@_);
 }
 
 ##############################################################################
 
 =head3 output_attached_diff
 
-  $notifier->output_attached_diff($file_handle);
+  $notifier->output_attached_diff($out_file_handle, $diff_file_handle);
 
-Sends the output of C<svnlook diff> to the specified file handle as an
-attachment for inclusion in the notification message.
+Reads diff data from C<$diff_file_handle> and outputs it to to
+C<$out_file_handle> as an attachment.
 
 =cut
 
 sub output_attached_diff {
-    my ($self, $out) = @_;
+    my ($self, $out, $diff) = @_;
     $self->_dbpnt( "Attaching diff") if $self->{verbose} > 2;
     print $out "\n--$self->{boundary}\n",
       "Content-Disposition: attachment; filename=",
       "r$self->{revision}-$self->{user}.diff\n",
       "Content-Type: text/plain; charset=$self->{charset}\n",
       "Content-Transfer-Encoding: 8bit\n\n";
-    $self->_dump_diff($out);
+    $self->_dump_diff($out, $diff);
 }
 
 ##############################################################################
@@ -930,10 +933,7 @@ sub end_message {
 ##############################################################################
 
 sub _dump_diff {
-    my ($self, $out) = @_;
-    # Get the diff and output it.
-    my $diff = $self->_pipe('-|', $self->{svnlook}, 'diff',
-                            $self->{repos_path}, '-r', $self->{revision});
+    my ($self, $out, $diff) = @_;
 
     while (<$diff>) {
         s/[\n\r]+$//;
