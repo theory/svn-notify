@@ -13,9 +13,9 @@ my %map = ( U => 'Modified Files',
 
 sub new {
     my ($class, %opts) = @_;
-    $opts{svnlook} ||= '/usr/local/bin/svnlook';
-    $opts{sendmail} ||= '/usr/sbin/sendmail';
-    $opts{format} ||= 'text';
+    $opts{svnlook}   ||= $ENV{SVNLOOK}  || '/usr/local/bin/svnlook';
+    $opts{sendmail}  ||= $ENV{SENDMAIL} || '/usr/sbin/sendmail';
+    $opts{format}    ||= 'text';
     $opts{with_diff} ||= $opts{attach_diff};
     $opts{viewcvs_url} .= '/'
       if $opts{viewcvs_url} && $opts{viewcvs_url} !~ m{/$};
@@ -381,8 +381,11 @@ SVN::Notify - Subversion activity notification
 
 In F<post-commit>:
 
-  svnnotify --repos-path "$1" --rev "$2" --to developers@example.com [options]
-  svnnotify --repos-path "$1" --rev "$2" --to-cx-regex i10n@example.com=I10N [options]
+  svnnotify --repos-path "$1" --rev "$2" \
+    --to developers@example.com [options]
+
+  svnnotify --repos-path "$1" --rev "$2" \
+    --to-cx-regex i10n@example.com=I10N [options]
 
 =head1 Description
 
@@ -410,14 +413,14 @@ L<HTML::Entities|HTML::Entities>.
 =item C<--svnlook>
 
 The location of the F<svnlook> executable. The default is
-F</usr/local/bin/svnlook>. Specify a different path if this is not the
-location of F<svnlook> on your box.
+F</usr/local/bin/svnlook>. Specify a different path or set the C<$SVNLOOK>
+environment variable if this is not the location of F<svnlook> on your box.
 
 =item C<--sendmail>
 
 The location of the F<sendmail> executable. The default is
-F</usr/sbin/sendmail>. Specify a different path if this is not the location of
-F<sendmail> on your box.
+F</usr/sbin/sendmail>. Specify a different path or set the C<$SENDMAIL>
+environment variable if this is not the location of F<sendmail> on your box.
 
 =back
 
