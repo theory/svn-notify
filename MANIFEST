@@ -18,6 +18,7 @@ t/data/dirs-changed/111.txt
 t/data/dirs-changed/222.txt
 t/data/info/111.txt
 t/data/info/222.txt
+t/errors.t
 t/pod-coverage.t
 t/pod.t
 t/script.t

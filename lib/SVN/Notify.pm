@@ -311,12 +311,12 @@ sub new {
 
     # Check for required parameters.
     _dbpnt "Checking required parameters to new()" if $params{verbose};
-    die qq{Missing required "to" or "to_regex_map" parameter}
-      unless $params{to} || $params{to_regex_map};
     die qq{Missing required "repos_path" parameter}
       unless $params{repos_path};
     die qq{Missing required "revision" parameter}
       unless $params{revision};
+    die qq{Missing required "to" or "to_regex_map" parameter}
+      unless $params{to} || $params{to_regex_map};
 
     # Set up default values.
     $params{svnlook}   ||= $ENV{SVNLOOK}  || '/usr/local/bin/svnlook';
@@ -841,10 +841,6 @@ L<http://rt.cpan.org/NoAuth/Bugs.html?Dist=SVN-Notify>.
 =item *
 
 Add tests for verbose modes.
-
-=item *
-
-Add tests for dies in new().
 
 =item *
 
