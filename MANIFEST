@@ -15,11 +15,15 @@ t/bin/testsvnlook
 t/bin/testsvnlook.bat
 t/data/changed/111.txt
 t/data/changed/222.txt
+t/data/changed/333.txt
 t/data/diff/111.txt
+t/data/diff/333.txt
 t/data/dirs-changed/111.txt
 t/data/dirs-changed/222.txt
+t/data/dirs-changed/333.txt
 t/data/info/111.txt
 t/data/info/222.txt
+t/data/info/333.txt
 t/errors.t
 t/html.t
 t/htmlcolordiff.t

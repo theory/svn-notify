@@ -1,0 +1,3 @@
+UU  trunk/activitymail/bin/activitymail
+_U  trunk/activitymail/t/activitymail.t
+_U  trunk/activitymail/t/zpod.t

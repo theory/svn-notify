@@ -1,0 +1,40 @@
+Modified: trunk/activitymail/bin/activitymail
+===================================================================
+--- trunk/activitymail/bin/activitymail 2004-09-28 02:04:18 UTC (rev 681)
++++ trunk/activitymail/bin/activitymail 2004-09-28 05:59:10 UTC (rev 682)
+@@ -3,7 +3,7 @@
+ eval 'exec /usr/bin/perl -w -S $0 ${1+"$@"}'
+     if 0; # not running under some shell
+ 
+-# $Id: activitymail,v 1.18 2003/08/28 14:49:44 david Exp $
++# $Id$
+ 
+ use strict;
+ use Getopt::Std;
+@@ -1193,7 +1193,7 @@
+ 
+ =head1 COPYRIGHT AND LICENSE
+ 
+-Copyright (c) 2002-2003, David Wheeler. All Rights Reserved.
++Copyright (c) 2002-2004, David Wheeler. All Rights Reserved.
+ 
+ This program is free software; you can redistribute it and/or modify it under
+ the same terms as Perl.
+
+
+Property changes on: trunk/activitymail/bin/activitymail
+___________________________________________________________________
+Name: svn:keywords
+   + Id
+
+
+Property changes on: trunk/activitymail/t/activitymail.t
+___________________________________________________________________
+Name: svn:keywords
+   + Id
+
+
+Property changes on: trunk/activitymail/t/zpod.t
+___________________________________________________________________
+Name: svn:keywords
+   + Id

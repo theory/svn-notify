@@ -3,6 +3,12 @@ Revision history for Perl extension SVN::Notify
 2.22
       - Fixed diff parsing in SVN::Notitfy::HTML and
         SVN::Notitfy::HTML::ColoDiff to recognize added and deleted files.
+      - Added links to files for which properties were set down into
+        their place in the diff in SVN::Notitfy::HTML and
+        SVN::Notitfy::HTML::ColoDiff.
+      - Changed the class for each file in the diff output by
+        SVN::Notitfy::HTML::ColoDiff to be specific to whether the file
+        was modified, added, deleted, or just had its properties set.
 
 2.21  2004-10-09T22:37:34
       - Tweaked HTML to make it all XHTML 1.1 compliant.

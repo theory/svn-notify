@@ -9,7 +9,7 @@ use File::Spec::Functions;
 if ($^O eq 'MSWin32') {
     plan skip_all => "SVN::Notify::HTML::ColorDiff not yet supported on Win32";
 } elsif (eval { require HTML::Entities }) {
-    plan tests => 104;
+    plan tests => 120;
 } else {
     plan skip_all => "SVN::Notify::HTML::ColorDiff requires HTML::Entities";
 }
@@ -147,10 +147,12 @@ is( scalar @{[$email =~ m{Content-Transfer-Encoding: 8bit\n}g]}, 1,
 like( $email, qr/<div id="patch">/, "Check for patch div" );
 like( $email, qr{<a id="trunkParamsCallbackRequestChanges"></a>\n},
       "Check for file div ID");
+like( $email, qr{<div class="modfile"><h4>trunk/Params-CallbackRequest/Changes \(600 => 601\)</h4>},
+      "Check for diff file header" );
 like( $email, qr{<a id="trunkParamsCallbackRequestlibParamsCallbackpm"></a>\n},
       "Check for added file div ID");
-like( $email, qr{<h3>trunk/Params-CallbackRequest/Changes \(600 => 601\)</h3>},
-      "Check for diff file header" );
+like( $email, qr{<div class="addfile"><h4>trunk/Params-CallbackRequest/lib/Params/Callback.pm \(600 => 601\)</h4>},
+      "Check for added diff file header" );
 
 # Make sure that it's not attached.
 unlike( $email, qr{Content-Type: multipart/mixed; boundary=},
@@ -168,11 +170,9 @@ like( $email,
 like( $email,
       qr|<li><a href="#trunkClassMetaChanges">trunk/Class-Meta/Changes</a></li>|,
       "Check for linked file name" );
-
-# Property changes aren't escaped.
 like( $email,
-      qr|<li>trunk/Class-Meta/lib/Class/Meta/Type.pm</li>|,
-      "Check for unescaped property change");
+      qr|<li><a href="#trunkClassMetalibClassMetaTypepm">trunk/Class-Meta/lib/Class/Meta/Type\.pm</a></li>|,
+      "Check for linked property change file");
 
 ##############################################################################
 # Attach diff.
@@ -270,6 +270,41 @@ ok( $notifier->execute, "Notify charset" );
 $email = get_output();
 like( $email, qr{Content-Type: text/html; charset=ISO-8859-1\n},
       'Check Content-Type charset' );
+
+##############################################################################
+# Try html format with propsets.
+##############################################################################
+ok( $notifier = SVN::Notify::HTML::ColorDiff->new(%args, with_diff => 1,
+                                                  revision => '333'),
+    "Construct new propset notifier" );
+isa_ok($notifier, 'SVN::Notify::HTML::ColorDiff');
+isa_ok($notifier, 'SVN::Notify::HTML');
+isa_ok($notifier, 'SVN::Notify');
+ok( $notifier->prepare, "Prepare propset HTML file" );
+ok( $notifier->execute, "Notify propset HTML file" );
+
+# Check the output.
+$email = get_output();
+like( $email, qr{Subject: \[333\] Property modification\.\n},
+      "Check subject header for propset HTML" );
+like( $email, qr/From: theory\n/, 'Check propset HTML From');
+like( $email, qr/To: test\@example\.com\n/, 'Check propset HTML To');
+like( $email, qr{Content-Type: text/html; charset=UTF-8\n},
+      'Check propset HTML Content-Type' );
+like( $email, qr{Content-Transfer-Encoding: 8bit\n},
+      'Check propset HTML Content-Transfer-Encoding');
+
+# Check for a header for the modified file.
+like( $email, qr{<a id="trunkactivitymailbinactivitymail"></a>\n},
+      "Check for modified file div ID");
+like( $email, qr{<div class="modfile"><h4>trunk/activitymail/bin/activitymail \(681 => 682\)</h4>},
+      "Check for modified file header" );
+
+# Check for propset file.
+like( $email, qr{<a id="trunkactivitymailbinactivitymail"></a>\n},
+      "Check for modified file div ID");
+like( $email, qr{<div class="propset"><h4>trunk/activitymail/t/activitymail\.t</h4>},
+      "Check for modified file header" );
 
 ##############################################################################
 # Functions.

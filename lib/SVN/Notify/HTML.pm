@@ -201,7 +201,7 @@ sub output_file_lists {
 
         # Identify the action and output each file.
         print $out "<h3>$map->{$type}</h3>\n<ul>\n";
-        if ($self->with_diff && !$self->attach_diff && $type ne '_') {
+        if ($self->with_diff && !$self->attach_diff) {
             for (@{ $files->{$type} }) {
                 my $file = encode_entities($_);
                 # Strip out letters illegal for IDs.
@@ -255,9 +255,12 @@ sub output_diff {
     $self->_dbpnt( "Outputting HTML diff") if $self->verbose > 1;
 
     print $out qq{</div>\n<div id="patch"><pre>\n};
+    my %seen;
     while (<$diff>) {
         s/[\n\r]+$//;
-        if (/^(Modified|Added|Deleted): (.*)/) {
+        if (/^(Modified|Added|Deleted|Property changes on): (.*)/
+            && !$seen{$2}++)
+        {
             my $action = $1;
             my $file = encode_entities($2);
             (my $id = $file) =~ s/[^\w_]//g;

@@ -1,0 +1,2 @@
+trunk/activitymail/bin/
+trunk/activitymail/t/

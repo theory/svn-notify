@@ -63,14 +63,17 @@ sub output_css {
     my ($self, $out) = @_;
     $self->SUPER::output_css($out);
     print $out
-      qq(#patch .file h3 {padding: 0 10px;line-height:1.5em;),
+      qq(#patch h4 {padding: 0 10px;line-height:1.5em;),
         qq(margin:0;background:#ccffff;border-bottom:1px solid black;),
         qq(margin:0 0 10px 0;}\n),
+      qq(#patch .propset h4 {margin: 0;}\n),
       qq(#patch pre {padding:0;line-height:1.2em;),
         qq(margin:0;}\n),
       qq(#patch .diff {background:#eeeeee;padding: 0 0 10px 0;}\n),
+      qq(#patch .propset .diff {padding: 10px 0;}\n),
       qq(#patch span {display:block;padding:0 10px;}\n),
-      qq(#patch .file {border:1px solid black;margin:10px 0;}\n),
+      qq(#patch .modfile, #patch .addfile, #patch .addfile, #patch .propset),
+        qq({border:1px solid black;margin:10px 0;}\n),
       qq(#patch .add {background:#ddffdd;}\n),
       qq(#patch .rem {background:#ffdddd;}\n),
       qq(#patch .lines, .info {color:#888888;background:#ffffff;}\n);
@@ -90,6 +93,12 @@ by C<HTML::Entities::encode_entities()>.
 
 =cut
 
+my %types = (
+    Modified => 'modfile',
+    Added    => 'addfile',
+    Deleted  => 'delfile',
+);
+
 sub output_diff {
     my ($self, $out, $diff) = @_;
     $self->_dbpnt( "Outputting colorized HTML diff") if $self->verbose > 1;
@@ -97,11 +106,13 @@ sub output_diff {
     my $in_div;
     my $in_span = '';
     print $out qq{</div>\n<div id="patch">\n<h3>Diff</h3>\n};
+    my %seen;
     while (my $line = <$diff>) {
         $line =~ s/[\n\r]+$//;
         next unless $line;
-        if ($line =~ /^(?:Modified|Added|Deleted): (.*)/) {
-            my $file = encode_entities($1);
+        if ($line =~ /^(Modified|Added|Deleted): (.*)/) {
+            my $class = $types{$1};
+            my $file = encode_entities($2);
             (my $id = $file) =~ s/[^\w_]//g;
             # Dump line.
             <$diff>;
@@ -117,12 +128,26 @@ sub output_diff {
             # Output the headers.
             print $out "</span>" if $in_span;
             print $out "</pre></div>\n" if $in_div;
-            print $out qq{<a id="$id"></a>\n<div class="file"><h3>$file},
-              " ($rev1 => $rev2)</h3>\n";
+            print $out qq{<a id="$id"></a>\n<div class="$class"><h4>$file},
+              " ($rev1 => $rev2)</h4>\n";
             print $out qq{<pre class="diff">\n<span class="info">};
             $in_div = 1;
             print $out encode_entities($_), "\n" for ($before, $after);
             print $out "</span>";
+            $in_span = '';
+        } elsif ($line =~ /^Property changes on: (.*)/ && !$seen{$1}) {
+            # It's just property changes.
+            my $file = encode_entities($1);
+            (my $id = $file) =~ s/[^\w_]//g;
+            # Dump line.
+            <$diff>;
+
+            # Output the headers.
+            print $out "</span>" if $in_span;
+            print $out "</pre></div>\n" if $in_div;
+            print $out qq{<a id="$id"></a>\n<div class="propset"><h4>$file</h4>\n};
+            print $out qq{<pre class="diff">\n};
+            $in_div = 1;
             $in_span = '';
         } elsif ($line =~ /^\@\@/) {
             print $out "</span>" if $in_span;
