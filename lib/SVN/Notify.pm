@@ -7,6 +7,15 @@ $SVN::Notify::VERSION = '2.42';
 
 =head1 Name
 
+=begin comment
+
+Fake-out Module::Build. Delete if it ever changes to support =head1 headers
+other than all uppercase.
+
+=head1 NAME
+
+=end comment
+
 SVN::Notify - Subversion activity notification
 
 =head1 Synopsis
@@ -1411,6 +1420,15 @@ code.
 =back
 
 =head1 Author
+
+=begin comment
+
+Fake-out Module::Build. Delete if it ever changes to support =head1 headers
+other than all uppercase.
+
+=head1 AUTHOR
+
+=end comment
 
 David Wheeler <david@kineticode.com>
 
