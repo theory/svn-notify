@@ -1,6 +1,6 @@
 Revision history for Perl extension SVN::Notify
 
-2.00
+2.00  2004-10-04T04:53:34
       - First release, ported from activitymail 1.11, but completely
         rewritten, with a new script interface and a separate class
         that manages everything.

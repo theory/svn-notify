@@ -8,6 +8,7 @@ license: perl
 requires:
   Getopt::Long: 0
 recommends:
+  HTML::Entities: 0
   POD::Usage: 0
 build_requires:
   HTML::Entities: 0
