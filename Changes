@@ -1,4 +1,4 @@
 Revision history for Perl extension SVN::Notify
 
 2.0
-      - Initial public release.
+      - First release, ported from activitymail 1.11.
