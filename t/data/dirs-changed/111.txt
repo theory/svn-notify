@@ -1,0 +1,6 @@
+trunk/Class-Meta/
+trunk/Class-Meta/lib/Class/
+trunk/Class-Meta/lib/Class/Meta/
+trunk/Class-Meta/lib/Class/Meta/AccessorBuilder/
+trunk/Class-Meta/lib/Class/Meta/Types/
+trunk/Class-Meta/t/

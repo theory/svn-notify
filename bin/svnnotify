@@ -12,38 +12,33 @@ use Getopt::Long;
 # Process the command-line arguments.
 ##############################################################################
 
-my %opts = (
-    svnlook  => 'svnlook',
-    sendmail => 'sendmail',
-    path     => '',
-    output   => 'plain_text',
-);
-
 # Enable bundling and, at the same time, case-sensitive matching of single
 # character options.
 Getopt::Long::Configure ("bundling");
+
+# Get options.
+my %opts;
 GetOptions(
-    "repos-path|p=s"     => \$opts{path},
-    "rev|r=s"            => \$opts{rev},
+    "repos-path|p=s"     => \$opts{repos_path},
+    "revision|r=s"       => \$opts{revision},
     "to|t=s"             => \$opts{to},
     "from|f=s"           => \$opts{from},
-    "to-cx-regex|x=s%"   => \$opts{regex},
+    "to-regex-map|x=s%"  => \$opts{to_regex_map},
     "svnlook|l=s"        => \$opts{svnlook},
     "sendmail|s=s"       => \$opts{sendmail},
-    "with-diff|d=s"      => \$opts{diff},
-    "attach-diff|a=s"    => \$opts{attach},
-    "reply-to|R=s"       => \$opts{replyto},
-    "subject-prefix|P=s" => \$opts{subject},
-    "subject-cx|C=s"     => \$opts{cx},
-    "max-sub-length|i=i" => \$opts{sublength},
-    "user-domain|D=s"    => \$opts{domain},
-    "max-size|M=i"       => \$opts{maxsize},
+    "with-diff|d=s"      => \$opts{with_diff},
+    "attach-diff|a=s"    => \$opts{attach_diff},
+    "reply-to|R=s"       => \$opts{reply_to},
+    "subject-prefix|P=s" => \$opts{subject_prefix},
+    "subject-cx|C=s"     => \$opts{subject_cx},
+    "max-sub-length|i=i" => \$opts{max_sub_length},
+    "user-domain|D=s"    => \$opts{user_domain},
     "format|F=s"         => \$opts{format},
-    "viewcvs-url|U=s"    => \$opts{viewcvs},
+    "viewcvs-url|U=s"    => \$opts{viewcvs_url},
     "verbose|V+"         => \$opts{verbose},
     "help|h"             => \$opts{help},
     "man|m"              => \$opts{man},
-    "version|v"          => \$opts{show_version},
+    "version|v"          => \$opts{version},
 ) or require Pod::Usage && Pod::Usage::pod2usage(2);
 
 print "svnnotify ", SVN::Notify->VERSION, $/, exit if delete $opts{version};
@@ -81,11 +76,11 @@ In F<post-commit>:
 =head1 Options
 
   -p --repos-path PATH         Path to the Subversion repository. Required.
-  -r --rev REVISION            Commit revision number. Required.
+  -r --revision REVISION       Commit revision number. Required.
   -t --to ADDRESS              The notification destination email address.
                                Required unless --to-cx-regex.
   -f --from ADDRESS            Email address to use in the From header.
-  -x --to-cx-regex TO=REGEX    A mapping between a destination email address
+  -x --to-regex-map TO=REGEX   A mapping between a destination email address
                                and a regular expresion to match against the
                                directories affected by the commit. Required
                                unless --to.
@@ -102,7 +97,6 @@ In F<post-commit>:
   -i --max-sub-length LENGTH   Maximum size of the subject line.
   -D --user-domain DOMAIN      Domain name to append to t username to complete
                                the email addres in the From header.
-  -M --max-size NUMBER         Maximum size of emailed messages in kilobytes.
   -A --format FORMAT           Format, "text" or "html". Defaults to "text".
   -U --viewcvs-url URL         Include links to specified ViewCVS URL.
   -V --verbose                 Verbose mode.

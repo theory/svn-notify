@@ -12,7 +12,17 @@ my %map = ( U => 'Modified Files',
             _ => 'Property Changed');
 
 sub new {
-    my ($class, %opts) = @_;
+    my $class = shift;
+    my %opts = (
+        svnlook    => 'svnlook',
+        sendmail   => 'sendmail',
+        repos_path => '',
+        output     => 'plain_text',
+        @_
+    );
+    $opts{with_diff} ||= $opts{attach_diff};
+    $opts{viewcvs_url} .= '/'
+      if $opts{viewcvs_url} && $opts{viewcvs_url} !~ m{/$};
     return bless \%opts, $class;
 }
 
@@ -23,39 +33,43 @@ sub prepare {
     $self->prepare_recipients;
     return $self unless $self->{to};
     $self->prepare_contents;
-    $self->prepare_subject;
     $self->prepare_files;
+    $self->prepare_subject;
 }
 
 ##############################################################################
 
 sub prepare_recipients {
     my $self = shift;
-    return $self unless $self->{regex} || $self->{cx};
+    return $self unless $self->{to_regex_map} || $self->{subject_cx};
     my @to = $self->{to} ? ($self->{to}) : ();
-    if (my $regexen = $self->{regex}) {
+    my $regexen = delete $self->{to_regex_map};
+    if ($regexen) {
         for (values %$regexen) {
             # Remove initial slash and compile.
             s|^\^[/\\]|^|;
             $_ = qr/$_/;
         }
+    } else {
+        $regexen = {};
     }
 
     my ($len, $cx);
-    my $fh = $self->_pipe($self->{svnlook}, 'dirs-changed', $self->{path},
-                          '-r', $self->{rev});
+    my $fh = $self->_pipe($self->{svnlook}, 'dirs-changed', $self->{repos_path},
+                          '-r', $self->{revision});
 
     # Read in a list of the directories changed.
     while (<$fh>) {
-        while (my ($email, $rx) = each %{$self->{regex}}) {
+        s/[\n\r\/\\]+$//;
+        while (my ($email, $rx) = each %$regexen) {
             # If the directory matches the regex, save the email.
             if (/$rx/) {
                 push @to, $email;
-                delete $self->{regex}{$email};
+                delete $regexen->{$email};
             }
         }
         # Grab the context if it's needed for the subject.
-        if ($self->{cx}) {
+        if ($self->{subject_cx}) {
             my $l = length;
             ($len, $cx) = ($l, $_) unless defined $len && $len < $l;
         }
@@ -70,18 +84,23 @@ sub prepare_recipients {
 sub prepare_files {
     my $self = shift;
     my %files;
-    my $fh = $self->_pipe($self->{svnlook}, 'changed', $self->{path},
-                          '-r', $self->{rev});
+    my $fh = $self->_pipe($self->{svnlook}, 'changed', $self->{repos_path},
+                          '-r', $self->{revision});
 
     # Read in a list of changed files.
-    while (<$fh>) {
+    my $cx = $_ = <$fh>;
+    do {
         s/[\n\r]+$//;
-        push @{$files{$1}}, $_ if s/^(.).\s+//;
-    }
+        if (s/^(.)(.)\s+//) {
+            push @{$files{$1}}, $_;
+            push @{$files{_}}, $_ if $2 ne ' ' && $1 ne '_';
+        }
+    } while (<$fh>);
 
-    if ($self->{cx} && keys %files == 1) {
+    if ($self->{subject_cx} && $. == 1) {
         # There's only one file; it's the context.
-        $self->{cx} = (values %files)[0]->[0];
+        $cx =~ s/[\n\r]+$//;
+        ($self->{cx} = $cx) =~ s/^..\s+//;
     }
     $self->{files} = \%files;
     return $self;
@@ -99,11 +118,12 @@ sub prepare_subject {
     my $self = shift;
 
     # Start with the optional message and revision number..
-    $self->{subject} .= (defined $self->{subject} ?  ' ' : '')
-      . "[$self->{rev}] ";
+    $self->{subject} .=
+      (defined $self->{subject_prefix} ?  "$self->{subject_prefix} " : '')
+      . "[$self->{revision}] ";
 
     # Add the context if there is one.
-    $self->{subject} .= "$self->{cx} " if $self->{cx};
+    $self->{subject} .= "$self->{cx}: " if $self->{cx};
 
     # Truncate to first period after a minimum of 10 characters.
     my $i = index $self->{message}[0], '. ';
@@ -112,8 +132,9 @@ sub prepare_subject {
       : $self->{message}[0];
 
     # Truncate to the last word under 72 characters.
-    $self->{subject} =~ s/^(.{0,$self->{sublength}}\s+).*$/$1/m
-      if $self->{sublength} && length $self->{subject} > $self->{sublength};
+    $self->{subject} =~ s/^(.{0,$self->{max_sub_length}})\s+.*$/$1/m
+      if $self->{max_sub_length}
+      && length $self->{subject} > $self->{max_sub_length};
     return $self;
 }
 
@@ -121,8 +142,8 @@ sub prepare_subject {
 
 sub prepare_contents {
     my $self = shift;
-    my $lines = $self->_read_pipe($self->{svnlook}, 'info', $self->{path},
-                                  '-r', $self->{rev});
+    my $lines = $self->_read_pipe($self->{svnlook}, 'info', $self->{repos_path},
+                                  '-r', $self->{revision});
     $self->{user} = shift @$lines;
     $self->{date} = shift @$lines;
     $self->{message_size} = shift @$lines;
@@ -131,7 +152,7 @@ sub prepare_contents {
     # Set up the from address.
     unless ($self->{from}) {
         $self->{from} = $self->{user}
-          . ($self->{domain} ? "@$self->{domain}" : '');
+          . ($self->{user_domain} ? "\@$self->{user_domain}" : '');
     }
     return $self;
 }
@@ -149,7 +170,7 @@ sub notify {
       "From: $self->{from}\n",
       "To: $self->{to}\n",
       "Subject: $self->{subject}\n";
-    print SENDMAIL "Reply-To: $self->{replyto}\n" if $self->{replyto};
+    print SENDMAIL "Reply-To: $self->{reply_to}\n" if $self->{reply_to};
     print SENDMAIL "X-Mailer: " . ref($self) . " " . $self->VERSION .
                    ", http://search.cpan.org/dist/activitymail/\n";
 
@@ -159,24 +180,25 @@ sub notify {
       :  "text/$self->{format}";
 
     # Output the content type.
-    if ($self->{attach}) {
+    if ($self->{attach_diff}) {
         # We need a boundary string.
         my $salt = join '',
           ('.', '/', 0..9, 'A'..'Z', 'a'..'z')[rand 64, rand 64];
-        $self->{attach} = crypt($self->{subject}, $salt);
+        $self->{attach_diff} = crypt($self->{subject}, $salt);
         print SENDMAIL
-          qq{Content-Type: multipart/mixed; boundary="$self->{attach}"\n\n}
-          . "--$self->{attach}\nContent-Type: $ctype\n";
-    } else {
-        # Just output a content-type header.
-        print SENDMAIL "Content-Type: $ctype\n\n";
+          qq{Content-Type: multipart/mixed; boundary="$self->{attach_diff}"\n},
+          "--$self->{attach_diff}\n";
     }
+
+    # Output content-type and encoding headers.
+    print SENDMAIL "Content-Type: $ctype; charset=UTF-8\n",
+      "Content-Transfer-Encoding: 8bit\n\n";
 
     # Output the message.
     my $method = "output_as_$self->{format}";
     $self->$method(\*SENDMAIL);
 
-    print SENDMAIL "--$self->{attach}--\n" if $self->{attach};
+    print SENDMAIL "--$self->{attach_diff}--\n" if $self->{attach_diff};
     close SENDMAIL;
 }
 
@@ -191,12 +213,108 @@ sub output_as_text {
     my $files = $self->{files} or return $self;
     foreach my $type (qw(U A D _)) {
         # Skip it if there's nothing to report.
-        next unless @{ $files->{$type} };
+        next unless $files->{$type};
 
         # Identify the action.
         print $out "\n$map{$type}:\n$dash{$type}\n";
-        print $out "    $_\n" for @{ $files->{$type} };
+        if ($self->{viewcvs_url}) {
+            # Append the ViewCVS URL to each file.
+            my $append = $type eq 'U'
+              ? "?r1=" . ($self->{revision} - 1) . "&r2=$self->{revision}"
+              : '';
+            for (@{ $files->{$type} }) {
+                print $out "    $_\n",
+                           "       $self->{viewcvs_url}$_$append\n";
+            }
+        } else {
+            # Just output each file.
+            print $out "    $_\n" for @{ $files->{$type} };
+        }
     }
+
+    $self->output_diff($out) if $self->{with_diff};
+    return $self;
+}
+
+sub output_as_html {
+    my ($self, $out) = @_;
+    require HTML::Entities;
+    print $out "<body>\n<h3>Log Message</h3>\n<pre>",
+      HTML::Entities::encode_entities(join("\n", @{$self->{message}})),
+      "</pre>\n\n";
+
+    my $files = $self->{files} or return $self;
+    foreach my $type (qw(U A D _)) {
+        # Skip it if there's nothing to report.
+        next unless @{ $files->{$type} };
+
+        # Identify the action.
+        print $out "<h3>$map{$type}</h3>\n<ul>\n";
+        if ($self->{viewcvs_url}) {
+            my $prev = $self->{revision} - 1;
+            # Make each file name a link.
+            for (@{ $files->{$type} }) {
+                my $file = HTML::Entities::encode_entities($_);
+                print $out qq{  <li><a href="$self->{viewcvs_url}$file">$file</a>};
+                # Add a diff link for modified files.
+                print $out qq{ (<a href="$self->{viewcvs_url}$file\?r1=$prev&amp;},
+                  qq{r2=$self->{revision}">Diff</a>)}
+                  if $type eq 'U';
+                print $out "</li>\n"
+            }
+        } else {
+            # Just output each file.
+            print $out "  <li>" . HTML::Entities::encode_entities($_) . "</li>\n"
+              for @{ $files->{$type} };
+        }
+        print $out "</ul>\n\n";
+    }
+    if ($self->{with_diff}) {
+        unless ($self->{attach_diff}) {
+            print $out "<pre>";
+            $self->output_diff($out);
+            print $out "</pre>\n";
+        } else {
+            $self->output_diff($out);
+        }
+    }
+
+    return $self;
+}
+
+sub output_diff {
+    my ($self, $out) = @_;
+    # Output the content type headers.
+    print $out "\n";
+    if ($self->{attach_diff}) {
+        # Get the date (UTC).
+        my @gm = gmtime;
+        $gm[5] += 1900;
+        $gm[4] += 1;
+        my $file = $self->{user}
+          . sprintf '-%04s-%02s-%02sT%02s-%02s-%02sZ.diff', @gm[5,4,3,2,1,0];
+        print $out "--$self->{attach_diff}\n",
+          "Content-Disposition: attachment; filename=$file\n",
+          "Content-Type: text/plain; charset=UTF-8\n",
+          "Content-Transfer-Encoding: 8bit\n\n";
+    }
+
+    # Get the diff and output it.
+    my $fh = $self->_pipe($self->{svnlook}, 'diff', $self->{repos_path}, '-r',
+                          $self->{revision});
+
+    if ($self->{format} eq 'text' || $self->{attach_diff}) {
+        while (<$fh>) {
+            s/[\n\r]+$//;
+            print $out "$_\n";
+        }
+    } else {
+        while (<$fh>) {
+            s/[\n\r]+$//;
+            print $out HTML::Entities::encode($_), "\n";
+        }
+    }
+    close $fh;
     return $self;
 }
 

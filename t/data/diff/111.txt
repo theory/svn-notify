@@ -1,0 +1,35 @@
+Modified: trunk/Params-CallbackRequest/Changes
+===================================================================
+--- trunk/Params-CallbackRequest/Changes        2004-04-20 08:33:35 UTC (rev 600)
++++ trunk/Params-CallbackRequest/Changes        2004-04-20 12:42:29 UTC (rev 601)
+@@ -1,6 +1,7 @@
+ Revision history for Perl extension Params::CallbackRequest.
+ 
+ 1.13  
++      - Apache 2 compatability added thanks to Fred Moyer.
+ 
+ 1.12  2004-03-15T15:27:54
+       - No longer using a Params::Validate callback to transform a value,
+
+Modified: trunk/Params-CallbackRequest/lib/Params/Callback.pm
+===================================================================
+--- trunk/Params-CallbackRequest/lib/Params/Callback.pm 2004-04-20 08:33:35 UTC (rev 600)
++++ trunk/Params-CallbackRequest/lib/Params/Callback.pm 2004-04-20 12:42:29 UTC (rev 601)
+@@ -17,6 +17,8 @@
+ 
+ my $is_num = { 'valid priority' => sub { $_[0] =~ /^\d$/ } };
+ 
++# Use Apache::RequestRec for mod_perl 2
++my $ap_req_class = $mod_perl::VERSION < 1.99 ? 'Apache' : 'Apache::RequestRec';
+ 
+ BEGIN {
+     # The object-oriented interface is only supported with the use of
+@@ -56,7 +58,7 @@
+     },
+ 
+     apache_req   =>
+-    { isa        => 'Apache',
++    { isa        => $ap_req_class,
+       optional   => 1,
+     },
+ 
