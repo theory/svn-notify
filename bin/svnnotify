@@ -79,6 +79,10 @@ Fake-out Pod::Usage
   -P --subject-prefix PREFIX   String to prepend to the subject.
   -C --subject-cx              Include the context of the commit in the
                                subject.
+  -X --strip-cx-regex          Regex to remove part of the CX file name from
+                               the subject.
+  -O --no-first-line           Do not include the first line of the log
+                               message in the subject.
   -i --max-sub-length LENGTH   Maximum size of the subject line.
   -H --handler HANDLER         The notification handler, such as "HTML".
   -U --viewcvs-url URL         Include links to specified ViewCVS URL.

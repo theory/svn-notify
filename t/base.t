@@ -9,7 +9,7 @@ use File::Spec::Functions;
 if ($^O eq 'MSWin32') {
     plan skip_all => "SVN::Notify not yet supported on Win32";
 } else {
-    plan tests => 135;
+    plan tests => 147;
 }
 
 BEGIN { use_ok('SVN::Notify') }
@@ -358,6 +358,49 @@ like($email, qr/JIRA Links:\n/, 'Check for ViewCVS URLs label' );
 like( $email,
       qr{    http://jira\.atlassian\.com/secure/ViewIssue\.jspa\?key=TST-1608\n},
       "Check for Jira URL" );
+
+##############################################################################
+# Try leaving out the first line from the subject and removing part of the
+# context file name.
+##############################################################################
+ok( $notifier = SVN::Notify->new(
+    %args,
+    subject_cx => 1,
+    strip_cx_regex => ['^trunk/'],
+    no_first_line => 1,
+),
+    "Construct new subject checking notifier" );
+isa_ok($notifier, 'SVN::Notify');
+ok( $notifier->prepare, "Prepare subject checking" );
+ok( $notifier->execute, "Notify subject checking" );
+is( $notifier->subject, '[111] Class-Meta',
+    "Check subject for stripped cx and no log message line");
+
+# Check the output.
+$email = get_output();
+like( $email, qr{Subject: \[111\] Class-Meta\n},
+      "Check subject header for stripped cx and no log message line" );
+
+##############################################################################
+# Try two cx stripping regular expressions.
+##############################################################################
+ok( $notifier = SVN::Notify->new(
+    %args,
+    subject_cx => 1,
+    strip_cx_regex => ['^trunk/', '-Meta$'],
+    no_first_line => 1,
+),
+    "Construct new subject checking notifier" );
+isa_ok($notifier, 'SVN::Notify');
+ok( $notifier->prepare, "Prepare subject checking" );
+ok( $notifier->execute, "Notify subject checking" );
+is( $notifier->subject, '[111] Class',
+    "Check subject for stripped cx and no log message line");
+
+# Check the output.
+$email = get_output();
+like( $email, qr{Subject: \[111\] Class\n},
+      "Check subject header for stripped cx and no log message line" );
 
 ##############################################################################
 # Functions.

@@ -256,6 +256,28 @@ commit. This should indicate up to how high up the Subversion repository tree
 the commit had an effect. If the commit affects a single file, then the
 context will simply be the name of that file.
 
+=item strip_cx_regex
+
+  svnnotify --strip-cx-regex '^trunk/'
+  svnnotify --strip-cx-regex '^trunk/' --strip-cx-regex '^branches/'
+  svnnotify -X '^trunk'
+  svnnotify -X '^trunk' -X '^branches'
+
+One or more regular expressions to be used to strip out parts of the subject
+context. This can be useful for very deep Subversion trees, where the commits
+you're sending will always be sent from a particular subtree, so you'd like to
+remove part of the tree. Used only if C<subject_cx> is set to a true value.
+Pass an array reference if calling C<new()> directly.
+
+=item no_first_line
+
+  svnnotify --no-first-line
+  svnnotify --O
+
+Omits the first line of the log message from the subject. This is most useful
+when used in combination with the C<subject_cx> parameter, so that just the
+commit context is displayed in the subject and no part of the log message.
+
 =item max_sub_length
 
   svnnotify --max-sub-length 72
@@ -461,31 +483,33 @@ sub get_options {
 
     # Get options.
     Getopt::Long::GetOptions(
-        "repos-path|p=s"     => \$opts->{repos_path},
-        "revision|r=s"       => \$opts->{revision},
-        "to|t=s"             => \$opts->{to},
-        "to-regex-map|x=s%"  => \$opts->{to_regex_map},
-        "from|f=s"           => \$opts->{from},
-        "user-domain|D=s"    => \$opts->{user_domain},
-        "svnlook|l=s"        => \$opts->{svnlook},
-        "sendmail|s=s"       => \$opts->{sendmail},
-        "charset|c=s"        => \$opts->{charset},
-        "language|g=s"       => \$opts->{language},
-        "with-diff|d"        => \$opts->{with_diff},
-        "attach-diff|a"      => \$opts->{attach_diff},
-        "reply-to|R=s"       => \$opts->{reply_to},
-        "subject-prefix|P=s" => \$opts->{subject_prefix},
-        "subject-cx|C"       => \$opts->{subject_cx},
-        "max-sub-length|i=i" => \$opts->{max_sub_length},
-        "handler|H=s"        => \$opts->{handler},
-        "viewcvs-url|U=s"    => \$opts->{viewcvs_url},
-        "rt-url|T=s"         => \$opts->{rt_url},
-        "bugzilla-url|B=s"   => \$opts->{bugzilla_url},
-        "jira-url|J=s"       => \$opts->{jira_url},
-        "verbose|V+"         => \$opts->{verbose},
-        "help|h"             => \$opts->{help},
-        "man|m"              => \$opts->{man},
-        "version|v"          => \$opts->{version},
+        "repos-path|p=s"      => \$opts->{repos_path},
+        "revision|r=s"        => \$opts->{revision},
+        "to|t=s"              => \$opts->{to},
+        "to-regex-map|x=s%"   => \$opts->{to_regex_map},
+        "from|f=s"            => \$opts->{from},
+        "user-domain|D=s"     => \$opts->{user_domain},
+        "svnlook|l=s"         => \$opts->{svnlook},
+        "sendmail|s=s"        => \$opts->{sendmail},
+        "charset|c=s"         => \$opts->{charset},
+        "language|g=s"        => \$opts->{language},
+        "with-diff|d"         => \$opts->{with_diff},
+        "attach-diff|a"       => \$opts->{attach_diff},
+        "reply-to|R=s"        => \$opts->{reply_to},
+        "subject-prefix|P=s"  => \$opts->{subject_prefix},
+        "subject-cx|C"        => \$opts->{subject_cx},
+        "strip-cx-regex|X=s@" => \$opts->{strip_cx_regex},
+        "no-first-line|O"     => \$opts->{no_first_line},
+        "max-sub-length|i=i"  => \$opts->{max_sub_length},
+        "handler|H=s"         => \$opts->{handler},
+        "viewcvs-url|U=s"     => \$opts->{viewcvs_url},
+        "rt-url|T=s"          => \$opts->{rt_url},
+        "bugzilla-url|B=s"    => \$opts->{bugzilla_url},
+        "jira-url|J=s"        => \$opts->{jira_url},
+        "verbose|V+"          => \$opts->{verbose},
+        "help|h"              => \$opts->{help},
+        "man|m"               => \$opts->{man},
+        "version|v"           => \$opts->{version},
     ) or return;
 
     # Load a subclass if one has been specified.
@@ -736,13 +760,22 @@ sub prepare_subject {
       . "[$self->{revision}] ";
 
     # Add the context if there is one.
-    $self->{subject} .= "$self->{cx}: " if $self->{cx};
+    if ($self->{cx}) {
+        if (my $rx = $self->{strip_cx_regex}) {
+            $self->{cx} =~ s/$_// for @$rx;
+        }
+        my $space = $self->{no_first_line} ? '' : ': ';
+        $self->{subject} .= $self->{cx}. $space if $self->{cx};
+    }
 
-    # Truncate to first period after a minimum of 10 characters.
-    my $i = index $self->{message}[0], '. ';
-    $self->{subject} .= $i > 0
-      ? substr($self->{message}[0], 0, $i + 1)
-      : $self->{message}[0];
+    # Add the first sentence/line from the log message.
+    unless ($self->{no_first_line}) {
+        # Truncate to first period after a minimum of 10 characters.
+        my $i = index $self->{message}[0], '. ';
+        $self->{subject} .= $i > 0
+          ? substr($self->{message}[0], 0, $i + 1)
+          : $self->{message}[0];
+    }
 
     # Truncate to the last word under 72 characters.
     $self->{subject} =~ s/^(.{0,$self->{max_sub_length}})\s+.*$/$1/m

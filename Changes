@@ -1,6 +1,13 @@
 Revision history for Perl extension SVN::Notify
 
 2.43
+      - Added "--strip-cx-regex" option to strip out parts of the
+        context from the subject. Useful for removing parts of the
+        file names you might not be interested in seeing in every
+        commit message.      
+      - Added "--no-first-line" option to omit the first sentence or
+        line of the log message from the subject. Useful in combination
+        with the "--subject-cx" option.
 
 2.42  2004-11-19T18:47:20
       - Changed "Files" to "Paths" in hash returned by "file_label_map()"
