@@ -76,19 +76,63 @@ sub content_type { 'text/html' }
   $notifier->start_body($file_handle);
 
 This method starts the body of the notification message. It outputs the
-opening C<< <html> >> and C<< <body> >> tags, as well as a definition list
-containting the metadata of the commit, including the revision number, author
-(user), and date of the revision. If the C<viewcvs_url> attribute has been
-set, then the appropriate URL for the revision will be used to turn the
-revision number into a link.
+opening C<< <html> >>, C<< <head> >>, C<< <style> >>, and C<< <body> >> tags.
 
 =cut
 
 sub start_body {
     my ($self, $out) = @_;
+    print $out qq{<html>\n<head><style type="text/css"><!--\n};
+    $self->output_css($out);
+    print $out qq{</style>\n</head>\n<body>\n\n<div class="msg">\n};
+    return $self;
+}
+
+##############################################################################
+
+=head3 output_css
+
+  $notifier->output_css($file_handle);
+
+This method starts outputs the CSS for the HTML message. It is called by
+C<start_body()>, and which wraps the output of C<output_css()> in the
+appropriate C<< <style> >> tags.
+
+=cut
+
+sub output_css {
+    my ($self, $out) = @_;
     print $out
-      "<html>\n<body>\n\n<dl>\n",
-      "<dt>Revision</dt> <dd>";
+      qq(sans-serif;font-size:85%;}\n),
+      qq(pre {font-size:125%;}\n),
+      qq(h3 {margin:15px 0;padding:0;line-height:0;}\n),
+      qq(#msg {margin: 0 0 2em 0;}\n),
+      qq(#msg dl, #msg ul, #msg pre {padding:1em;border:1px dashed black;),
+        qq(margin: 10px 0 30px 0;}),
+      qq(#msg dl {background:#ccccff;}),
+      qq(#msg pre {background:#ffffcc;}),
+      qq(#msg ul {background:#cc99ff;list-style:none;}),
+      qq(#msg dt {font-weight:bold;float:left;width: 6em;}),
+      qq(#msg dt:after { content:':';});
+    return $self;
+}
+
+##############################################################################
+
+=head3 output_metadata
+
+  $notifier->output_metadata($file_handle);
+
+This method outputs a definition list containting the metadata of the commit,
+including the revision number, author (user), and date of the revision. If the
+C<viewcvs_url> attribute has been set, then the appropriate URL for the
+revision will be used to turn the revision number into a link.
+
+=cut
+
+sub output_metadata {
+    my ($self, $out) = @_;
+    print $out "<dl>\n<dt>Revision</dt> <dd>";
 
     if ($self->{viewcvs_url}) {
         # Make the revision number a URL.
@@ -175,6 +219,7 @@ complete, and before any call to C<output_attached_diff()>.
 sub end_body {
     my ($self, $out) = @_;
     $self->_dbpnt( "Ending body") if $self->{verbose} > 2;
+    print $out "\n</div>" unless $self->{with_diff} && !$self->{attach_diff};
     print $out "\n</body>\n</html>\n";
     return $self;
 }
@@ -199,12 +244,12 @@ sub output_diff {
     my $diff = $self->_pipe('-|', $self->{svnlook}, 'diff',
                             $self->{repos_path}, '-r', $self->{revision});
 
-    print $out "<pre>\n";
+    print $out qq{</div>\n<div class="patch"><pre>\n};
     while (<$diff>) {
         s/[\n\r]+$//;
         print $out encode_entities($_), "\n";
     }
-    print $out "</pre>\n";
+    print $out "</pre></div>\n";
 
     close $diff or warn "Child process exited: $?\n";
     return $self;

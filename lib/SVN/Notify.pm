@@ -650,6 +650,7 @@ It is thus essentially a shortcut for:
     $notifier->output_headers($out);
     $notifier->output_content_type($out);
     $notifier->start_body($out);
+    $self->output_metadata($out);
     $notifier->output_log_message($out);
     $notifier->output_file_lists($out);
     if ($notifier->with_diff) {
@@ -674,6 +675,7 @@ sub output {
     $self->output_headers($out);
     $self->output_content_type($out);
     $self->start_body($out);
+    $self->output_metadata($out);
     $self->output_log_message($out);
     $self->output_file_lists($out);
     if ($self->{with_diff}) {
@@ -763,16 +765,28 @@ sub output_content_type {
 
   $notifier->start_body($file_handle);
 
-This method starts the body of the notification message. It outputs the
-metadata of the commit, including the revision number, author (user), and date
-of the revision. If the C<viewcvs_url> attribute has been set, then the
-appropriate URL for the revision will also be output.
+This method starts the body of the notification message. It doesn't actually
+do anything in this class, but see subclasses for other behaviors.
 
 =cut
 
-sub start_body {
+sub start_body { shift }
+
+##############################################################################
+
+=head3 output_metadata
+
+  $notifier->output_metadata($file_handle);
+
+This method outputs the metadata of the commit, including the revision number,
+author (user), and date of the revision. If the C<viewcvs_url> attribute has
+been set, then the appropriate URL for the revision will also be output.
+
+=cut
+
+sub output_metadata {
     my ($self, $out) = @_;
-    print $out "\n",
+    print $out
       "Revision: $self->{revision}\n",
       "Author:   $self->{user}\n",
       "Date:     $self->{date}\n";

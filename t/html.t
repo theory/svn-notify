@@ -9,7 +9,7 @@ use File::Spec::Functions;
 if ($^O eq 'MSWin32') {
     plan skip_all => "SVN::Notify::HTML not yet supported on Win32";
 } elsif (eval { require HTML::Entities }) {
-    plan tests => 92;
+    plan tests => 97;
 } else {
     plan skip_all => "SVN::Notify::HTML requires HTML::Entities";
 }
@@ -52,11 +52,17 @@ like( $email, qr{Content-Type: text/html; charset=UTF-8\n},
 like( $email, qr{Content-Transfer-Encoding: 8bit\n},
       'Check HTML Content-Transfer-Encoding');
 
-# Make sure that the <html> and <body> headers tags are included.
-for my $tag (qw(html body dl)) {
+# Make sure that the <html>, <head>, <body>, and <dl> headers tags
+# are included.
+for my $tag (qw(html head body dl)) {
     like( $email, qr/<$tag>/, "Check for <$tag> tag" );
     like( $email, qr/<\/$tag>/, "Check for </$tag> tag" );
 }
+
+# Make sure we have styles.
+like( $email, qr|<style type="text/css">|, "Check for <style> tag" );
+like( $email, qr/<\/style>/, "Check for </style> tag" );
+like( $email, qr/pre {font-size:125%;}/, "Check for style" );
 
 # Make sure we have headers for each of the four kinds of changes.
 for my $header ('Log Message', 'Modified Files', 'Added Files',
