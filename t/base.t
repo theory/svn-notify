@@ -3,9 +3,14 @@
 # $Id$
 
 use strict;
-use Test::More tests => 137;
-
+use Test::More;
 use File::Spec::Functions;
+
+if ($^O eq 'MSWin32') {
+    plan skip_all => "SVN::Notify not yet supported on Win32";
+} else {
+    plan tests => 136;
+}
 
 BEGIN { use_ok('SVN::Notify') }
 
