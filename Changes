@@ -1,6 +1,6 @@
 Revision history for Perl extension SVN::Notify
 
-2.42
+2.42  2004-11-19T18:47:20
       - Changed "Files" to "Paths" in hash returned by "file_label_map()"
         since directories can be listed as well as files.
       - Fixed SVN::Notify::HTML so that directories listed among the
