@@ -66,14 +66,14 @@ sub output_css {
       qq(#patch h4 {padding: 0 10px;line-height:1.5em;),
         qq(margin:0;background:#ccffff;border-bottom:1px solid black;),
         qq(margin:0 0 10px 0;}\n),
-      qq(#patch .propset h4 {margin: 0;}\n),
+      qq(#patch .propset h4, #patch .binary h4 {margin: 0;}\n),
       qq(#patch pre {padding:0;line-height:1.2em;),
         qq(margin:0;}\n),
       qq(#patch .diff {background:#eeeeee;padding: 0 0 10px 0;}\n),
-      qq(#patch .propset .diff {padding: 10px 0;}\n),
+      qq(#patch .propset .diff, #patch .binary .diff  {padding: 10px 0;}\n),
       qq(#patch span {display:block;padding:0 10px;}\n),
-      qq(#patch .modfile, #patch .addfile, #patch .addfile, #patch .propset),
-        qq({border:1px solid black;margin:10px 0;}\n),
+      qq(#patch .modfile, #patch .addfile, #patch .delfile, #patch .propset,),
+        qq( #patch .binary {border:1px solid black;margin:10px 0;}\n),
       qq(#patch .add {background:#ddffdd;}\n),
       qq(#patch .rem {background:#ffdddd;}\n),
       qq(#patch .lines, .info {color:#888888;background:#ffffff;}\n);
@@ -111,25 +111,37 @@ sub output_diff {
         $line =~ s/[\n\r]+$//;
         next unless $line;
         if ($line =~ /^(Modified|Added|Deleted): (.*)/) {
-            my $class = $types{$1};
+            my $class = $types{my $action = $1};
             ++$seen{$2};
             my $file = encode_entities($2);
             (my $id = $file) =~ s/[^\w_]//g;
+
+            print $out "</span>" if $in_span;
+            print $out "</pre></div>\n" if $in_div;
+
             # Dump line.
             <$diff>;
 
             # Get the revision numbers.
             my $before = <$diff>;
-            chomp $before;
+            $before =~ s/[\n\r]+$//;
+
+            if ($before =~ /^\(Binary files differ\)/) {
+                # Just output the whole file div.
+                print $out qq{<a id="$id"></a>\n<div class="binary"><h4>},
+                  qq{$action: $file</h4>\n<pre class="diff">\n},
+                  qq{<span class="cx">$before\n</span></pre></div>\n};
+                ($in_span, $in_div) = 0;
+                next;
+            }
+
             my ($rev1) = $before =~ /\(rev (\d+)\)$/;
             my $after = <$diff>;
-            chomp $after;
+            $after =~ s/[\n\r]+$//;
             my ($rev2) = $after =~ /\(rev (\d+)\)$/;
 
             # Output the headers.
-            print $out "</span>" if $in_span;
-            print $out "</pre></div>\n" if $in_div;
-            print $out qq{<a id="$id"></a>\n<div class="$class"><h4>$file},
+            print $out qq{<a id="$id"></a>\n<div class="$class"><h4>$action: $file},
               " ($rev1 => $rev2)</h4>\n";
             print $out qq{<pre class="diff">\n<span class="info">};
             $in_div = 1;
@@ -146,8 +158,8 @@ sub output_diff {
             # Output the headers.
             print $out "</span>" if $in_span;
             print $out "</pre></div>\n" if $in_div;
-            print $out qq{<a id="$id"></a>\n<div class="propset"><h4>$file</h4>\n};
-            print $out qq{<pre class="diff">\n};
+            print $out qq{<a id="$id"></a>\n<div class="propset">},
+              qq{<h4>Property changes: $file</h4>\n<pre class="diff">\n};
             $in_div = 1;
             $in_span = '';
         } elsif ($line =~ /^\@\@/) {

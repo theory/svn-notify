@@ -20,6 +20,14 @@ Revision history for Perl extension SVN::Notify
         post sample output on the Web.
       - Fixed the parsing of log messages so that empty lines are no
         longer eliminated.
+      - HTML::ColorDiff now properly handles the listing of binary files
+        in the diff, marking them with a new class, "binary", and using
+        the same CSS as is used for the "propset" class.
+      - In HTML::ColorDiff, Fixed CSS for the "delfile" class to properly
+        wrap it in a border like the other files in the diff.
+      - Added labels to the HTML::ColorDiff diff file sections to indicate
+        the type of change ("Modified", "Added", "Deleted", or "Property
+        changes").
 
 2.30  2004-10-19T05:20:02
       - Added "register_attributes()" class method so that subclasses can

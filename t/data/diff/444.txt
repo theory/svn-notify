@@ -60,6 +60,7 @@ Deleted: trunk/SVN-Notify/t/colordiff.t
 -
 -BEGIN { use_ok('SVN::Notify::HTML::ColorDiff') }
 
+
 Deleted: trunk/SVN-Notify/t/data/bin/sendmail.exe
 ===================================================================
 (Binary files differ)

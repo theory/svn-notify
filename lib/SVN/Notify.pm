@@ -1338,6 +1338,10 @@ L<http://rt.cpan.org/NoAuth/Bugs.html?Dist=SVN-Notify>.
 
 =item *
 
+Copy URL matching to Notify.pm.
+
+=item *
+
 Port to Win32. I think it just needs to use Win32::Process to manage
 communication with F<svnlook> and F<sendmail>. See comments in the source
 code.
