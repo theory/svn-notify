@@ -3,7 +3,7 @@ package SVN::Notify;
 # $Id$
 
 use strict;
-$SVN::Notify::VERSION = '2.23';
+$SVN::Notify::VERSION = '2.30';
 
 =head1 Name
 
@@ -186,7 +186,16 @@ apply here.
 
 The character set typically used on the repository for log messages, file
 names, and file contents. Used to specify the character set in the email
-Content-Type headers. Defaults to UTF-8.
+Content-Type headers. Defaults to "UTF-8".
+
+=item language
+
+  svnnotify --language fr
+  svnnotify -g i-klingon
+
+The language typically used on the repository for log messages, file names,
+and file contents. Used to specify the email Content-Language header.
+Undefined by default, meaning that no Content-Language header is output.
 
 =item with_diff
 
@@ -261,25 +270,15 @@ directly, but this parameter is designed to make it easy to just use
 C<< SVN::Notify->new >> without worrying about loading subclasses, such as
 in F<svnnotify>.
 
-=item format
-
-  svnnotify --format text
-  svnnotify -A html
-
-The format of the notification email. Two formats are supported, "text" and
-"html". If "html" is specified, HTML::Entities B<must> be installed to ensure
-that the log message, file names, and diff are properly escaped.
-
-B<Note:> This parameter is deprecated and will be removed in the next release.
-Use C<handler>, instead.
-
 =item viewcvs_url
 
-  svnnotify --viewcvs-url http://svn.example.com/viewcvs/
-  svnnotify -U http://viewcvs.example.net/
+  svnnotify --viewcvs-url http://svn.example.com/viewcvs/?rev=%s&view=rev
+  svnnotify -U http://svn.example.net/viewcvs?rev=%s&view=rev
 
 If a URL is specified for this parameter, then it will be used to create a
-linnk to the ViewCVS URL corresponding to the current revision number.
+link to the ViewCVS URL corresponding to the current revision number. The URL
+must have the "%s" format where the Subversion revision number should be put
+into the URL.
 
 =item verbose
 
@@ -311,9 +310,11 @@ sub new {
 
     # Delegate to a subclass if requested.
     if (my $handler = delete $params{handler}) {
-        my $class = __PACKAGE__ . "::$handler";
-        eval "require $class" or die $@;
-        return $class->new(%params);
+        my $subclass = __PACKAGE__ . "::$handler";
+        unless ($subclass eq $class) {
+            eval "require $subclass" or die $@;
+            return $subclass->new(%params);
+        }
     }
 
     # Check for required parameters.
@@ -332,6 +333,10 @@ sub new {
     $params{with_diff} ||= $params{attach_diff};
     $params{verbose}   ||= 0;
     $params{charset}   ||= 'UTF-8';
+    if ($params{viewcvs_url} && $params{viewcvs_url} !~ /%s/) {
+        warn "--viewcvs-url must have '%s' format\n";
+        $params{viewcvs_url} .= '?rev=%s&view=rev'
+    }
 
     # Make it so!
     $class->_dbpnt( "Instantiating $class object") if $params{verbose};
@@ -352,6 +357,107 @@ set the Content-Type header for the message.
 =cut
 
 sub content_type { 'text/plain' }
+
+##############################################################################
+
+=head3 register_attributes
+
+  SVN::Notify::Subclass->register_attributes(
+      foo_attr => 'foo-attr=s',
+      bar      => 'bar',
+      bat      => undef,
+  );
+
+This class method is used by subclasses to register new attributes. Pass in a
+list of key/value pairs, where the keys are the attribute names and the values
+are option specifications in the format required by Getopt::Long. SVN::Notify
+will create accessors for each attribute, and if the corresponding value is
+defined, it will be used by the C<get_options()> class method to get a
+command-line option value.
+
+See <LSVN::Notify::HTML|SVN::Notify::HTML> for an example usage of
+C<register_attributes()>.
+
+=cut
+
+my %OPTS;
+
+sub register_attributes {
+    my $class = shift;
+    my @attrs;
+    while (@_) {
+        push @attrs, shift;
+        if (my $opt = shift) {
+            $OPTS{$attrs[-1]} = $opt;
+        }
+    }
+    _accessors(@attrs);
+}
+
+##############################################################################
+
+=head3 get_options
+
+  my $options = SVN::Notify->get_options;
+
+Parses the command-line options in C<@ARGV> to a hash reference suitable for
+passing as the parameters to C<new()>. See L<"new"> for a complete list of the
+supported parameters and their corresponding command-line options.
+
+This method use Getopt::Long to parse C<@ARGV>. It then looks for a C<handler>
+option and, if it finds one, loads the appropriate subclass and parsed any
+options it requires from C<@ARGV>. Subclasses should use
+C<register_attributes()> to register any attributes and options they require.
+
+=cut
+
+sub get_options {
+    my ($class, $opts) = @_;
+    require Getopt::Long;
+
+    # Enable bundling and, at the same time, case-sensitive matching of
+    # single character options. Also enable pass-through so that subclasses
+    # can grab more options.
+    Getopt::Long::Configure (qw(bundling pass_through));
+
+    # Get options.
+    Getopt::Long::GetOptions(
+        "repos-path|p=s"     => \$opts->{repos_path},
+        "revision|r=s"       => \$opts->{revision},
+        "to|t=s"             => \$opts->{to},
+        "to-regex-map|x=s%"  => \$opts->{to_regex_map},
+        "from|f=s"           => \$opts->{from},
+        "user-domain|D=s"    => \$opts->{user_domain},
+        "svnlook|l=s"        => \$opts->{svnlook},
+        "sendmail|s=s"       => \$opts->{sendmail},
+        "charset|c=s"        => \$opts->{charset},
+        "language|g=s"       => \$opts->{language},
+        "with-diff|d"        => \$opts->{with_diff},
+        "attach-diff|a"      => \$opts->{attach_diff},
+        "reply-to|R=s"       => \$opts->{reply_to},
+        "subject-prefix|P=s" => \$opts->{subject_prefix},
+        "subject-cx|C"       => \$opts->{subject_cx},
+        "max-sub-length|i=i" => \$opts->{max_sub_length},
+        "handler|H=s"        => \$opts->{handler},
+        "viewcvs-url|U=s"    => \$opts->{viewcvs_url},
+        "verbose|V+"         => \$opts->{verbose},
+        "help|h"             => \$opts->{help},
+        "man|m"              => \$opts->{man},
+        "version|v"          => \$opts->{version},
+    ) or return;
+
+    # Load a subclass if one has been specified.
+    return $opts unless $opts->{handler};
+    eval "require " . __PACKAGE__ . "::$opts->{handler}" or die $@;
+
+    # Load any options for the subclass.
+    return $opts unless %OPTS;
+    Getopt::Long::GetOptions(
+        map { delete $OPTS{$_} => \$opts->{$_} } keys %OPTS
+    ) or return;
+
+    return $opts;
+}
 
 ##############################################################################
 
@@ -758,6 +864,7 @@ sub output_content_type {
     my $ctype = $self->content_type;
     print $out "--$self->{boundary}\n" if $self->{attach_diff};
     print $out "Content-Type: $ctype; charset=$self->{charset}\n",
+      ($self->{language} ? "Content-Language: $self->{language}\n" : ()),
       "Content-Transfer-Encoding: 8bit\n\n";
     return $self;
 }
@@ -793,11 +900,9 @@ sub output_metadata {
       "Revision: $self->{revision}\n",
       "Author:   $self->{user}\n",
       "Date:     $self->{date}\n";
-    print $out
-      "ViewCVS:  $self->{viewcvs_url}?rev=$self->{revision}&view=rev\n"
+    printf $out "ViewCVS:  $self->{viewcvs_url}", $self->{revision}
       if $self->{viewcvs_url};
     print $out "\n";
-
     return $self;
 }
 
@@ -904,6 +1009,7 @@ sub output_attached_diff {
       "Content-Disposition: attachment; filename=",
       "r$self->{revision}-$self->{user}.diff\n",
       "Content-Type: text/plain; charset=$self->{charset}\n",
+      ($self->{language} ? "Content-Language: $self->{language}\n" : ()),
       "Content-Transfer-Encoding: 8bit\n\n";
     $self->_dump_diff($out, $diff);
 }
@@ -945,18 +1051,21 @@ sub _dump_diff {
 
 ##############################################################################
 
-for my $attr (qw(repos_path revision to to_regex_map from user_domain
-                 svnlook sendmail charset with_diff attach_diff reply_to
-                 subject_prefix subject_cx max_sub_length viewcvs_url
-                 verbose boundary user date message message_size subject
-                 files)) {
-    no strict 'refs';
-    *{$attr} = sub {
-        my $self = shift;
-        return $self->{$attr} unless @_;
-        $self->{$attr} = shift;
-        return $self;
-    };
+_accessors(qw(repos_path revision to to_regex_map from user_domain svnlook
+              sendmail charset language with_diff attach_diff reply_to
+              subject_prefix subject_cx max_sub_length viewcvs_url verbose
+              boundary user date message message_size subject files));
+
+sub _accessors {
+    for my $attr (@_) {
+        no strict 'refs';
+        *{$attr} = sub {
+            my $self = shift;
+            return $self->{$attr} unless @_;
+            $self->{$attr} = shift;
+            return $self;
+        };
+    }
 }
 
 =head2 Accessors
@@ -1024,6 +1133,13 @@ Gets or sets the value of the C<sendmail> attribute.
   $notifier = $notifier->charset($charset);
 
 Gets or sets the value of the C<charset> attribute.
+
+=head3 language
+
+  my $language = $notifier->language;
+  $notifier = $notifier->language($language);
+
+Gets or sets the value of the C<language> attribute.
 
 =head3 with_diff
 

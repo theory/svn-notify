@@ -1,6 +1,27 @@
 Revision history for Perl extension SVN::Notify
 
-2.23
+2.30
+      - Added "register_attributes()" class method so that subclases can
+        easily specify their own attributes and the corresponding command-
+        line options. This method will also create accessors for such
+        attributes.
+      - Moved the command-line option parsing to the new "get_options()"
+        class method, so options specified via the "register_attributes()"
+        class method can centrally be parsed from the command-line.
+      - Removed the deprecated "format" option and parameter to new().
+      - Added the "language" attribute to specify the language of the
+        message, file names, and file contents.
+      - Added the "linkize" attribute to SVN::Notify::HTML. When this
+        attribute is set to a true value, URLs and email addresses in the
+        log message will be turned into links.
+      - Added new "bugzilla_url", "jira_url", and "rt_url" attributes to
+        SVN::Notify. If present, these URLs will be used to create
+        links from certain strings in the log message.
+      - Changed the "viewcvs_url" attribute to require an "%s" format
+        for the placement of the revision number to match the way the
+        new URL attributes work. As an interim measure, SVN::Notify will
+        append what it has always appeneded and emit a warning if there is
+        no "%s" in the "viewcvs_url" string.
 
 2.22  2004-10-15T06:12:46
       - Fixed diff parsing in SVN::Notitfy::HTML and

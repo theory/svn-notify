@@ -1,4 +1,13 @@
 theory
 2004-04-20 01:33:35 -0700 (Tue, 20 Apr 2004)
-9
-Hrm hrm.
+442
+Hrm hrm. Let's try a few links. First, there's an email address,
+foo@example.com. Then there is a URL, http://www.kineticode.com/.
+Try a fancy URL, such as http://foo.bar.com/one/two/do.pl?this=1&that=2.
+
+We should also try a few links to other applications. First, we have
+A Bugzilla Bug # 709. Then we have a JIRA key, JIRA-1234. And
+finally, we have an RT link to Ticket # 4321.
+
+Hey, we could add one for a Subversion Revision # 606, too!
+

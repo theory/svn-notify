@@ -6,8 +6,15 @@ use strict;
 use HTML::Entities;
 use SVN::Notify ();
 
-$SVN::Notify::HTML::VERSION = '2.23';
+$SVN::Notify::HTML::VERSION = '2.30';
 @SVN::Notify::HTML::ISA = qw(SVN::Notify);
+
+__PACKAGE__->register_attributes(
+    linkize      => 'linkize',
+    rt_url       => "rt-url=s",
+    bugzilla_url => "bugzilla-url=s",
+    jira_url     => "jira-url=s",
+);
 
 =head1 Name
 
@@ -54,6 +61,71 @@ in SVN::Notify, but when using F<svnnotify>, specify C<--handler HTML>.
 
 =head1 Class Interface
 
+=head2 Constructor
+
+=head3 new
+
+=head3 new
+
+  my $notifier = SVN::Notify->new(%params);
+
+Constructs and returns a new SVN::Notify object. All parameters supported by
+SVN::Notity are supported here, but SVN::Notify::HTML supports a few
+additional parameters:
+
+=over
+
+=item linkize
+
+  svnnotify --linkize
+
+A boolean attribute to specify whether or not to "linkize" the SVN log
+message--that is, to turn any URLs or email addresses in the log message into
+links.
+
+=item rt_url
+
+  svnnotify --rt-url http://rt.cpan.org/NoAuth/Bugs.html?id=%s
+
+The URL of a Request Tracker (RT) server. If passed in, any strings in the log
+message of the form "Ticket # 12" or "ticket 6" or even "Ticket#1066" will be
+turned into links to the RT server. The URL must have the "%s" format where
+the RT ticket ID should be put into the URL.
+
+=item bugzilla_url
+
+  svnnotify --bugzilla-url http://bugzilla.mozilla.org/show_bug.cgi?id=%s
+
+The URL of a Bugzilla server. If passed in, any strings in the log message of
+the form "Bug # 12" or "bug 6" or even "Bug#1066" will be turned into links to
+the Bugzilla server. The URL must have the "%s" format where the Bugzilla Bug
+ID should be put into the URL.
+
+=item jira_url
+
+  svnnotify --jira-url http://jira.atlassian.com/secure/ViewIssue.jspa?key=%s
+
+The URL of a Jira server. If passed in, any strings in the log message that
+appear to be Jira keys (such as "JIRA-1234") will be turned into links to the
+Jira server. The URL must have the "%s" format where the Jira key should be
+put into the URL.
+
+=back
+
+=cut
+
+sub new {
+    my $self = shift->SUPER::new(@_);
+    # Escape URLs.
+    for (qw(viewcvs bugzilla jira rt)) {
+        $self->{"$_\_url"} = encode_entities($self->{"$_\_url"})
+          if $self->{"$_\_url"};
+    }
+    return $self;
+}
+
+##############################################################################
+
 =head2 Class Methods
 
 =head3 content_type
@@ -76,17 +148,20 @@ sub content_type { 'text/html' }
   $notifier->start_body($file_handle);
 
 This method starts the body of the notification message. It outputs the
-opening C<< <html> >>, C<< <head> >>, C<< <style> >>, and C<< <body> >> tags.
+opening C<< <html> >>, C<< <head> >>, C<< <style> >>, and C<< <body> >>
+tags. Note that if the C<language> attribute is set to a value, it will be
+specified in the C<< <html> >> tag.
 
 =cut
 
 sub start_body {
     my ($self, $out) = @_;
-    # XXX Add language attribute for these headers!
+    my $lang = $self->language;
     print $out qq{<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN"\n},
       qq{"http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">\n},
-      qq{<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">\n},
-      qq{<head><style type="text/css"><!--\n};
+      qq{<html xmlns="http://www.w3.org/1999/xhtml"},
+        ($lang ? qq{ xml:lang="$lang"} : ()),
+      qq{>\n<head><style type="text/css"><!--\n};
     $self->output_css($out);
     print $out qq{--></style>\n<title>}, encode_entities($self->subject),
       qq{</title>\n</head>\n<body>\n\n<div id="msg">\n};
@@ -141,7 +216,7 @@ sub output_metadata {
     my $rev = $self->revision;
     if (my $url = $self->viewcvs_url) {
         # Make the revision number a URL.
-        print $out qq{<a href="$url?rev=$rev&amp;view=rev">$rev</a>};
+        printf $out qq{<a href="$url">$rev</a>}, $rev;
     } else {
         # Just output the revision number.
         print $out $rev;
@@ -162,16 +237,55 @@ sub output_metadata {
   $notifier->output_log_message($file_handle);
 
 Outputs the commit log message in C<< <pre> >> tags, and the label "Log
-Message" in C<< <h3> >> tags.
+Message" in C<< <h3> >> tags. If the C<bugzilla_url> attribute is set, then
+any strings like "Bug 2" or "bug # 567" will be turned into links.
 
 =cut
 
 sub output_log_message {
     my ($self, $out) = @_;
     $self->_dbpnt( "Outputting log message as HTML") if $self->verbose > 1;
-    print $out "<h3>Log Message</h3>\n<pre>",
-      HTML::Entities::encode_entities(join("\n", @{$self->message})),
-      "</pre>\n\n";
+
+    # Assemble the message.
+    my $msg = encode_entities(join("\n", @{$self->message}));
+
+    # Turn URLs and email addresses into links.
+    if ($self->linkize) {
+        # These regular expressions modified from "Mastering Regular
+        # Expressions" 2ed., pp 70-75.
+
+        # Make email links.
+        $msg =~ s{\b(\w[-.\w]*\@[-a-z0-9]+(?:\.[-a-z0-9]+)*\.[-a-z0-9]+)\b}
+          {<a href="mailto:$1">$1</a>}gi;
+
+        # Make URLs linkable.
+        $msg =~ s{\b([a-z0-9]+://[-a-z0-9]+(?:\.[-a-z0-9]+)*\.[-a-z0-9]+\b(?:/(?:[-a-z0-9_:\@?=+,.!/~*I'%\$]|&amp;)*(?<![.,?!]))?)}
+          {<a href="$1">$1</a>}gi;
+
+    }
+
+    # Make ViewCVS links.
+    if (my $url = $self->viewcvs_url) {
+        $msg =~ s|(revision\s*#?\s*(\d+))|sprintf qq{<a href="$url">$1</a>}, $2|ige;
+    }
+
+    # Make Bugzilla links.
+    if (my $url = $self->bugzilla_url) {
+        $msg =~ s|(bug\s*#?\s*(\d+))|sprintf qq{<a href="$url">$1</a>}, $2|ige;
+    }
+
+    # Make RT links.
+    if (my $url = $self->rt_url) {
+        $msg =~ s|(ticket\s*#?\s*(\d+))|sprintf qq{<a href="$url">$1</a>}, $2|ige;
+    }
+
+    # Make JIRA links.
+    if (my $url = $self->jira_url) {
+        $msg =~ s|(jira-\d+)|sprintf qq{<a href="$url">$1</a>}, $1|ige;
+    }
+
+    # Print it out and return.
+    print $out "<h3>Log Message</h3>\n<pre>$msg</pre>\n\n";
     return $self;
 }
 
@@ -282,21 +396,6 @@ __END__
 =over
 
 =item L<SVN::Notify|SVN::Notify>
-
-=back
-
-=head1 To Do
-
-=over
-
-=item *
-
-Add support for Bugzilla, RT, and Jira links, so that text in the log message that
-looks like it refers to them will link to them.
-
-=item *
-
-Turn email addresses and URLs in the log message into actual links.
 
 =back
 

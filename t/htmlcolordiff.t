@@ -242,7 +242,7 @@ like( $email, qr{Content-Transfer-Encoding: 8bit\n},
 # Try view_cvs_url + HTML.
 ##############################################################################
 ok( $notifier = SVN::Notify::HTML::ColorDiff->new(%args,
-     viewcvs_url => 'http://svn.example.com/',
+     viewcvs_url => 'http://svn.example.com/?rev=%s&view=rev',
 ),
     "Construct new HTML view_cvs_url notifier" );
 isa_ok($notifier, 'SVN::Notify::HTML::ColorDiff');

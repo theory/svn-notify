@@ -9,7 +9,7 @@ use File::Spec::Functions;
 if ($^O eq 'MSWin32') {
     plan skip_all => "SVN::Notify not yet supported on Win32";
 } else {
-    plan tests => 119;
+    plan tests => 122;
 }
 
 BEGIN { use_ok('SVN::Notify') }
@@ -50,6 +50,7 @@ is($notifier->user_domain, $args{user_domain},
 is($notifier->svnlook, $args{svnlook}, "Check svnlook accessor" );
 is($notifier->sendmail, $args{sendmail}, "Check sendmail accessor" );
 is($notifier->charset, 'UTF-8', "Check charset accessor" );
+is($notifier->language, undef, "Check language accessor" );
 is($notifier->with_diff, $args{with_diff}, "Check with_diff accessor" );
 is($notifier->attach_diff, $args{attach_diff}, "Check attach_diff accessor" );
 is($notifier->reply_to, $args{reply_to}, "Check reply_to accessor" );
@@ -116,9 +117,9 @@ unlike( $email, qr{Modified: trunk/Params-CallbackRequest/Changes},
 
 
 ##############################################################################
-# Include diff.
+# Include diff and language.
 ##############################################################################
-ok( $notifier = SVN::Notify->new(%args, with_diff => 1),
+ok( $notifier = SVN::Notify->new(%args, with_diff => 1, language => 'en'),
     "Construct new diff notifier" );
 isa_ok($notifier, 'SVN::Notify');
 ok( $notifier->prepare, "Single method call prepare" );
@@ -131,6 +132,7 @@ like( $email, qr/Subject: \[111\] Did this, that, and the other\.\n/,
       "Check diff subject" );
 like( $email, qr/From: theory\n/, 'Check diff From');
 like( $email, qr/To: test\@example\.com\n/, 'Check diff To');
+like( $email, qr/Content-Language: en\n/, 'Check diff Content-Language');
 
 # Make sure there are no attachment headers
 is( scalar @{[ $email =~ m{Content-Type: text/plain; charset=UTF-8\n} ]}, 1,
@@ -149,9 +151,9 @@ unlike( $email, qr{Content-Disposition: attachment; filename=},
         "Check for no filename" );
 
 ##############################################################################
-# Attach diff.
+# Attach diff with language.
 ##############################################################################
-ok( $notifier = SVN::Notify->new(%args, attach_diff => 1),
+ok( $notifier = SVN::Notify->new(%args, attach_diff => 1, language => 'en'),
     "Construct new attach diff notifier" );
 isa_ok($notifier, 'SVN::Notify');
 ok( $notifier->prepare, "Single method call prepare" );
@@ -168,6 +170,8 @@ like( $email, qr/To: test\@example\.com\n/, 'Check attach diff To');
 # Make sure we have two sets of headers for attachments.
 is( scalar @{[ $email =~ m{Content-Type: text/plain; charset=UTF-8\n}g ]}, 2,
     'Check for two Content-Type headers' );
+is( scalar @{[ $email =~ m{Content-Language: en\n}g ]}, 2,
+    'Check for two Content-Language headers' );
 is( scalar @{[$email =~ m{Content-Transfer-Encoding: 8bit\n}g]}, 2,
       'Check for two Content-Transfer-Encoding headers');
 
@@ -291,8 +295,9 @@ like( $email, qr/From: theory\@example\.net\n/, 'Check From for user domain');
 ##############################################################################
 # Try view_cvs_url.
 ##############################################################################
-ok( $notifier = SVN::Notify->new(%args, viewcvs_url => 'http://svn.example.com/'),
-    "Construct new view_cvs_url notifier" );
+ok( $notifier = SVN::Notify->new(
+    %args, viewcvs_url => 'http://svn.example.com/?rev=%s&view=rev'
+   ), "Construct new view_cvs_url notifier" );
 isa_ok($notifier, 'SVN::Notify');
 ok( $notifier->prepare, "Prepare view_cvs_url" );
 ok( $notifier->execute, "Notify view_cvs_url" );

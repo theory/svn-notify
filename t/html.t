@@ -9,7 +9,7 @@ use File::Spec::Functions;
 if ($^O eq 'MSWin32') {
     plan skip_all => "SVN::Notify::HTML not yet supported on Win32";
 } elsif (eval { require HTML::Entities }) {
-    plan tests => 115;
+    plan tests => 135;
 } else {
     plan skip_all => "SVN::Notify::HTML requires HTML::Entities";
 }
@@ -27,6 +27,7 @@ my %args = (
     repos_path => 'tmp',
     revision   => '111',
     to         => 'test@example.com',
+    linkize    => 1,
 );
 
 ##############################################################################
@@ -37,9 +38,15 @@ ok( my $notifier = SVN::Notify::HTML->new(%args),
 isa_ok($notifier, 'SVN::Notify::HTML');
 isa_ok($notifier, 'SVN::Notify');
 ok( $notifier->prepare, "Single method call prepare" );
-ok( $notifier->execute, "HTML notify" );
 
-# Get the output.
+# Check that the accessors work properly.
+is ($notifier->linkize, 1, "Check linkize" );
+is ($notifier->bugzilla_url, undef, "Check bugzilla_url" );
+is ($notifier->jira_url, undef, "Check jira_url" );
+is ($notifier->rt_url, undef, "Check rt_url" );
+
+# Send the mesasge and get the output.
+ok( $notifier->execute, "HTML notify" );
 my $email = get_output();
 
 # Check the email headers.
@@ -119,9 +126,9 @@ like( $email, qr{Content-Transfer-Encoding: 8bit\n},
       'Check HTML Content-Transfer-Encoding');
 
 ##############################################################################
-# Include HTML diff.
+# Include HTML diff and language.
 ##############################################################################
-ok( $notifier = SVN::Notify::HTML->new(%args, with_diff => 1),
+ok( $notifier = SVN::Notify::HTML->new(%args, with_diff => 1, language => 'en'),
     "Construct new HTML diff notifier" );
 isa_ok($notifier, 'SVN::Notify::HTML');
 isa_ok($notifier, 'SVN::Notify');
@@ -141,7 +148,12 @@ is( scalar @{[ $email =~ m{Content-Type: text/(plain|html); charset=UTF-8\n} ]},
     'Check for one HTML Content-Type header' );
 is( scalar @{[$email =~ m{Content-Transfer-Encoding: 8bit\n}g]}, 1,
       'Check for one HTML Content-Transfer-Encoding header');
+is( scalar @{[$email =~ m{Content-Language: en\n}g]}, 1,
+      'Check for one HTML Content-Language header');
 
+# Check for the html header.
+like( $email, qr|<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">|,
+      "Check for HTML tag" );
 # Make sure that the diff is included and escaped.
 like( $email, qr/<div id="patch">/, "Check for patch div" );
 like( $email, qr{Modified: trunk/Params-CallbackRequest/Changes},
@@ -190,6 +202,10 @@ is( scalar @{[ $email =~ m{Content-Type: text/(plain|html); charset=UTF-8\n}g ]}
 is( scalar @{[$email =~ m{Content-Transfer-Encoding: 8bit\n}g]}, 2,
       'Check for two Content-Transfer-Encoding headers');
 
+# No language, so no xml:lang.
+like( $email, qr|<html xmlns="http://www.w3.org/1999/xhtml">|,
+      "Check for attach diff HTML tag" );
+
 # Make sure that the diff is included.
 like( $email, qr{Modified: trunk/Params-CallbackRequest/Changes},
       "Check for diff" );
@@ -233,7 +249,7 @@ like( $email, qr{Content-Transfer-Encoding: 8bit\n},
 # Try view_cvs_url + HTML.
 ##############################################################################
 ok( $notifier = SVN::Notify::HTML->new(%args,
-     viewcvs_url => 'http://svn.example.com/',
+     viewcvs_url => 'http://svn.example.com/?rev=%s&view=rev',
 ),
     "Construct new HTML view_cvs_url notifier" );
 isa_ok($notifier, 'SVN::Notify::HTML');
@@ -289,6 +305,51 @@ like( $email,
 like( $email,
       qr|<a id="trunkactivitymailtactivitymailt">Property changes on: trunk/activitymail/t/activitymail\.t</a>\n|,
       "Check for propset file name anchor id" );
+
+##############################################################################
+# Try linkize and Bug tracking URLs.
+##############################################################################
+ok( $notifier = SVN::Notify::HTML->new(
+    %args,
+    revision => 222,
+    viewcvs_url  => 'http://viewsvn.bricolage.cc/?rev=%s&view=rev',
+    rt_url       => 'http://rt.cpan.org/NoAuth/Bugs.html?id=%s',
+    bugzilla_url => 'http://bugzilla.mozilla.org/show_bug.cgi?id=%s',
+    jira_url     => 'http://jira.atlassian.com/secure/ViewIssue.jspa?key=%s',
+),
+    "Construct new HTML URL notifier" );
+isa_ok($notifier, 'SVN::Notify::HTML');
+isa_ok($notifier, 'SVN::Notify');
+ok( $notifier->prepare, "Prepare HTML URL" );
+ok( $notifier->execute, "Notify HTML URL" );
+
+$email = get_output();
+
+# Check linkize results.
+like($email, qr|<a href="mailto:foo\@example\.com">foo\@example\.com</a>|,
+     "Check for linked email address");
+like($email, qr{<a href="http://www\.kineticode\.com/">http://www\.kineticode\.com/</a>},
+     "Check for linked URL" );
+like($email,
+     qr{<a href="http://foo\.bar\.com/one/two/do\.pl\?this=1&amp;that=2">http://foo\.bar\.com/one/two/do\.pl\?this=1&amp;that=2</a>},
+     "Check for fancy linked URL" );
+
+# Check for application URLs.
+like( $email,
+      qr|<dt>Revision</dt>\s+<dd><a href="http://viewsvn\.bricolage\.cc/\?rev=222\&amp;view=rev">222</a></dd>\n|,
+      'Check for main ViewCVS URL');
+like($email,
+     qr{<a href="http://rt\.cpan\.org/NoAuth/Bugs\.html\?id=4321">Ticket # 4321</a>},
+     "Check for RT URL");
+like($email,
+     qr{<a href="http://viewsvn\.bricolage\.cc/\?rev=606&amp;view=rev">Revision # 606</a>},
+     "Check for log mesage ViewCVS URL");
+like( $email,
+      qr{<a href="http://bugzilla\.mozilla\.org/show_bug\.cgi\?id=709">Bug # 709</a>},
+      "Check for Bugzilla URL" );
+like( $email,
+      qr{<a href="http://jira\.atlassian\.com/secure/ViewIssue\.jspa\?key=JIRA-1234">JIRA-1234</a>},
+      "Check for Jira URL" );
 
 ##############################################################################
 # Functions.
