@@ -1,5 +1,7 @@
 Revision history for Perl extension SVN::Notify
 
+2.42
+
 2.41  2004-10-21T20:33:25
       - Added missing newline between the commit metadata and the log
         message in SVN::Notify.
