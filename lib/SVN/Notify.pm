@@ -13,8 +13,8 @@ my %map = ( U => 'Modified Files',
 
 sub new {
     my ($class, %opts) = @_;
-    $opts{svnlook} ||= 'svnlook';
-    $opts{sendmail} ||= 'sendmail';
+    $opts{svnlook} ||= '/usr/local/bin/svnlook';
+    $opts{sendmail} ||= '/usr/sbin/sendmail';
     $opts{format} ||= 'text';
     $opts{with_diff} ||= $opts{attach_diff};
     $opts{viewcvs_url} .= '/'
@@ -402,6 +402,24 @@ Perl.
 
 For sending HTML formatted email, this script requires
 L<HTML::Entities|HTML::Entities>.
+
+=head1 OPTIONS
+
+=over
+
+=item C<--svnlook>
+
+The location of the F<svnlook> executable. The default is
+F</usr/local/bin/svnlook>. Specify a different path if this is not the
+location of F<svnlook> on your box.
+
+=item C<--sendmail>
+
+The location of the F<sendmail> executable. The default is
+F</usr/sbin/sendmail>. Specify a different path if this is not the location of
+F<sendmail> on your box.
+
+=back
 
 =head1 Bugs
 
