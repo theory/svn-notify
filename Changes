@@ -1,6 +1,8 @@
 Revision history for Perl extension SVN::Notify
 
 2.01
+      - Removed absolute path to Perl in the test scripts so that they
+        should just work if Perl is in the path.
 
 2.00  2004-10-04T05:09:17
       - First release, ported from activitymail 1.11, but completely
