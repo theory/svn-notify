@@ -22,8 +22,9 @@ GetOptions(
     "repos-path|p=s"     => \$opts{repos_path},
     "revision|r=s"       => \$opts{revision},
     "to|t=s"             => \$opts{to},
-    "from|f=s"           => \$opts{from},
     "to-regex-map|x=s%"  => \$opts{to_regex_map},
+    "from|f=s"           => \$opts{from},
+    "user-domain|D=s"    => \$opts{user_domain},
     "svnlook|l=s"        => \$opts{svnlook},
     "sendmail|s=s"       => \$opts{sendmail},
     "with-diff|d"        => \$opts{with_diff},
@@ -32,7 +33,6 @@ GetOptions(
     "subject-prefix|P=s" => \$opts{subject_prefix},
     "subject-cx|C"       => \$opts{subject_cx},
     "max-sub-length|i=i" => \$opts{max_sub_length},
-    "user-domain|D=s"    => \$opts{user_domain},
     "format|F=s"         => \$opts{format},
     "viewcvs-url|U=s"    => \$opts{viewcvs_url},
     "verbose|V+"         => \$opts{verbose},
@@ -81,11 +81,13 @@ Fake-out Pod::Usage
   -r --revision REVISION       Commit revision number. Required.
   -t --to ADDRESS              The notification destination email address.
                                Required unless --to-cx-regex.
-  -f --from ADDRESS            Email address to use in the From header.
   -x --to-regex-map TO=REGEX   A mapping between a destination email address
                                and a regular expresion to match against the
                                directories affected by the commit. Required
                                unless --to.
+  -f --from ADDRESS            Email address to use in the From header.
+  -D --user-domain DOMAIN      Domain name to append to the username to
+                               complete the email address in the From header.
   -l --svnlook SVNLOOK         Location of the svnlook executable. Defaults
                                to "/usr/local/bin/svnlook".
   -s --sendmail SENDMAIL       Location of the sendmail executable. Defaults
@@ -97,8 +99,6 @@ Fake-out Pod::Usage
   -C --subject-cx              Include the context of the commit in the
                                subject.
   -i --max-sub-length LENGTH   Maximum size of the subject line.
-  -D --user-domain DOMAIN      Domain name to append to the username to
-                               complete the email address in the From header.
   -A --format FORMAT           Format: "text" or "html". Defaults to "text".
   -U --viewcvs-url URL         Include links to specified ViewCVS URL.
   -V --verbose                 Incremental verbose mode.

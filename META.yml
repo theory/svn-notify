@@ -1,19 +1,19 @@
 --- #YAML:1.0
 name: SVN-Notify
-version: 2.0
+version: 2.0_1
 author:
   - David Wheeler <david@kineticode.com>
 abstract: Subversion activity notification
 license: perl
 requires:
   Getopt::Long: 0
-  HTML::Entities: 0
 recommends:
-  File::Spec: 0
+  POD::Usage: 0
 build_requires:
+  HTML::Entities: 0
   Test::Simple: 0.17
 provides:
   SVN::Notify:
     file: lib/SVN/Notify.pm
-    version: 2.0
+    version: 2.0_1
 generated_by: Module::Build version 0.25_03
