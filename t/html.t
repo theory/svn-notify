@@ -18,9 +18,12 @@ BEGIN { use_ok('SVN::Notify::HTML') }
 
 my $ext = $^O eq 'MSWin32' ? '.bat' : '';
 
+my $dir = catdir curdir, 't', 'scripts';
+$dir = catdir curdir, 't', 'bin' unless -d $dir;
+
 my %args = (
-    svnlook    => catfile(curdir, 't', 'bin', "testsvnlook$ext"),
-    sendmail   => catfile(curdir, 't', 'bin', "testsendmail$ext"),
+    svnlook    => catfile($dir, "testsvnlook$ext"),
+    sendmail   => catfile($dir, "testsendmail$ext"),
     repos_path => 'tmp',
     revision   => '111',
     to         => 'test@example.com',
