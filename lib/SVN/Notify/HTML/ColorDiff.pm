@@ -112,6 +112,7 @@ sub output_diff {
         next unless $line;
         if ($line =~ /^(Modified|Added|Deleted): (.*)/) {
             my $class = $types{$1};
+            ++$seen{$2};
             my $file = encode_entities($2);
             (my $id = $file) =~ s/[^\w_]//g;
             # Dump line.

@@ -22,6 +22,9 @@ Revision history for Perl extension SVN::Notify
         new URL attributes work. As an interim measure, SVN::Notify will
         append what it has always appeneded and emit a warning if there is
         no "%s" in the "viewcvs_url" string.
+      - Fixed SVN::Notify::HTML::ColorDiff so that it does not output two
+        separate sections for a single file that was both modified (or
+        added or deleted) and had properties set.
 
 2.22  2004-10-15T06:12:46
       - Fixed diff parsing in SVN::Notitfy::HTML and

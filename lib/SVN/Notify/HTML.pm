@@ -85,7 +85,7 @@ links.
 
 =item rt_url
 
-  svnnotify --rt-url http://rt.cpan.org/NoAuth/Bugs.html?id=%s
+  svnnotify --rt-url 'http://rt.cpan.org/NoAuth/Bugs.html?id=%s'
 
 The URL of a Request Tracker (RT) server. If passed in, any strings in the log
 message of the form "Ticket # 12" or "ticket 6" or even "Ticket#1066" will be
@@ -94,7 +94,7 @@ the RT ticket ID should be put into the URL.
 
 =item bugzilla_url
 
-  svnnotify --bugzilla-url http://bugzilla.mozilla.org/show_bug.cgi?id=%s
+  svnnotify --bugzilla-url 'http://bugzilla.mozilla.org/show_bug.cgi?id=%s'
 
 The URL of a Bugzilla server. If passed in, any strings in the log message of
 the form "Bug # 12" or "bug 6" or even "Bug#1066" will be turned into links to
@@ -103,7 +103,7 @@ ID should be put into the URL.
 
 =item jira_url
 
-  svnnotify --jira-url http://jira.atlassian.com/secure/ViewIssue.jspa?key=%s
+  svnnotify --jira-url 'http://jira.atlassian.com/secure/ViewIssue.jspa?key=%s'
 
 The URL of a Jira server. If passed in, any strings in the log message that
 appear to be Jira keys (such as "JIRA-1234") will be turned into links to the

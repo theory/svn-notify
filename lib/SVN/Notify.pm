@@ -272,8 +272,8 @@ in F<svnnotify>.
 
 =item viewcvs_url
 
-  svnnotify --viewcvs-url http://svn.example.com/viewcvs/?rev=%s&view=rev
-  svnnotify -U http://svn.example.net/viewcvs?rev=%s&view=rev
+  svnnotify --viewcvs-url 'http://svn.example.com/viewcvs/?rev=%s&view=rev'
+  svnnotify -U 'http://svn.example.net/viewcvs?rev=%s&view=rev'
 
 If a URL is specified for this parameter, then it will be used to create a
 link to the ViewCVS URL corresponding to the current revision number. The URL
@@ -647,7 +647,7 @@ sub prepare_files {
     do {
         s/[\n\r]+$//;
         if (s/^(.)(.)\s+//) {
-            $self->_dbpnt( "$1 => $_") if $self->{verbose} > 2;
+            $self->_dbpnt( "$1,$2 => $_") if $self->{verbose} > 2;
             push @{$files{$1}}, $_;
             push @{$files{_}}, $_ if $2 ne ' ' && $1 ne '_';
         }
