@@ -844,10 +844,6 @@ Add tests for verbose modes.
 
 =item *
 
-Add test for HTML format with revision 222.
-
-=item *
-
 Add charset option.
 
 =item *

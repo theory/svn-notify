@@ -9,7 +9,7 @@ use File::Spec::Functions;
 if ($^O eq 'MSWin32') {
     plan skip_all => "SVN::Notify not yet supported on Win32";
 } else {
-    plan tests => 136;
+    plan tests => 145;
 }
 
 BEGIN { use_ok('SVN::Notify') }
@@ -328,6 +328,26 @@ ok( $notifier->send, "Notify subject_cx file" );
 $email = get_output();
 like( $email, qr{Subject: \[222\] trunk/App-Info/META.yml: Hrm hrm\.\n},
       "Check subject header for file CX" );
+
+##############################################################################
+# Try html format with a single file changed.
+##############################################################################
+ok( $notifier = SVN::Notify->new(%args, revision => '222', format => 'html'),
+    "Construct new subject_cx file notifier" );
+isa_ok($notifier, 'SVN::Notify');
+ok( $notifier->prepare, "Prepare HTML file" );
+ok( $notifier->send, "Notify HTML file" );
+
+# Check the output.
+$email = get_output();
+like( $email, qr{Subject: \[222\] Hrm hrm\.\n},
+      "Check subject header for HTML file" );
+like( $email, qr/From: theory\n/, 'Check HTML file From');
+like( $email, qr/To: test\@example\.com\n/, 'Check HTML file To');
+like( $email, qr{Content-Type: text/html; charset=UTF-8\n},
+      'Check HTML file Content-Type' );
+like( $email, qr{Content-Transfer-Encoding: 8bit\n},
+      'Check HTML file Content-Transfer-Encoding');
 
 ##############################################################################
 # Try max_sub_length.
