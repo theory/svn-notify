@@ -42,15 +42,23 @@ GetOptions(
     "version|v"          => \$opts{version},
 ) or require Pod::Usage && Pod::Usage::pod2usage(2);
 
+# Handle version, help, man.
 if (delete $opts{version}) {
     require SVN::Notify;
     print "svnnotify ", SVN::Notify->VERSION, $/;
     exit;
 }
-
 require Pod::Usage && Pod::Usage::pod2usage(1) if delete $opts{help};
 require Pod::Usage && Pod::Usage::pod2usage(-exitstatus => 0, -verbose => 2)
   if delete$opts{man};
+
+# Handle required options.
+die qq{Missing required "--repos-path" parameter\n}
+  unless $opts{repos_path};
+die qq{Missing required "--revision" parameter\n}
+  unless $opts{revision};
+die qq{Missing required "--to" or "--to_regex_map" parameter\n}
+  unless $opts{to} || $opts{to_regex_map};
 
 require SVN::Notify;
 my $notifier = SVN::Notify->new(%opts);
@@ -74,7 +82,7 @@ Fake-out Pod::Usage
 
 =end comment
 
-  svnnotify --repos-path "$1" --rev "$2" [options]
+  svnnotify --repos-path "$1" --revision "$2" [options]
 
 =head1 Options
 

@@ -13,10 +13,10 @@ SVN::Notify - Subversion activity notification
 
 Use F<svnnotify> in F<post-commit>:
 
-  svnnotify --repos-path "$1" --rev "$2" \
+  svnnotify --repos-path "$1" --revision "$2" \
     --to developers@example.com [options]
 
-  svnnotify --repos-path "$1" --rev "$2" \
+  svnnotify --repos-path "$1" --revision "$2" \
     --to-cx-regex i10n@example.com=I10N [options]
 
 Use the class in a custom script:
@@ -417,8 +417,8 @@ sub prepare_recipients {
     }
 
     my ($len, $cx);
-    my $fh = $self->_pipe($self->{svnlook}, 'dirs-changed', $self->{repos_path},
-                          '-r', $self->{revision});
+    my $fh = $self->_pipe('-|', $self->{svnlook}, 'dirs-changed',
+                          $self->{repos_path}, '-r', $self->{revision});
 
     # Read in a list of the directories changed.
     while (<$fh>) {
@@ -439,6 +439,7 @@ sub prepare_recipients {
             _dbpnt qq{Context is "$cx"} if $self->{verbose} > 1;
         }
     }
+    close $fh or warn "Child process exited: $?\n";
     $self->{to} = join ', ', @to;
     $self->{cx} = $cx;
     _dbpnt qq{Recipients: "$self->{to}"} if $self->{verbose} > 1;
@@ -501,8 +502,8 @@ sub prepare_files {
     my $self = shift;
     _dbpnt "Preparing file lists" if $self->{verbose};
     my %files;
-    my $fh = $self->_pipe($self->{svnlook}, 'changed', $self->{repos_path},
-                          '-r', $self->{revision});
+    my $fh = $self->_pipe('-|', $self->{svnlook}, 'changed',
+                          $self->{repos_path}, '-r', $self->{revision});
 
     # Read in a list of changed files.
     my $cx = $_ = <$fh>;
@@ -519,8 +520,11 @@ sub prepare_files {
         # There's only one file; it's the context.
         $cx =~ s/[\n\r]+$//;
         ($self->{cx} = $cx) =~ s/^..\s+//;
-        _dbpnt qq{Directory context is "$self->{cx}"} if $self->{verbose} > 1;
+        _dbpnt qq{File context is "$self->{cx}"} if $self->{verbose} > 1;
     }
+    # Wait till we get here to close the file handle, otherwise $. gets reset
+    # to 0!
+    close $fh or warn "Child process exited: $?\n";
     $self->{files} = \%files;
     return $self;
 }
@@ -587,16 +591,17 @@ sub send {
     _dbpnt "Sending message" if $self->{verbose};
     return $self unless $self->{to};
 
-    open(SENDMAIL, "|$self->{sendmail} -oi -t")
-      or die "Cannot fork for $self->{sendmail}: $!\n";
+    # Safe pipe to sendmail. See perlipc(1).
+    my $out = $self->_pipe('|-', $self->{sendmail}, '-oi', '-t');
+
     # Output the headers.
-    print SENDMAIL
+    print $out
       "MIME-Version: 1.0\n",
       "From: $self->{from}\n",
       "To: $self->{to}\n",
       "Subject: $self->{subject}\n";
-    print SENDMAIL "Reply-To: $self->{reply_to}\n" if $self->{reply_to};
-    print SENDMAIL "X-Mailer: " . ref($self) . " " . $self->VERSION .
+    print $out "Reply-To: $self->{reply_to}\n" if $self->{reply_to};
+    print $out "X-Mailer: " . ref($self) . " " . $self->VERSION .
                    ", http://search.cpan.org/dist/SVN-Notify/\n";
 
     # Determine the content-type.
@@ -610,21 +615,21 @@ sub send {
         my $salt = join '',
           ('.', '/', 0..9, 'A'..'Z', 'a'..'z')[rand 64, rand 64];
         $self->{attach_diff} = crypt($self->{subject}, $salt);
-        print SENDMAIL
+        print $out
           qq{Content-Type: multipart/mixed; boundary="$self->{attach_diff}"\n},
           "--$self->{attach_diff}\n";
     }
 
     # Output content-type and encoding headers.
-    print SENDMAIL "Content-Type: $ctype; charset=$self->{charset}\n",
+    print $out "Content-Type: $ctype; charset=$self->{charset}\n",
       "Content-Transfer-Encoding: 8bit\n\n";
 
     # Output the message.
     my $method = "output_as_$self->{format}";
-    $self->$method(\*SENDMAIL);
+    $self->$method($out);
 
-    print SENDMAIL "--$self->{attach_diff}--\n" if $self->{attach_diff};
-    close SENDMAIL;
+    print $out "--$self->{attach_diff}--\n" if $self->{attach_diff};
+    close $out or warn "Child process exited: $?\n";
     _dbpnt "Message sent" if $self->{verbose};
     return $self;
 }
@@ -716,16 +721,18 @@ sub output_as_html {
             for (@{ $files->{$type} }) {
                 my $file = HTML::Entities::encode_entities($_);
                 # XXX Do we need to convert the directory separators on Win32?
-                print $out qq{  <li><a href="$self->{viewcvs_url}$file">$file</a>};
+                print $out qq{  <li><a href="$self->{viewcvs_url}$file">},
+                  qq{$file</a>};
                 # Add a diff link for modified files.
-                print $out qq{ (<a href="$self->{viewcvs_url}$file\?r1=$prev&amp;},
-                  qq{r2=$self->{revision}">Diff</a>)}
+                print $out qq{ (<a href="$self->{viewcvs_url}$file\?},
+                  qq{r1=$prev&amp;r2=$self->{revision}">Diff</a>)}
                   if $type eq 'U';
                 print $out "</li>\n"
             }
         } else {
             # Just output each file.
-            print $out "  <li>" . HTML::Entities::encode_entities($_) . "</li>\n"
+            print $out "  <li>" . HTML::Entities::encode_entities($_)
+              . "</li>\n"
               for @{ $files->{$type} };
         }
         print $out "</ul>\n\n";
@@ -780,42 +787,43 @@ sub output_diff {
     }
 
     # Get the diff and output it.
-    my $fh = $self->_pipe($self->{svnlook}, 'diff', $self->{repos_path}, '-r',
-                          $self->{revision});
+    my $diff = $self->_pipe('-|', $self->{svnlook}, 'diff',
+                            $self->{repos_path}, '-r', $self->{revision});
 
     if ($self->{format} eq 'text' || $self->{attach_diff}) {
-        while (<$fh>) {
+        while (<$diff>) {
             s/[\n\r]+$//;
             print $out "$_\n";
         }
     } else {
-        while (<$fh>) {
+        while (<$diff>) {
             s/[\n\r]+$//;
             print $out HTML::Entities::encode($_), "\n";
         }
     }
-    close $fh;
+    close $diff or warn "Child process exited: $?\n";
     return $self;
 }
 
 ##############################################################################
 # This method forks off a process to execute an external program and any
-# associated arguments and returns a file handle that can be read to fetch
-# the output of the external program.
+# associated arguments and returns a file handle that can be read from to
+# fetch the output of the external program, or written to.
 ##############################################################################
 
 sub _pipe {
-    my $self = shift;
+    my ($self, $mode) = (shift, shift);
     _dbpnt "Piping execution of '" . join("', '", @_) . "'"
       if $self->{verbose};
     # Safer version of backtick (see perlipc(1)).
-    # XXX Use Win32::Pipe on Win32? This doesn't seem to work as-is on Win32.
-    my $pid = open(PIPE, '-|');
+    # XXX Use Win32::Process on Win32? This doesn't seem to work as-is on Win32.
+    local *PIPE;
+    my $pid = open(PIPE, $mode);
     die "Cannot fork: $!\n" unless defined $pid;
 
     if ($pid) {
         # Parent process. Return the file handle.
-        return \*PIPE;
+        return *PIPE;
     } else {
         # Child process. Execute the commands.
         exec(@_) or die "Cannot exec $_[0]: $!\n";
@@ -832,9 +840,9 @@ sub _pipe {
 
 sub _read_pipe {
     my $self = shift;
-    my $fh = $self->_pipe(@_);
+    my $fh = $self->_pipe('-|', @_);
     local $/; my @lines = split /[\r\n]+/, <$fh>;
-    close $fh;
+    close $fh or warn "Child process exited: $?\n";
     return \@lines;
 }
 
@@ -849,6 +857,10 @@ L<http://rt.cpan.org/NoAuth/Bugs.html?Dist=SVN-Notify>.
 =head1 To Do
 
 =over
+
+=item *
+
+Check required values in svnnotify.
 
 =item *
 
