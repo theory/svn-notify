@@ -6,3 +6,4 @@
 ^MANIFEST\.SKIP$
 ^SVN-Notify
 .svn
+output.txt

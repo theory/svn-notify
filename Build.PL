@@ -7,5 +7,6 @@ my $build = Module::Build->new(
     dist_abstract      => 'Subversion activity notification',
     build_requires     => { Test::Simple  => '0.17' },
     create_makefile_pl => 'passthrough',
+    add_to_cleanup     => ['t/data/output.txt'],
 );
 $build->create_build_script;
