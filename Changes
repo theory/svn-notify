@@ -4,6 +4,16 @@ Revision history for Perl extension SVN::Notify
       - Subclassing Module::Build in Build.PL to move and set the shebang
         line in test scripts during "./Build" instead of simply changing
         the shebang line in-place during "perl Build.PL".
+      - Split the "start_message()" method into two methods, the second
+        one called "output_metadata()", to separate starting the message
+        and outputting content.
+      - Added "output_css()" method to SVN::Notify::HTML, called by its
+        "start_message()" method to output CSS for the HTML email.
+      - Added CSS to the email in SVN::Notify::HTML.
+      - Added links from the changed file list in HTML email to the
+        included diff.
+      - Added SVN::Notify::HTML::ColorDiff, a new subclass that colorizes
+        the diff when it is included in the HTML email message.
 
 2.10  2004-10-07T06:18:59
       - Added many new methods to break up the various activities of

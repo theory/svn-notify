@@ -21,4 +21,7 @@ provides:
   SVN::Notify::HTML:
     file: lib/SVN/Notify/HTML.pm
     version: 2.11
+  SVN::Notify::HTML::ColorDiff:
+    file: lib/SVN/Notify/HTML/ColorDiff.pm
+    version: 2.11
 generated_by: Module::Build version 0.25_03

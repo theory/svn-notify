@@ -7,14 +7,14 @@ use Test::More;
 use File::Spec::Functions;
 
 if ($^O eq 'MSWin32') {
-    plan skip_all => "SVN::Notify::HTML not yet supported on Win32";
+    plan skip_all => "SVN::Notify::HTML::ColorDiff not yet supported on Win32";
 } elsif (eval { require HTML::Entities }) {
-    plan tests => 100;
+    plan tests => 102;
 } else {
-    plan skip_all => "SVN::Notify::HTML requires HTML::Entities";
+    plan skip_all => "SVN::Notify::HTML::ColorDiff requires HTML::Entities";
 }
 
-BEGIN { use_ok('SVN::Notify::HTML') }
+BEGIN { use_ok('SVN::Notify::HTML::ColorDiff') }
 
 my $ext = $^O eq 'MSWin32' ? '.bat' : '';
 
@@ -32,8 +32,9 @@ my %args = (
 ##############################################################################
 # Basic Functionality.
 ##############################################################################
-ok( my $notifier = SVN::Notify::HTML->new(%args),
-    "Construct new HTML notifier" );
+ok( my $notifier = SVN::Notify::HTML::ColorDiff->new(%args),
+    "Construct new HTML::ColorDiff notifier" );
+isa_ok($notifier, 'SVN::Notify::HTML::ColorDiff');
 isa_ok($notifier, 'SVN::Notify::HTML');
 isa_ok($notifier, 'SVN::Notify');
 ok( $notifier->prepare, "Single method call prepare" );
@@ -98,9 +99,9 @@ unlike( $email, qr{Modified: trunk/Params-CallbackRequest/Changes},
 ##############################################################################
 # Make sure that handler delegation works.
 ##############################################################################
-ok( $notifier = SVN::Notify->new(%args, handler => 'HTML'),
+ok( $notifier = SVN::Notify->new(%args, handler => 'HTML::ColorDiff'),
     "Construct new HTML notifier" );
-isa_ok($notifier, 'SVN::Notify::HTML');
+isa_ok($notifier, 'SVN::Notify::HTML::ColorDiff');
 isa_ok($notifier, 'SVN::Notify');
 ok( $notifier->prepare, "Single method call prepare" );
 ok( $notifier->execute, "HTML notify" );
@@ -121,9 +122,9 @@ like( $email, qr{Content-Transfer-Encoding: 8bit\n},
 ##############################################################################
 # Include HTML diff.
 ##############################################################################
-ok( $notifier = SVN::Notify::HTML->new(%args, with_diff => 1),
+ok( $notifier = SVN::Notify::HTML::ColorDiff->new(%args, with_diff => 1),
     "Construct new HTML diff notifier" );
-isa_ok($notifier, 'SVN::Notify::HTML');
+isa_ok($notifier, 'SVN::Notify::HTML::ColorDiff');
 isa_ok($notifier, 'SVN::Notify');
 ok( $notifier->prepare, "Single method call prepare" );
 ok( $notifier->execute, "HTML diff notify" );
@@ -144,8 +145,8 @@ is( scalar @{[$email =~ m{Content-Transfer-Encoding: 8bit\n}g]}, 1,
 
 # Make sure that the diff is included and escaped.
 like( $email, qr/<div id="patch">/, "Check for patch div" );
-like( $email, qr{Modified: trunk/Params-CallbackRequest/Changes},
-      "Check for diff" );
+like( $email, qr{<h3><a id="trunk/Params-CallbackRequest/Changes">trunk/Params-CallbackRequest/Changes</a> \(600 => 601\)</h3>},
+      "Check for diff file header" );
 
 # Make sure that it's not attached.
 unlike( $email, qr{Content-Type: multipart/mixed; boundary=},
@@ -158,17 +159,24 @@ like( $email, qr{isa        =\&gt; 'Apache',}, "Check for HTML escaping" );
 like( $email,
       qr|<li><a href="#trunk/Params-CallbackRequest/Changes">trunk/Params-CallbackRequest/Changes</a></li>\n|,
       "Check for file name link." );
+
+# Make sure that the file names are linked.
 like( $email,
-      qr|<a id="trunk/Params-CallbackRequest/Changes">Modified: trunk/Params-CallbackRequest/Changes</a>\n|,
-      "Check for file name anchor id" );
+      qr|<li><a href="#trunk/Class-Meta/Changes">trunk/Class-Meta/Changes</a></li>|,
+      "Check for linked file name" );
+
+# Property changes aren't escaped.
+like( $email,
+      qr|<li>trunk/Class-Meta/lib/Class/Meta/Type.pm</li>|,
+      "Check for unescaped property change");
 
 ##############################################################################
 # Attach diff.
 ##############################################################################
-ok( $notifier = SVN::Notify::HTML->new(%args, attach_diff => 1,
+ok( $notifier = SVN::Notify::HTML::ColorDiff->new(%args, attach_diff => 1,
                                        boundary => 'frank'),
     "Construct new HTML attach diff notifier" );
-isa_ok($notifier, 'SVN::Notify::HTML');
+isa_ok($notifier, 'SVN::Notify::HTML::ColorDiff');
 isa_ok($notifier, 'SVN::Notify');
 ok( $notifier->prepare, "Single method call prepare" );
 ok( $notifier->execute, "Attach HTML attach diff notify" );
@@ -208,9 +216,9 @@ is( scalar @{[$email =~ m{(--frank--)}g]}, 1,
 ##############################################################################
 # Try html format with a single file changed.
 ##############################################################################
-ok( $notifier = SVN::Notify::HTML->new(%args, revision => '222'),
+ok( $notifier = SVN::Notify::HTML::ColorDiff->new(%args, revision => '222'),
     "Construct new subject_cx file notifier" );
-isa_ok($notifier, 'SVN::Notify::HTML');
+isa_ok($notifier, 'SVN::Notify::HTML::ColorDiff');
 isa_ok($notifier, 'SVN::Notify');
 ok( $notifier->prepare, "Prepare HTML file" );
 ok( $notifier->execute, "Notify HTML file" );
@@ -229,11 +237,11 @@ like( $email, qr{Content-Transfer-Encoding: 8bit\n},
 ##############################################################################
 # Try view_cvs_url + HTML.
 ##############################################################################
-ok( $notifier = SVN::Notify::HTML->new(%args,
+ok( $notifier = SVN::Notify::HTML::ColorDiff->new(%args,
      viewcvs_url => 'http://svn.example.com/',
 ),
     "Construct new HTML view_cvs_url notifier" );
-isa_ok($notifier, 'SVN::Notify::HTML');
+isa_ok($notifier, 'SVN::Notify::HTML::ColorDiff');
 isa_ok($notifier, 'SVN::Notify');
 ok( $notifier->prepare, "Prepare HTML view_cvs_url" );
 ok( $notifier->execute, "Notify HTML view_cvs_url" );
@@ -247,9 +255,9 @@ like( $email,
 ##############################################################################
 # Try charset.
 ##############################################################################
-ok( $notifier = SVN::Notify::HTML->new(%args, charset => 'ISO-8859-1'),
+ok( $notifier = SVN::Notify::HTML::ColorDiff->new(%args, charset => 'ISO-8859-1'),
     "Construct new charset notifier" );
-isa_ok($notifier, 'SVN::Notify::HTML');
+isa_ok($notifier, 'SVN::Notify::HTML::ColorDiff');
 isa_ok($notifier, 'SVN::Notify');
 ok( $notifier->prepare, "Prepare charset" );
 ok( $notifier->execute, "Notify charset" );

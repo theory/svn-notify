@@ -1192,7 +1192,7 @@ sub _dbpnt { print __PACKAGE__, ": $_[1]\n" }
 1;
 __END__
 
-=head2 See Also
+=head1 See Also
 
 =over
 

@@ -84,7 +84,7 @@ sub start_body {
     my ($self, $out) = @_;
     print $out qq{<html>\n<head><style type="text/css"><!--\n};
     $self->output_css($out);
-    print $out qq{</style>\n</head>\n<body>\n\n<div class="msg">\n};
+    print $out qq{\n--></style>\n</head>\n<body>\n\n<div id="msg">\n};
     return $self;
 }
 
@@ -171,7 +171,6 @@ sub output_log_message {
     return $self;
 }
 
-
 ##############################################################################
 
 =head3 output_file_lists
@@ -198,8 +197,15 @@ sub output_file_lists {
 
         # Identify the action and output each file.
         print $out "<h3>$map->{$type}</h3>\n<ul>\n";
-        print $out "  <li>" . HTML::Entities::encode_entities($_) . "</li>\n"
-          for @{ $files->{$type} };
+        if ($self->{with_diff} && !$self->{attach_diff} && $type ne '_') {
+            for (@{ $files->{$type} }) {
+                my $file = encode_entities($_);
+                print $out qq{<li><a href="#$file">$file</a></li>\n};
+            }
+        } else {
+            print $out "  <li>" . encode_entities($_) . "</li>\n"
+              for @{ $files->{$type} };
+        }
         print $out "</ul>\n\n";
     }
 }
@@ -244,9 +250,13 @@ sub output_diff {
     my $diff = $self->_pipe('-|', $self->{svnlook}, 'diff',
                             $self->{repos_path}, '-r', $self->{revision});
 
-    print $out qq{</div>\n<div class="patch"><pre>\n};
+    print $out qq{</div>\n<div id="patch"><pre>\n};
     while (<$diff>) {
         s/[\n\r]+$//;
+        if (/^Modified: (.*)/) {
+            my $f = encode_entities($1);
+            print $out qq{<a id="$f">Modified: $f</a>\n"};
+        }
         print $out encode_entities($_), "\n";
     }
     print $out "</pre></div>\n";
@@ -258,11 +268,26 @@ sub output_diff {
 1;
 __END__
 
-=head2 See Also
+=head1 See Also
 
 =over
 
 =item L<SVN::Notify|SVN::Notify>
+
+=back
+
+=head1 To Do
+
+=over
+
+=item *
+
+Add support for Bugzilla, RT, and Jira links, so that text in the log message that
+looks like it refers to them will link to them.
+
+=item *
+
+Turn email addresses and URLs in the log message into actual links.
 
 =back
 
