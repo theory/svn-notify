@@ -1,0 +1,40 @@
+MIME-Version: 1.0
+From: theory
+To: test@example.com
+Subject: [111] Did this, that, and the other.
+X-Mailer: SVN::Notify 2.0, http://search.cpan.org/dist/activitymail/
+Content-Type: text/plain
+
+Log Message:
+-----------
+Did this, that, and the other. And then I did some more. Some
+it was done on a second line. Go figure.
+
+Modified Files:
+--------------
+    trunk/Class-Meta/lib/Class/Meta/AccessorBuilder/Affordance.pm
+    trunk/Class-Meta/lib/Class/Meta/AccessorBuilder/SemiAffordance.pm
+    trunk/Class-Meta/lib/Class/Meta/AccessorBuilder.pm
+    trunk/Class-Meta/lib/Class/Meta/Attribute.pm
+    trunk/Class-Meta/lib/Class/Meta/Class.pm
+    trunk/Class-Meta/lib/Class/Meta/Constructor.pm
+    trunk/Class-Meta/lib/Class/Meta/Method.pm
+    trunk/Class-Meta/lib/Class/Meta.pm
+
+Added Files:
+-----------
+    trunk/Class-Meta/Changes
+    trunk/Class-Meta/t/view.t
+
+Removed Files:
+-------------
+    trunk/Class-Meta/META.yml
+    trunk/Class-Meta/README
+
+Property Changed:
+----------------
+    trunk/Class-Meta/lib/Class/Meta/Type.pm
+    trunk/Class-Meta/lib/Class/Meta/Types/Boolean.pm
+    trunk/Class-Meta/lib/Class/Meta/Types/Numeric.pm
+    trunk/Class-Meta/lib/Class/Meta/Types/Perl.pm
+    trunk/Class-Meta/lib/Class/Meta/Types/String.pm

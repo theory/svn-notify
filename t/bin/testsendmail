@@ -1,0 +1,11 @@
+#!/usr/bin/perl -w
+
+use strict;
+use FindBin;
+use File::Spec::Functions;
+
+my $file = catfile($FindBin::Bin, updir, 'data', "output.txt");
+
+open F, ">$file" or die "Cannot open '$file': $!\n";
+while (<STDIN>) { print F }
+close F;

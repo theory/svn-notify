@@ -1,0 +1,14 @@
+#!/usr/bin/perl -w
+
+use strict;
+use FindBin;
+use File::Spec::Functions;
+
+my $command = shift;
+my $rev = pop;
+
+my $file = catfile($FindBin::Bin, updir, 'data', $command, "$rev.txt");
+
+open F, "<$file" or die "Cannot open '$file': $!\n";
+print for <F>;
+close F;

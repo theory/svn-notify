@@ -1,0 +1,17 @@
+A   trunk/Class-Meta/Changes
+D   trunk/Class-Meta/META.yml
+D   trunk/Class-Meta/README
+U   trunk/Class-Meta/lib/Class/Meta/AccessorBuilder/Affordance.pm
+U   trunk/Class-Meta/lib/Class/Meta/AccessorBuilder/SemiAffordance.pm
+U   trunk/Class-Meta/lib/Class/Meta/AccessorBuilder.pm
+U   trunk/Class-Meta/lib/Class/Meta/Attribute.pm
+U   trunk/Class-Meta/lib/Class/Meta/Class.pm
+U   trunk/Class-Meta/lib/Class/Meta/Constructor.pm
+U   trunk/Class-Meta/lib/Class/Meta/Method.pm
+_U  trunk/Class-Meta/lib/Class/Meta/Type.pm
+_U  trunk/Class-Meta/lib/Class/Meta/Types/Boolean.pm
+_U  trunk/Class-Meta/lib/Class/Meta/Types/Numeric.pm
+_U  trunk/Class-Meta/lib/Class/Meta/Types/Perl.pm
+_U  trunk/Class-Meta/lib/Class/Meta/Types/String.pm
+UU   trunk/Class-Meta/lib/Class/Meta.pm
+A   trunk/Class-Meta/t/view.t

@@ -1,0 +1,133 @@
+#!/usr/bin/perl -w
+
+eval 'exec /usr/bin/perl -w -S $0 ${1+"$@"}'
+    if 0; # not running under some shell
+
+# $Id$
+
+use strict;
+use Getopt::Long;
+
+##############################################################################
+# Process the command-line arguments.
+##############################################################################
+
+my %opts = (
+    svnlook  => 'svnlook',
+    sendmail => 'sendmail',
+    path     => '',
+    output   => 'plain_text',
+);
+
+# Enable bundling and, at the same time, case-sensitive matching of single
+# character options.
+Getopt::Long::Configure ("bundling");
+GetOptions(
+    "repos-path|p=s"     => \$opts{path},
+    "rev|r=s"            => \$opts{rev},
+    "to|t=s"             => \$opts{to},
+    "from|f=s"           => \$opts{from},
+    "to-cx-regex|x=s%"   => \$opts{regex},
+    "svnlook|l=s"        => \$opts{svnlook},
+    "sendmail|s=s"       => \$opts{sendmail},
+    "with-diff|d=s"      => \$opts{diff},
+    "attach-diff|a=s"    => \$opts{attach},
+    "reply-to|R=s"       => \$opts{replyto},
+    "subject-prefix|P=s" => \$opts{subject},
+    "subject-cx|C=s"     => \$opts{cx},
+    "max-sub-length|i=i" => \$opts{sublength},
+    "user-domain|D=s"    => \$opts{domain},
+    "max-size|M=i"       => \$opts{maxsize},
+    "format|F=s"         => \$opts{format},
+    "viewcvs-url|U=s"    => \$opts{viewcvs},
+    "verbose|V+"         => \$opts{verbose},
+    "help|h"             => \$opts{help},
+    "man|m"              => \$opts{man},
+    "version|v"          => \$opts{show_version},
+) or require Pod::Usage && Pod::Usage::pod2usage(2);
+
+print "svnnotify ", SVN::Notify->VERSION, $/, exit if delete $opts{version};
+require Pod::Usage && Pod::Usage::pod2usage(1) if delete $opts{help};
+require Pod::Usage && Pod::Usage::pod2usage(-exitstatus => 0, -verbose => 2)
+  if delete$opts{man};
+
+require SVN::Notify;
+my $notifier = SVN::Notify->new(%opts);
+$notifier->prepare;
+$notifier->notify;
+
+1;
+__END__
+
+=head1 Name
+
+svnnotify - Subversion activity notification
+
+=head1 Synopsis
+
+=begin comment
+
+Fake-out Pod::Usage
+
+=head1 SYNOPSIS
+
+=end comment
+
+In F<post-commit>:
+
+  svnnotify --repos-path "$1" --rev "$2" --to developers@example.com [options]
+  svnnotify --repos-path "$1" --rev "$2" --to-cx-regex i10n@example.com=I10N [options]
+
+=head1 Options
+
+  -p --repos-path PATH         Path to the Subversion repository. Required.
+  -r --rev REVISION            Commit revision number. Required.
+  -t --to ADDRESS              The notification destination email address.
+                               Required unless --to-cx-regex.
+  -f --from ADDRESS            Email address to use in the From header.
+  -x --to-cx-regex TO=REGEX    A mapping between a destination email address
+                               and a regular expresion to match against the
+                               directories affected by the commit. Required
+                               unless --to.
+  -l --svnlook SVNLOOK         Location of the svnlook executable. Defaults
+                               to "svnlook".
+  -s --sendmail SENDMAIL       Location of the sendmail executable. Defaults
+                               to "sendmail".
+  -d --with-diff               Include the diff in the message.
+  -a --attach-diff             Attach the diff to the message.
+  -R --reply-to ADDRESS        Address for use in the Reply-To header.
+  -P --subject-prefix PREFIX   String to prepend to the subject.
+  -C --subject-cx              Include the context of the commit in the
+                               subject.
+  -i --max-sub-length LENGTH   Maximum size of the subject line.
+  -D --user-domain DOMAIN      Domain name to append to t username to complete
+                               the email addres in the From header.
+  -M --max-size NUMBER         Maximum size of emailed messages in kilobytes.
+  -A --format FORMAT           Format, "text" or "html". Defaults to "text".
+  -U --viewcvs-url URL         Include links to specified ViewCVS URL.
+  -V --verbose                 Verbose mode.
+  -h --help                    Print this usage statement and exit.
+  -m --man                     Print the complete documentation and exit.
+  -v --version                 Print the version number and exit.
+
+=head1 Description
+
+=head1 Option Details
+
+=head1 Bugs
+
+Report all bugs via the CPAN Request Tracker at
+L<http://rt.cpan.org/NoAuth/Bugs.html?Dist=SVN-Notify>.
+
+=head1 Author
+
+David Wheeler <david@kineticode.com>
+
+=head1 Copyright and License
+
+Copyright (c) 2004 Kineticode, Inc. All Rights Reserved.
+
+This module is free software; you can redistribute it and/or modify it under the
+same terms as Perl itself.
+
+=cut
