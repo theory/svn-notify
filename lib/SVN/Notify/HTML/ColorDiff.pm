@@ -100,7 +100,7 @@ sub output_diff {
     while (my $line = <$diff>) {
         $line =~ s/[\n\r]+$//;
         next unless $line;
-        if ($line =~ /^Modified: (.*)/) {
+        if ($line =~ /^(?:Modified|Added|Deleted): (.*)/) {
             my $file = encode_entities($1);
             (my $id = $file) =~ s/[^\w_]//g;
             # Dump line.

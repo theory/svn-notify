@@ -11,7 +11,7 @@ Modified: trunk/Params-CallbackRequest/Changes
  1.12  2004-03-15T15:27:54
        - No longer using a Params::Validate callback to transform a value,
 
-Modified: trunk/Params-CallbackRequest/lib/Params/Callback.pm
+Added: trunk/Params-CallbackRequest/lib/Params/Callback.pm
 ===================================================================
 --- trunk/Params-CallbackRequest/lib/Params/Callback.pm 2004-04-20 08:33:35 UTC (rev 600)
 +++ trunk/Params-CallbackRequest/lib/Params/Callback.pm 2004-04-20 12:42:29 UTC (rev 601)

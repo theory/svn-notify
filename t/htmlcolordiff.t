@@ -9,7 +9,7 @@ use File::Spec::Functions;
 if ($^O eq 'MSWin32') {
     plan skip_all => "SVN::Notify::HTML::ColorDiff not yet supported on Win32";
 } elsif (eval { require HTML::Entities }) {
-    plan tests => 103;
+    plan tests => 104;
 } else {
     plan skip_all => "SVN::Notify::HTML::ColorDiff requires HTML::Entities";
 }
@@ -147,6 +147,8 @@ is( scalar @{[$email =~ m{Content-Transfer-Encoding: 8bit\n}g]}, 1,
 like( $email, qr/<div id="patch">/, "Check for patch div" );
 like( $email, qr{<a id="trunkParamsCallbackRequestChanges"></a>\n},
       "Check for file div ID");
+like( $email, qr{<a id="trunkParamsCallbackRequestlibParamsCallbackpm"></a>\n},
+      "Check for added file div ID");
 like( $email, qr{<h3>trunk/Params-CallbackRequest/Changes \(600 => 601\)</h3>},
       "Check for diff file header" );
 
