@@ -1,5 +1,7 @@
 Revision history for Perl extension SVN::Notify
 
+2.44
+
 2.43  2004-11-24T18:49:40
       - Added "--strip-cx-regex" option to strip out parts of the
         context from the subject. Useful for removing parts of the
