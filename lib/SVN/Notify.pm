@@ -386,7 +386,22 @@ In F<post-commit>:
 
 =head1 Description
 
+This program may be used for sending email messages for Subversion repository
+activity. There are a number of different modes supported. A list of all the
+files affected by the commit will be assembled and listed in the single
+message. An additional option allows for diffs to be calculated for the recent
+changes, and either appended to the message or added as an attachment. See the
+C<with_diff> and C<attach_diff> options below.
 
+=head1 Prerequisites
+
+This script requires L<Getopt::Long|Getopt::Long>, which is included with
+Perl.
+
+=head1 Corequisites
+
+For sending HTML formatted email, this script requires
+L<HTML::Entities|HTML::Entities>.
 
 =head1 Bugs
 
