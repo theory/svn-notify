@@ -5,6 +5,8 @@ Revision history for Perl extension SVN::Notify
         since directories can be listed as well as files.
       - Fixed SVN::Notify::HTML so that directories listed among the
         changed paths are not links.
+      - Requiring Module::Build 0.26 to make sure that the installation
+        works properly. Reported by Robert Spier.
 
 2.41  2004-10-21T20:33:25
       - Added missing newline between the commit metadata and the log
