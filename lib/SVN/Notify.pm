@@ -5,8 +5,6 @@ package SVN::Notify;
 use strict;
 $SVN::Notify::VERSION = '2.44';
 
-=head1 Name
-
 =begin comment
 
 Fake-out Module::Build. Delete if it ever changes to support =head1 headers
@@ -14,7 +12,11 @@ other than all uppercase.
 
 =head1 NAME
 
+SVN::Notify - Subversion activity notification
+
 =end comment
+
+=head1 Name
 
 SVN::Notify - Subversion activity notification
 
