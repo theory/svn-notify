@@ -1,6 +1,6 @@
 Revision history for Perl extension SVN::Notify
 
-2.30
+2.30  2004-10-19T05:20:02
       - Added "register_attributes()" class method so that subclases can
         easily specify their own attributes and the corresponding command-
         line options. This method will also create accessors for such
