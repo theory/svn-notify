@@ -379,7 +379,10 @@ SVN::Notify - Subversion activity notification
 
 =head1 Synopsis
 
+In F<post-commit>:
 
+  svnnotify --repos-path "$1" --rev "$2" --to developers@example.com [options]
+  svnnotify --repos-path "$1" --rev "$2" --to-cx-regex i10n@example.com=I10N [options]
 
 =head1 Description
 
