@@ -106,7 +106,7 @@ ID should be put into the URL.
   svnnotify --jira-url 'http://jira.atlassian.com/secure/ViewIssue.jspa?key=%s'
 
 The URL of a Jira server. If passed in, any strings in the log message that
-appear to be Jira keys (such as "JIRA-1234") will be turned into links to the
+appear to be Jira keys (such as "JRA-1234") will be turned into links to the
 Jira server. The URL must have the "%s" format where the Jira key should be
 put into the URL.
 
@@ -281,7 +281,7 @@ sub output_log_message {
 
     # Make JIRA links.
     if (my $url = $self->jira_url) {
-        $msg =~ s|(jira-\d+)|sprintf qq{<a href="$url">$1</a>}, $1|ige;
+        $msg =~ s|([A-Z]+-\d+)|sprintf qq{<a href="$url">$1</a>}, $1|ge;
     }
 
     # Print it out and return.

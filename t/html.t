@@ -348,7 +348,7 @@ like( $email,
       qr{<a href="http://bugzilla\.mozilla\.org/show_bug\.cgi\?id=709">Bug # 709</a>},
       "Check for Bugzilla URL" );
 like( $email,
-      qr{<a href="http://jira\.atlassian\.com/secure/ViewIssue\.jspa\?key=JIRA-1234">JIRA-1234</a>},
+      qr{<a href="http://jira\.atlassian\.com/secure/ViewIssue\.jspa\?key=TST-1608">TST-1608</a>},
       "Check for Jira URL" );
 
 ##############################################################################
