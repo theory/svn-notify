@@ -1,8 +1,27 @@
 use Module::Build;
-use File::Spec::Functions;
 use Config;
 
-my $build = Module::Build->new(
+my $class = Module::Build->subclass(
+    class => 'My::Builder',
+    code => q{
+             sub ACTION_build {
+                 use File::Spec::Functions;
+                 my $self = shift;
+                 $self->SUPER::ACTION_build(@_);
+                 # Set the shebang line in the test scripts and make sure that
+                 # they're executable.
+                 for my $script (qw(testsvnlook testsendmail)) {
+                     for my $suf ('', '.bat') {
+                         my $file = catfile curdir, 't', 'bin', $script . $suf;
+                         $self->fix_shebang_line($file);
+                         chmod 0755, $file;
+                     }
+                 }
+             }
+         },
+);
+
+my $build = $class->new(
     module_name        => 'SVN::Notify',
     license            => 'perl',
     dist_author        => 'David Wheeler <david@kineticode.com>',
@@ -20,12 +39,3 @@ my $build = Module::Build->new(
 );
 $build->create_build_script;
 
-# Set the shebang line in the test scripts and make sure that they're
-# executable.
-for my $script (qw(testsvnlook testsendmail)) {
-    for my $suf ('', '.bat') {
-        my $file = catfile curdir, 't', 'bin', $script . $suf;
-        $build->fix_shebang_line($file);
-        chmod 0755, $file;
-    }
-}
