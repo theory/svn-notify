@@ -55,7 +55,7 @@ like( $email, qr{Content-Transfer-Encoding: 8bit\n},
 # Make sure that the <html>, <head>, <body>, and <dl> headers tags
 # are included.
 for my $tag (qw(html head body dl)) {
-    like( $email, qr/<$tag>/, "Check for <$tag> tag" );
+    like( $email, qr/<$tag/, "Check for <$tag> tag" );
     like( $email, qr/<\/$tag>/, "Check for </$tag> tag" );
 }
 
@@ -156,10 +156,10 @@ like( $email, qr{isa        =\&gt; 'Apache',}, "Check for HTML escaping" );
 
 # Make sure that the file names have links into the diff.
 like( $email,
-      qr|<li><a href="#trunk/Params-CallbackRequest/Changes">trunk/Params-CallbackRequest/Changes</a></li>\n|,
+      qr|<li><a href="#trunkParamsCallbackRequestChanges">trunk/Params-CallbackRequest/Changes</a></li>\n|,
       "Check for file name link." );
 like( $email,
-      qr|<a id="trunk/Params-CallbackRequest/Changes">Modified: trunk/Params-CallbackRequest/Changes</a>\n|,
+      qr|<a id="trunkParamsCallbackRequestChanges">Modified: trunk/Params-CallbackRequest/Changes</a>\n|,
       "Check for file name anchor id" );
 
 ##############################################################################

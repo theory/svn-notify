@@ -56,7 +56,7 @@ like( $email, qr{Content-Transfer-Encoding: 8bit\n},
 # Make sure that the <html>, <head>, <body>, and <dl> headers tags
 # are included.
 for my $tag (qw(html head body dl)) {
-    like( $email, qr/<$tag>/, "Check for <$tag> tag" );
+    like( $email, qr/<$tag/, "Check for <$tag> tag" );
     like( $email, qr/<\/$tag>/, "Check for </$tag> tag" );
 }
 
@@ -145,7 +145,7 @@ is( scalar @{[$email =~ m{Content-Transfer-Encoding: 8bit\n}g]}, 1,
 
 # Make sure that the diff is included and escaped.
 like( $email, qr/<div id="patch">/, "Check for patch div" );
-like( $email, qr{<a id="trunk/Params-CallbackRequest/Changes"></a>\n},
+like( $email, qr{<a id="trunkParamsCallbackRequestChanges"></a>\n},
       "Check for file div ID");
 like( $email, qr{<h3>trunk/Params-CallbackRequest/Changes \(600 => 601\)</h3>},
       "Check for diff file header" );
@@ -159,12 +159,12 @@ like( $email, qr{isa        =\&gt; 'Apache',}, "Check for HTML escaping" );
 
 # Make sure that the file names have links into the diff.
 like( $email,
-      qr|<li><a href="#trunk/Params-CallbackRequest/Changes">trunk/Params-CallbackRequest/Changes</a></li>\n|,
+      qr|<li><a href="#trunkParamsCallbackRequestChanges">trunk/Params-CallbackRequest/Changes</a></li>\n|,
       "Check for file name link." );
 
 # Make sure that the file names are linked.
 like( $email,
-      qr|<li><a href="#trunk/Class-Meta/Changes">trunk/Class-Meta/Changes</a></li>|,
+      qr|<li><a href="#trunkClassMetaChanges">trunk/Class-Meta/Changes</a></li>|,
       "Check for linked file name" );
 
 # Property changes aren't escaped.

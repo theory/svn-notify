@@ -82,9 +82,14 @@ opening C<< <html> >>, C<< <head> >>, C<< <style> >>, and C<< <body> >> tags.
 
 sub start_body {
     my ($self, $out) = @_;
-    print $out qq{<html>\n<head><style type="text/css"><!--\n};
+    # XXX Add language attribute for these headers!
+    print $out qq{<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN"\n},
+      qq{"http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">\n},
+      qq{<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">\n},
+      qq{<head><style type="text/css"><!--\n};
     $self->output_css($out);
-    print $out qq{--></style>\n</head>\n<body>\n\n<div id="msg">\n};
+    print $out qq{--></style>\n<title>}, encode_entities($self->{subject}),
+      qq{</head>\n<body>\n\n<div id="msg">\n};
     return $self;
 }
 
@@ -164,7 +169,7 @@ Message" in C<< <h3> >> tags.
 sub output_log_message {
     my ($self, $out) = @_;
     $self->_dbpnt( "Outputting log message as HTML") if $self->{verbose} > 1;
-    print $out "<body>\n<h3>Log Message</h3>\n<pre>",
+    print $out "<h3>Log Message</h3>\n<pre>",
       HTML::Entities::encode_entities(join("\n", @{$self->{message}})),
       "</pre>\n\n";
     return $self;
@@ -199,7 +204,9 @@ sub output_file_lists {
         if ($self->{with_diff} && !$self->{attach_diff} && $type ne '_') {
             for (@{ $files->{$type} }) {
                 my $file = encode_entities($_);
-                print $out qq{<li><a href="#$file">$file</a></li>\n};
+                # Strip out letters illegal for IDs.
+                (my $id = $file) =~ s/[^\w_]//g;
+                print $out qq{<li><a href="#$id">$file</a></li>\n};
             }
         } else {
             print $out "  <li>" . encode_entities($_) . "</li>\n"
@@ -253,8 +260,9 @@ sub output_diff {
     while (<$diff>) {
         s/[\n\r]+$//;
         if (/^Modified: (.*)/) {
-            my $f = encode_entities($1);
-            print $out qq{<a id="$f">Modified: $f</a>\n"};
+            my $file = encode_entities($1);
+            (my $id = $file) =~ s/[^\w_]//g;
+            print $out qq{<a id="$id">Modified: $file</a>\n"};
         }
         print $out encode_entities($_), "\n";
     }

@@ -84,8 +84,9 @@ sub output_css {
   $notifier->output_diff($file_handle);
 
 Sends the output of C<svnlook diff> to the specified file handle for inclusion
-in the notification message. The diff is output between C<< <pre> >> tags, and
-Each line of the diff file is escaped by C<HTML::Entities::encode_entities>.
+in the notification message. The diff is output with nice colorized HTML
+markup. Each line of the diff file is escaped by
+C<HTML::Entities::encode_entities>.
 
 =cut
 
@@ -105,6 +106,7 @@ sub output_diff {
         next unless $line;
         if ($line =~ /^Modified: (.*)/) {
             my $file = encode_entities($1);
+            (my $id = $file) =~ s/[^\w_]//g;
             # Dump line.
             <$diff>;
 
@@ -119,7 +121,7 @@ sub output_diff {
             # Output the headers.
             print $out "</span>" if $in_span;
             print $out "</pre></div>\n" if $in_div;
-            print $out qq{<a id="$file"></a>\n<div class="file"><h3>$file},
+            print $out qq{<a id="$id"></a>\n<div class="file"><h3>$file},
               " ($rev1 => $rev2)</h3>\n";
             print $out qq{<pre class="diff">\n<span class="info">};
             $in_div = 1;
