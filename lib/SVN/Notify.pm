@@ -3,7 +3,7 @@ package SVN::Notify;
 # $Id$
 
 use strict;
-$SVN::Notify::VERSION = '2.44';
+$SVN::Notify::VERSION = '2.45';
 
 =begin comment
 
