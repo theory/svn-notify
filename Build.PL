@@ -1,5 +1,6 @@
 use Module::Build;
 use File::Spec::Functions;
+use Config;
 
 my $build = Module::Build->new(
     module_name        => 'SVN::Notify',
@@ -19,7 +20,23 @@ my $build = Module::Build->new(
 );
 $build->create_build_script;
 
-for (qw(testsvnlook testsendmail)) {
-    my $f = catfile curdir, 't', 'bin', $_;
-    chmod 0755, $f;
+# Set the shebang line in the test scripts and make sure that they're
+# executable.
+# XXX Replace with $build->fix_shebang_line() once that method is fixed.
+for my $script (qw(testsvnlook testsendmail)) {
+    for my $suf ('', '.bat') {
+        my $file = catfile curdir, 't', 'bin', $script . $suf;
+        my $temp = $file . '.tmp';
+        open FILE, "<$file" or die "Cannot open '$file': $!\n";
+        open TEMP, ">$temp" or die "Cannot open '$temp': $!\n";
+        while (<FILE>) {
+            s/^#!.*/#!$Config{perlpath} -w/;
+            print TEMP;
+        }
+        close FILE;
+        close TEMP;
+        rename $temp, $file or die "Cannot rename '$temp' to $file': $!\n";
+        chmod 0755, $file;
+    }
+
 }

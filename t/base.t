@@ -183,7 +183,7 @@ like( $email, qr{Modified: trunk/Params-CallbackRequest/Changes},
 like( $email, qr{Content-Type: multipart/mixed; boundary=},
       "Check for attachment" );
 like( $email,
-      qr{Content-Disposition: attachment; filename=theory-\d{4}-\d\d-\d\dT\d\d-\d\d-\d\dZ.diff\n},
+      qr{Content-Disposition: attachment; filename=r111-theory.diff\n},
       "Check for filename" );
 
 ##############################################################################
@@ -251,7 +251,7 @@ like( $email, qr{Modified: trunk/Params-CallbackRequest/Changes},
 like( $email, qr{Content-Type: multipart/mixed; boundary=},
         "Check for html diff attachment" );
 like( $email,
-      qr{Content-Disposition: attachment; filename=theory-\d{4}-\d\d-\d\dT\d\d-\d\d-\d\dZ.diff\n},
+      qr{Content-Disposition: attachment; filename=r111-theory.diff\n},
       "Check for html diff filename" );
 unlike( $email, qr{<pre>\nModified}, "Check for no pre tag" );
 

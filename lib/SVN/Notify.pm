@@ -774,14 +774,10 @@ sub output_diff {
     print $out "\n";
     if ($self->{attach_diff}) {
         _dbpnt "Attaching diff" if $self->{verbose} > 2;
-        # Get the date (UTC).
-        my @gm = gmtime;
-        $gm[5] += 1900;
-        $gm[4] += 1;
-        my $file = $self->{user}
-          . sprintf '-%04s-%02s-%02sT%02s-%02s-%02sZ.diff', @gm[5,4,3,2,1,0];
+        my $file = "";
         print $out "--$self->{attach_diff}\n",
-          "Content-Disposition: attachment; filename=$file\n",
+          "Content-Disposition: attachment; filename=",
+          "r$self->{revision}-$self->{user}.diff\n",
           "Content-Type: text/plain; charset=$self->{charset}\n",
           "Content-Transfer-Encoding: 8bit\n\n";
     }
