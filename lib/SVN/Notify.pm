@@ -595,14 +595,39 @@ sub send {
     my $out = $self->_pipe('|-', $self->{sendmail}, '-oi', '-t');
 
     # Output the headers.
+    $self->output_headers($out);
+    # Output the message.
+    my $method = "output_as_$self->{format}";
+    $self->$method($out);
+
+    print $out "--$self->{boundary}--\n" if $self->{attach_diff};
+    close $out or warn "Child process exited: $?\n";
+    _dbpnt "Message sent" if $self->{verbose};
+    return $self;
+}
+
+##############################################################################
+
+=head3 output_headers
+
+  $notifier->output_headers($file_handle);
+
+Called internally by C<send> to output the headers for the notification
+message. If the C<attach_diff> parameter was set to true, then a boundary
+string will be generated and the Content-Type set to "multipart/mixed".
+
+=cut
+
+sub output_headers {
+    my ($self, $out) = @_;
     print $out
       "MIME-Version: 1.0\n",
       "From: $self->{from}\n",
       "To: $self->{to}\n",
       "Subject: $self->{subject}\n";
     print $out "Reply-To: $self->{reply_to}\n" if $self->{reply_to};
-    print $out "X-Mailer: " . ref($self) . " " . $self->VERSION .
-                   ", http://search.cpan.org/dist/SVN-Notify/\n";
+    print $out "X-Mailer: SVN::Notify " . $self->VERSION .
+      ": http://search.cpan.org/dist/SVN-Notify/\n";
 
     # Determine the content-type.
     my $ctype = $self->{format} eq 'text'
@@ -614,23 +639,15 @@ sub send {
         # We need a boundary string.
         my $salt = join '',
           ('.', '/', 0..9, 'A'..'Z', 'a'..'z')[rand 64, rand 64];
-        $self->{attach_diff} = crypt($self->{subject}, $salt);
+        $self->{boundary} = crypt($self->{subject}, $salt);
         print $out
-          qq{Content-Type: multipart/mixed; boundary="$self->{attach_diff}"\n},
-          "--$self->{attach_diff}\n";
+          qq{Content-Type: multipart/mixed; boundary="$self->{boundary}"\n},
+          "--$self->{boundary}\n";
     }
 
     # Output content-type and encoding headers.
     print $out "Content-Type: $ctype; charset=$self->{charset}\n",
       "Content-Transfer-Encoding: 8bit\n\n";
-
-    # Output the message.
-    my $method = "output_as_$self->{format}";
-    $self->$method($out);
-
-    print $out "--$self->{attach_diff}--\n" if $self->{attach_diff};
-    close $out or warn "Child process exited: $?\n";
-    _dbpnt "Message sent" if $self->{verbose};
     return $self;
 }
 
@@ -775,7 +792,7 @@ sub output_diff {
     if ($self->{attach_diff}) {
         _dbpnt "Attaching diff" if $self->{verbose} > 2;
         my $file = "";
-        print $out "--$self->{attach_diff}\n",
+        print $out "--$self->{boundary}\n",
           "Content-Disposition: attachment; filename=",
           "r$self->{revision}-$self->{user}.diff\n",
           "Content-Type: text/plain; charset=$self->{charset}\n",
