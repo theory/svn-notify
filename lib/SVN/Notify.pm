@@ -58,9 +58,9 @@ everything executes properly.
 =cut
 
 # Map the svnlook changed codes to nice labels.
-my %map = ( U => 'Modified Files',
-            A => 'Added Files',
-            D => 'Removed Files',
+my %map = ( U => 'Modified Paths',
+            A => 'Added Paths',
+            D => 'Removed Paths',
             _ => 'Property Changed');
 
 ##############################################################################
@@ -513,9 +513,9 @@ C<prepare_files()> has been called. The hash keys in that list correspond to
 Subversion status codes, and these are mapped to their appropriate labels by
 the hash reference returned by this method:
 
-  { U => 'Modified Files',
-    A => 'Added Files',
-    D => 'Removed Files',
+  { U => 'Modified Paths',
+    A => 'Added Paths',
+    D => 'Removed Paths',
     _ => 'Property Changed'
   }
 

@@ -283,9 +283,14 @@ sub output_file_lists {
         if ($self->with_diff && !$self->attach_diff) {
             for (@{ $files->{$type} }) {
                 my $file = encode_entities($_);
-                # Strip out letters illegal for IDs.
-                (my $id = $file) =~ s/[^\w_]//g;
-                print $out qq{<li><a href="#$id">$file</a></li>\n};
+                if ($file =~ m{/$}) {
+                    # Directories don't link to the diff.
+                    print $out qq{<li>$file</li>\n};
+                } else {
+                    # Strip out letters illegal for IDs.
+                    (my $id = $file) =~ s/[^\w_]//g;
+                    print $out qq{<li><a href="#$id">$file</a></li>\n};
+                }
             }
         } else {
             print $out "  <li>" . encode_entities($_) . "</li>\n"

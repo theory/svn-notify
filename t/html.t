@@ -9,7 +9,7 @@ use File::Spec::Functions;
 if ($^O eq 'MSWin32') {
     plan skip_all => "SVN::Notify::HTML not yet supported on Win32";
 } elsif (eval { require HTML::Entities }) {
-    plan tests => 159;
+    plan tests => 160;
 } else {
     plan skip_all => "SVN::Notify::HTML requires HTML::Entities";
 }
@@ -73,8 +73,8 @@ like( $email, qr/#msg dl {background:#ccccff;}/, "Check for style" );
 like( $email, qr/<div id="msg">/, "Check for msg div" );
 
 # Make sure we have headers for each of the four kinds of changes.
-for my $header ('Log Message', 'Modified Files', 'Added Files',
-                'Removed Files', 'Property Changed') {
+for my $header ('Log Message', 'Modified Paths', 'Added Paths',
+                'Removed Paths', 'Property Changed') {
     like( $email, qr{<h3>$header</h3>}, "HTML $header" );
 }
 
@@ -170,6 +170,9 @@ like( $email, qr{isa        =\&gt; 'Apache',}, "Check for HTML escaping" );
 like( $email,
       qr|<li><a href="#trunkParamsCallbackRequestChanges">trunk/Params-CallbackRequest/Changes</a></li>\n|,
       "Check for file name link." );
+like( $email,
+      qr|<li>trunk/Class-Meta/t/</li>\n|,
+      "Check for directory name." );
 like( $email,
       qr|<a id="trunkParamsCallbackRequestChanges">Modified: trunk/Params-CallbackRequest/Changes</a>\n|,
       "Check for file name anchor id" );

@@ -87,8 +87,8 @@ like( $email, qr{Content-Transfer-Encoding: 8bit\n},
       'Check Content-Transfer-Encoding');
 
 # Make sure we have headers for each of the four kinds of changes.
-for my $header ('Log Message', 'Modified Files', 'Added Files',
-                'Removed Files', 'Property Changed') {
+for my $header ('Log Message', 'Modified Paths', 'Added Paths',
+                'Removed Paths', 'Property Changed') {
     like( $email, qr/$header/, $header);
 }
 
