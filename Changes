@@ -1,6 +1,6 @@
 Revision history for Perl extension SVN::Notify
 
-2.20
+2.20  2004-10-09T20:01:28
       - Subclassing Module::Build in Build.PL to move and set the shebang
         line in test scripts during "./Build" instead of simply changing
         the shebang line in-place during "perl Build.PL".
