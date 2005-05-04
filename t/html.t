@@ -9,7 +9,7 @@ use File::Spec::Functions;
 if ($^O eq 'MSWin32') {
     plan skip_all => "SVN::Notify::HTML not yet supported on Win32";
 } elsif (eval { require HTML::Entities }) {
-    plan tests => 160;
+    plan tests => 161;
 } else {
     plan skip_all => "SVN::Notify::HTML requires HTML::Entities";
 }
@@ -319,6 +319,7 @@ ok( $notifier = SVN::Notify::HTML->new(
     rt_url       => 'http://rt.cpan.org/NoAuth/Bugs.html?id=%s',
     bugzilla_url => 'http://bugzilla.mozilla.org/show_bug.cgi?id=%s',
     jira_url     => 'http://jira.atlassian.com/secure/ViewIssue.jspa?key=%s',
+    gnats_url    => 'http://gnats.example.com/gnatsweb.pl?cmd=view&pr=%s',
 ),
     "Construct new HTML URL notifier" );
 isa_ok($notifier, 'SVN::Notify::HTML');
@@ -353,6 +354,9 @@ like( $email,
 like( $email,
       qr{<a href="http://jira\.atlassian\.com/secure/ViewIssue\.jspa\?key=TST-1608">TST-1608</a>},
       "Check for Jira URL" );
+like( $email,
+      qr{<a href="http://gnats\.example\.com/gnatsweb\.pl\?cmd=view&amp;pr=12345">PR 12345</a>},
+      "Check for GNATS URL" );
 
 ##############################################################################
 # Major linkize and Bug tracking URLs, as well as complex diff.

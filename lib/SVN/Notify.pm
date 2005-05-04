@@ -343,6 +343,16 @@ appear to be JIRA keys (such as "JRA-1234") will be turned into links to the
 JIRA server. The URL must have the "%s" format where the Jira key should be
 put into the URL.
 
+=item gnats_url
+
+  svnnotify --gnats-url 'http://gnatsweb.example.com/cgi-bin/gnatsweb.pl?cmd=view&pr=%s'
+  svnnotify -G 'http://gnatsweb.example.com/cgi-bin/gnatsweb.pl?cmd=view&pr=%s'
+
+The URL of a GnatsWeb server. If passed in, any strings in the log message
+that appear to be GNATS PRs (such as "PR 1234") will be turned into links to
+the GnatsWeb server. The URL must have the "%s" format where the GNATS PR
+number should be put into the URL.
+
 =item verbose
 
   svnnotify --verbose -V
@@ -508,6 +518,7 @@ sub get_options {
         "rt-url|T=s"          => \$opts->{rt_url},
         "bugzilla-url|B=s"    => \$opts->{bugzilla_url},
         "jira-url|J=s"        => \$opts->{jira_url},
+        "gnats-url|G=s"       => \$opts->{gnats_url},
         "verbose|V+"          => \$opts->{verbose},
         "help|h"              => \$opts->{help},
         "man|m"               => \$opts->{man},
@@ -1031,6 +1042,14 @@ sub output_log_message {
         }
     }
 
+    # Make GNATS links.
+    if (my $url = $self->gnats_url) {
+        if (my @matches = $msg =~ /\b(?:PR\s*(\d+))\b/ig) {
+            print $out "\nGNATS Links:\n-----------\n";
+            printf $out "    $url\n", $_ for @matches;
+        }
+     }
+
     return $self;
 }
 
@@ -1165,8 +1184,8 @@ __PACKAGE__->_accessors(qw(repos_path revision to to_regex_map from
                            user_domain svnlook sendmail charset language
                            with_diff attach_diff reply_to subject_prefix
                            subject_cx max_sub_length viewcvs_url rt_url
-                           bugzilla_url jira_url verbose boundary user date
-                           message message_size subject files));
+                           bugzilla_url jira_url gnats_url verbose boundary
+                           user date message message_size subject files));
 
 ##############################################################################
 # This method is used to create accessors for the list of attributes passed to

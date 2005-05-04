@@ -9,7 +9,7 @@ use File::Spec::Functions;
 if ($^O eq 'MSWin32') {
     plan skip_all => "SVN::Notify not yet supported on Win32";
 } else {
-    plan tests => 147;
+    plan tests => 149;
 }
 
 BEGIN { use_ok('SVN::Notify') }
@@ -331,6 +331,7 @@ ok( $notifier = SVN::Notify->new(
     rt_url       => 'http://rt.cpan.org/NoAuth/Bugs.html?id=%s',
     bugzilla_url => 'http://bugzilla.mozilla.org/show_bug.cgi?id=%s',
     jira_url     => 'http://jira.atlassian.com/secure/ViewIssue.jspa?key=%s',
+    gnats_url    => 'http://gnats.example.com/gnatsweb.pl?cmd=view&pr=%s',
 ),
     "Construct new URL notifier" );
 isa_ok($notifier, 'SVN::Notify');
@@ -350,14 +351,18 @@ like($email, qr/RT Links:\n/, 'Check for ViewCVS URLs label' );
 like($email,
      qr{    http://rt\.cpan\.org/NoAuth/Bugs\.html\?id=4321\n},
      "Check for RT URL");
-like($email, qr/Bugzilla Links:\n/, 'Check for ViewCVS URLs label' );
+like($email, qr/Bugzilla Links:\n/, 'Check for Bugzilla URLs label' );
 like( $email,
       qr{   http://bugzilla\.mozilla\.org/show_bug\.cgi\?id=709\n},
       "Check for Bugzilla URL" );
-like($email, qr/JIRA Links:\n/, 'Check for ViewCVS URLs label' );
+like($email, qr/JIRA Links:\n/, 'Check for JIRA URLs label' );
 like( $email,
       qr{    http://jira\.atlassian\.com/secure/ViewIssue\.jspa\?key=TST-1608\n},
       "Check for Jira URL" );
+like($email, qr/GNATS Links:\n/, 'Check for GNATS URLs label' );
+like($email,
+     qr{    http://gnats\.example\.com/gnatsweb\.pl\?cmd=view&pr=12345\n},
+     "Check for GNATS URL");
 
 ##############################################################################
 # Try leaving out the first line from the subject and removing part of the

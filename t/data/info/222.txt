@@ -7,7 +7,8 @@ Try a fancy URL, such as http://foo.bar.com/one/two/do.pl?this=1&that=2.
 
 We should also try a few links to other applications. First, we have
 A Bugzilla Bug # 709. Then we have a JIRA key, TST-1608. And
-finally, we have an RT link to Ticket # 4321.
+finally, we have an RT link to Ticket # 4321. Oh, and don't forget
+the GNATS key, PR 12345!
 
 Hey, we could add one for a Subversion Revision # 606, too!
 

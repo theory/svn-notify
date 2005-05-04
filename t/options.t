@@ -33,6 +33,7 @@ my %params = (
     viewcvs_url    => undef,
     rt_url         => undef,
     bugzilla_url   => undef,
+    gnats_url      => undef,
     jira_url       => undef,
     verbose        => undef,
     help           => undef,

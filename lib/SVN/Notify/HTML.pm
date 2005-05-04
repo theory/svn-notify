@@ -249,6 +249,12 @@ sub output_log_message {
         $msg =~ s|\b([A-Z]+-\d+)\b|sprintf qq{<a href="$url">$1</a>}, $1|ge;
     }
 
+    # Make GNATS links.
+    if (my $url = $self->gnats_url) {
+        $url = encode_entities($url);
+	$msg =~ s|\b(PR\s*(\d+))\b|sprintf qq{<a href="$url">$1</a>}, $2|ge;
+    }
+
     # Print it out and return.
     print $out "<h3>Log Message</h3>\n<pre>$msg</pre>\n\n";
     return $self;
