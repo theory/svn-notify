@@ -1,5 +1,7 @@
 Revision history for Perl extension SVN::Notify
 
+2.46
+
 2.45  2005-05-04T20:38:18
       - Added support for links to the GNATS bug tracking system.
         Patch from Nathan Walp.
