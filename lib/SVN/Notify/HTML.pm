@@ -348,7 +348,7 @@ sub output_diff {
     my %seen;
     while (<$diff>) {
         s/[\n\r]+$//;
-        if (/^(Modified|Added|Deleted|Property changes on): (.*)/
+        if (/^(Modified|Added|Deleted|Copied|Property changes on): (.*)/
             && !$seen{$2}++)
         {
             my $action = $1;

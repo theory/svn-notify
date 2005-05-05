@@ -142,3 +142,22 @@ ___________________________________________________________________
 Name: svn:keywords
    + Id
 
+Copied: trunk/TestSimple/doc/pod/Test/Builder.pod
+===================================================================
+--- trunk/TestSimple/doc/pod/TestBuilder.pod    2005-05-04 19:49:31 UTC (rev 1634)
++++ trunk/TestSimple/doc/pod/Test/Builder.pod   2005-05-05 03:42:19 UTC (rev 1646)
+@@ -0,0 +1,672 @@
++=pod
++
++=head1 Name
++
++Test.Builder - Back end for building test libraries
++
++=head1 Synopsis
++
++  var Test = new Test.Builder();
++
++  function ok (test, description) {
++      Test.ok(test, description);
++  }
++

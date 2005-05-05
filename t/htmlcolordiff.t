@@ -9,7 +9,7 @@ use File::Spec::Functions;
 if ($^O eq 'MSWin32') {
     plan skip_all => "SVN::Notify::HTML::ColorDiff not yet supported on Win32";
 } elsif (eval { require HTML::Entities }) {
-    plan tests => 145;
+    plan tests => 146;
 } else {
     plan skip_all => "SVN::Notify::HTML::ColorDiff requires HTML::Entities";
 }
@@ -334,6 +334,11 @@ like($email, qr/link\.\n\nWe/, "Check for multiple lines" );
 like($email,
      qr{<div class="binary"><h4>Deleted: trunk/SVN-Notify/t/data/bin/sendmail\.exe</h4>},
      "Check for binary file div");
+
+# Make sure that copied files in the diff are set up properly.
+like($email,
+     qr{<div class="copfile"><h4>Copied: trunk/TestSimple/doc/pod/Test/Builder\.pod \(1634 => 1646\)</h4>},
+     "Check for copied file div");
 
 # Check linkize results.
 like($email, qr|<a href="mailto:recipient\@example\.com">recipient\@example\.com</a>\.|,
