@@ -1,5 +1,7 @@
 Revision history for Perl extension SVN::Notify
 
+2.47
+
 2.46  2005-05-05T05:22:54
       - Added support for "Copied" files to HTML::ColorDiff so that they
         display properly.

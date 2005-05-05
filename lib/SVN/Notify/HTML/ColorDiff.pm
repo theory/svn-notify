@@ -6,7 +6,7 @@ use strict;
 use HTML::Entities;
 use SVN::Notify::HTML ();
 
-$SVN::Notify::HTML::ColorDiff::VERSION = '2.46';
+$SVN::Notify::HTML::ColorDiff::VERSION = '2.47';
 @SVN::Notify::HTML::ColorDiff::ISA = qw(SVN::Notify::HTML);
 
 =head1 Name
