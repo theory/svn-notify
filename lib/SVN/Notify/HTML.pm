@@ -143,28 +143,22 @@ appropriate C<< <style> >> tags.
 sub output_css {
     my ($self, $out) = @_;
     print $out
-      qq(#msg dl { border: 1px #006 solid; background-color: #369; padding: 6px; color: #fff; }\n),
+      qq(#msg dl { border: 1px #006 solid; background: #369; ),
+        qq(padding: 6px; color: #fff; }\n),
       qq(#msg dt { float: left; width: 6em; font-weight: bold; }\n),
-      qq(#msg dl, #msg dt, #msg ul, #msg li { font-family: verdana,arial,helvetica,sans-serif; font-size: 10pt;  }\n),
+      qq(#msg dt:after { content:':';}\n),
+      qq(#msg dl, #msg dt, #msg ul, #msg li { font-family: ),
+          qq(verdana,arial,helvetica,sans-serif; font-size: 10pt;  }\n),
       qq(#msg dl a { font-weight: bold}\n),
       qq(#msg dl a:link    { color:#fc3; }\n),
       qq(#msg dl a:active  { color:#ff0; }\n),
       qq(#msg dl a:visited { color:#cc6; }\n),
-      qq(h3 { font-family: verdana,arial,helvetica,sans-serif; font-size: 10pt; font-weight: bold; }\n),
-      qq(#msg pre { overflow: auto; background-color: #ffc; border: 1px #fc0 solid; padding: 6px; }\n),
-      qq(#msg ul, pre, .diff { overflow: auto; }\n),
-      qq(#patch h4 { font-family: verdana,arial,helvetica,sans-serif; font-size: 10pt; }\n),
-      qq(#patch h4 { padding: 8px; background: #369; color: #fff; margin: 0; }\n),
-      qq(#patch .propset h4, #patch .binary h4 {margin: 0;}\n),
-      qq(#patch pre {padding:0;line-height:1.2em;margin:0;}\n),
-      qq(#patch .diff {background:#eeeeee;padding: 0 0 10px 0;}\n),
-      qq(#patch .propset .diff, #patch .binary .diff  {padding: 10px 0;}\n),
-      qq(#patch span {display:block;padding:0 10px;}\n),
-      qq(#patch .modfile, #patch .addfile, #patch .delfile, #patch .propset, #patch .binary, #patch .copfile {border:1px solid #ccc;margin:10px 0;}\n),
-      qq(#patch .add {background:#ddffdd;}\n),
-      qq(#patch .rem {background:#ffdddd;}\n),
-      qq(#patch .lines, .info {color:#888888;background:#ffffff;}\n),
-      qq(.diff { width: 100%; }\n);
+      qq(h3 { font-family: verdana,arial,helvetica,sans-serif; ),
+          qq(font-size: 10pt; font-weight: bold; }\n),
+      qq(#msg pre { overflow: auto; background: #ffc; ),
+          qq(border: 1px #fc0 solid; padding: 6px; }\n),
+      qq(#msg ul, pre { overflow: auto; }\n),
+      qq(#patch { width: 100%; }\n);
     return $self;
 }
 
@@ -366,9 +360,11 @@ sub output_diff {
             my $action = $1;
             my $file = encode_entities($2);
             (my $id = $file) =~ s/[^\w_]//g;
-            print $out qq{<a id="$id">$action: $file</a>\n"};
+            print $out qq{<a id="$id">$action: $file</a>\n};
         }
-        print $out encode_entities($_), "\n";
+        else {
+            print $out encode_entities($_), "\n";
+        }
     }
     print $out "</pre></div>\n";
 

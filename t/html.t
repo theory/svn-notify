@@ -70,7 +70,7 @@ for my $tag (qw(html head body title dl)) {
 like( $email, qr|<style type="text/css">|, "Check for <style> tag" );
 like( $email, qr/<\/style>/, "Check for </style> tag" );
 like( $email,
-      qr/#msg dl { border: 1px #006 solid; background-color: #369; padding: 6px; color: #fff; }/,
+      qr/#msg dl { border: 1px #006 solid; background: #369; padding: 6px; color: #fff; }/,
       "Check for style" );
 like( $email, qr/<div id="msg">/, "Check for msg div" );
 

@@ -424,7 +424,7 @@ unlike( $email,
       "Check for no studlyCAPS Jira URL" );
 
 ##############################################################################
-# Major linkize and Bug tracking URLs, as well as complex diff.
+# SVNWeb URL.
 ##############################################################################
 ok( $notifier = SVN::Notify::HTML::ColorDiff->new(
     %args,
