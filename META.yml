@@ -1,6 +1,6 @@
 ---
 name: SVN-Notify
-version: 2.46
+version: 2.47
 author:
   - David Wheeler <david@kineticode.com>
 abstract: Subversion activity notification
@@ -18,11 +18,11 @@ build_requires:
 provides:
   SVN::Notify:
     file: lib/SVN/Notify.pm
-    version: 2.46
+    version: 2.47
   SVN::Notify::HTML:
     file: lib/SVN/Notify/HTML.pm
-    version: 2.46
+    version: 2.47
   SVN::Notify::HTML::ColorDiff:
     file: lib/SVN/Notify/HTML/ColorDiff.pm
-    version: 2.46
-generated_by: Module::Build version 0.2701
+    version: 2.47
+generated_by: Module::Build version 0.2702

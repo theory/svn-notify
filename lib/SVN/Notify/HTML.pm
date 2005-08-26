@@ -143,16 +143,24 @@ appropriate C<< <style> >> tags.
 sub output_css {
     my ($self, $out) = @_;
     print $out
-      qq(body {background:#ffffff;font-family:Verdana,Helvetica,Arial,sans-serif;}\n),
-      qq(h3 {margin:15px 0;padding:0;line-height:0;}\n),
-      qq(#msg {margin: 0 0 2em 0;}\n),
-      qq(#msg dl, #msg ul, #msg pre {padding:1em;border:1px dashed black;),
-        qq(margin: 10px 0 30px 0;}\n),
-      qq(#msg dl {background:#ccccff;}\n),
-      qq(#msg pre {background:#ffffcc;}\n),
-      qq(#msg ul {background:#cc99ff;list-style:none;}\n),
-      qq(#msg dt {font-weight:bold;float:left;width: 6em;}\n),
-      qq(#msg dt:after { content:':';}\n);
+      qq(#msg dl { border: 1px #006 solid; background-color: #369; padding: 6px; color: #fff; }\n),
+      qq(#msg dt { float: left; width: 6em; font-weight: bold; }\n),
+      qq(#msg dl, #msg dt, #msg ul, #msg li { font-family: arial,helvetica,sans-serif; font-size: 10pt;  }\n),
+      qq(h3 { font-family: arial,helvetica,sans-serif; font-size: 10pt; font-weight: bold; }\n),
+      qq(#msg pre { overflow: auto; white-space: normal; background-color: #ffc; border: 1px #fc0 solid; padding: 6px; }\n),
+      qq(#msg ul, pre, .diff { overflow: auto; }\n),
+      qq(#patch h4 { font-family: arial,helvetica,sans-serif; font-size: 10pt; }\n),
+      qq(#patch h4 { padding: 8px; background: #369; color: #fff; margin: 0; }\n),
+      qq(#patch .propset h4, #patch .binary h4 {margin: 0;}\n),
+      qq(#patch pre {padding:0;line-height:1.2em;margin:0;}\n),
+      qq(#patch .diff {background:#eeeeee;padding: 0 0 10px 0;}\n),
+      qq(#patch .propset .diff, #patch .binary .diff  {padding: 10px 0;}\n),
+      qq(#patch span {display:block;padding:0 10px;}\n),
+      qq(#patch .modfile, #patch .addfile, #patch .delfile, #patch .propset, #patch .binary, #patch .copfile {border:1px solid #ccc;margin:10px 0;}\n),
+      qq(#patch .add {background:#ddffdd;}\n),
+      qq(#patch .rem {background:#ffdddd;}\n),
+      qq(#patch .lines, .info {color:#888888;background:#ffffff;}\n),
+      qq(.diff { width: 100%; }\n);
     return $self;
 }
 
