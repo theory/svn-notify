@@ -31,6 +31,7 @@ my %params = (
     max_sub_length => undef,
     handler        => undef,
     viewcvs_url    => undef,
+    svnweb_url     => undef,
     rt_url         => undef,
     bugzilla_url   => undef,
     gnats_url      => undef,

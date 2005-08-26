@@ -9,7 +9,7 @@ use File::Spec::Functions;
 if ($^O eq 'MSWin32') {
     plan skip_all => "SVN::Notify not yet supported on Win32";
 } else {
-    plan tests => 149;
+    plan tests => 155;
 }
 
 BEGIN { use_ok('SVN::Notify') }
@@ -60,6 +60,7 @@ is($notifier->subject_cx, $args{subject_cx}, "Check subject_cx accessor" );
 is($notifier->max_sub_length, $args{max_sub_length},
    "Check max_sub_length accessor" );
 is($notifier->viewcvs_url, $args{viewcvs_url}, "Check viewcvs_url accessor" );
+is($notifier->svnweb_url, $args{svnweb_url}, "Check svnweb_url accessor" );
 is($notifier->verbose, 0, "Check verbose accessor" );
 is($notifier->user, 'theory', "Check user accessor" );
 is($notifier->date, '2004-04-20 01:33:35 -0700 (Tue, 20 Apr 2004)',
@@ -293,18 +294,35 @@ $email = get_output();
 like( $email, qr/From: theory\@example\.net\n/, 'Check From for user domain');
 
 ##############################################################################
-# Try view_cvs_url.
+# Try viewcvs_url.
 ##############################################################################
 ok( $notifier = SVN::Notify->new(
-    %args, viewcvs_url => 'http://svn.example.com/?rev=%s&view=rev'
-   ), "Construct new view_cvs_url notifier" );
+    %args,
+    viewcvs_url => 'http://svn.example.com/?rev=%s&view=rev'
+   ), "Construct new viewcvs_url notifier" );
 isa_ok($notifier, 'SVN::Notify');
-ok( $notifier->prepare, "Prepare view_cvs_url" );
-ok( $notifier->execute, "Notify view_cvs_url" );
+ok( $notifier->prepare, "Prepare viewcvs_url" );
+ok( $notifier->execute, "Notify viewcvs_url" );
 
 # Check the output.
 $email = get_output();
 like( $email, qr|ViewCVS:\s+http://svn\.example\.com/\?rev=111\&view=rev\n|,
+      'Check for URL');
+
+##############################################################################
+# Try svnweb_url.
+##############################################################################
+ok( $notifier = SVN::Notify->new(
+    %args,
+    svnweb_url => 'http://svn.example.com/?rev=%s&view=rev'
+   ), "Construct new svnweb_url notifier" );
+isa_ok($notifier, 'SVN::Notify');
+ok( $notifier->prepare, "Prepare svnweb_url" );
+ok( $notifier->execute, "Notify svnweb_url" );
+
+# Check the output.
+$email = get_output();
+like( $email, qr|SVNWeb:\s+http://svn\.example\.com/\?rev=111\&view=rev\n|,
       'Check for URL');
 
 ##############################################################################
@@ -414,7 +432,5 @@ like( $email, qr{Subject: \[111\] Class\n},
 sub get_output {
     my $outfile = catfile qw(t data output.txt);
     open CAP, "<$outfile" or die "Cannot open '$outfile': $!\n";
-    my $email = do { local $/;  <CAP>; };
-    close CAP;
-    return $email;
+    return join '', <CAP>;
 }

@@ -303,6 +303,16 @@ directly, but this parameter is designed to make it easy to just use
 C<< SVN::Notify->new >> without worrying about loading subclasses, such as
 in F<svnnotify>.
 
+=item svnweb_url
+
+  svnnotify --svnweb-url 'http://svn.example.com/index.cgi/revision/?rev=%s'
+  svnnotify -S 'http://svn.example.net/index.cgi/revision/?rev=%s'
+
+If a URL is specified for this parameter, then it will be used to create a
+link to the L<SVN::Web|SVN::Web> URL corresponding to the current revision
+number. The URL must have the "%s" format where the Subversion revision number
+should be put into the URL. Mutually exclusive with C<viewcvs_url>.
+
 =item viewcvs_url
 
   svnnotify --viewcvs-url 'http://svn.example.com/viewcvs/?rev=%s&view=rev'
@@ -311,7 +321,7 @@ in F<svnnotify>.
 If a URL is specified for this parameter, then it will be used to create a
 link to the ViewCVS URL corresponding to the current revision number. The URL
 must have the "%s" format where the Subversion revision number should be put
-into the URL.
+into the URL. Mutually exclusive with C<svnweb_url>.
 
 =item rt_url
 
@@ -406,6 +416,12 @@ sub new {
     $params{with_diff} ||= $params{attach_diff};
     $params{verbose}   ||= 0;
     $params{charset}   ||= 'UTF-8';
+
+    # svnweb_url and viewcvs_url are mutually exlusive.
+    if ($params{svnweb_url} && $params{svnweb_url} !~ /%s/) {
+        warn "--svnweb-url must have '%s' format\n";
+        $params{svnweb_url} .= '/revision/?rev=%s&view=rev'
+    }
     if ($params{viewcvs_url} && $params{viewcvs_url} !~ /%s/) {
         warn "--viewcvs-url must have '%s' format\n";
         $params{viewcvs_url} .= '?rev=%s&view=rev'
@@ -515,6 +531,7 @@ sub get_options {
         "max-sub-length|i=i"  => \$opts->{max_sub_length},
         "handler|H=s"         => \$opts->{handler},
         "viewcvs-url|U=s"     => \$opts->{viewcvs_url},
+        "svnweb-url|S=s"      => \$opts->{svnweb_url},
         "rt-url|T=s"          => \$opts->{rt_url},
         "bugzilla-url|B=s"    => \$opts->{bugzilla_url},
         "jira-url|J=s"        => \$opts->{jira_url},
@@ -977,8 +994,9 @@ sub start_body { shift }
   $notifier->output_metadata($file_handle);
 
 This method outputs the metadata of the commit, including the revision number,
-author (user), and date of the revision. If the C<viewcvs_url> attribute has
-been set, then the appropriate URL for the revision will also be output.
+author (user), and date of the revision. If the C<viewcvs_url> or
+C<svnweb_url> attributes have been set, then the appropriate URL(s) for the
+revision will also be output.
 
 =cut
 
@@ -988,8 +1006,14 @@ sub output_metadata {
       "Revision: $self->{revision}\n",
       "Author:   $self->{user}\n",
       "Date:     $self->{date}\n";
-    printf $out "ViewCVS:  $self->{viewcvs_url}\n", $self->{revision}
-      if $self->{viewcvs_url};
+
+    # svnweb_url and viewcvs_url are mutually exlusive.
+    if ($self->{svnweb_url}) {
+        printf $out "SVNWeb:   $self->{svnweb_url}\n", $self->{revision};
+    } elsif ($self->{viewcvs_url}) {
+        printf $out "ViewCVS:  $self->{viewcvs_url}\n", $self->{revision};
+    }
+
     print $out "\n";
     return $self;
 }
@@ -1010,8 +1034,16 @@ sub output_log_message {
     my $msg = join "\n", @{$self->{message}};
     print $out "Log Message:\n-----------\n$msg\n";
 
-    # Make ViewCVS links.
-    if (my $url = $self->viewcvs_url) {
+    # Make SVN::Web links. Mutually exclusive with viewcvs.
+    if (my $url = $self->svnweb_url) {
+        if (my @matches = $msg =~ /\b(?:rev(?:ision)?\s*#?\s*(\d+))\b/ig) {
+            print $out "\nSVNWeb Links:\n-------------\n";
+            printf $out "    $url\n", $_ for @matches;
+        }
+    }
+
+    # Make ViewCVS links. Mutually exclusive with svnweb.
+    elsif ($url = $self->viewcvs_url) { # No my; $url is still in scope.
         if (my @matches = $msg =~ /\b(?:rev(?:ision)?\s*#?\s*(\d+))\b/ig) {
             print $out "\nViewCVS Links:\n-------------\n";
             printf $out "    $url\n", $_ for @matches;
@@ -1183,9 +1215,10 @@ sub _dump_diff {
 __PACKAGE__->_accessors(qw(repos_path revision to to_regex_map from
                            user_domain svnlook sendmail charset language
                            with_diff attach_diff reply_to subject_prefix
-                           subject_cx max_sub_length viewcvs_url rt_url
-                           bugzilla_url jira_url gnats_url verbose boundary
-                           user date message message_size subject files));
+                           subject_cx max_sub_length viewcvs_url svnweb_url
+                           rt_url bugzilla_url jira_url gnats_url verbose
+                           boundary user date message message_size subject
+                           files));
 
 ##############################################################################
 # This method is used to create accessors for the list of attributes passed to
@@ -1321,12 +1354,21 @@ Gets or sets the value of the C<subject_cx> attribute.
 
 Gets or sets the value of the C<max_sub_length> attribute.
 
+=head3 svnweb_url
+
+  my $svnweb_url = $notifier->svnweb_url;
+  $notifier = $notifier->svnweb_url($svnweb_url);
+
+Gets or sets the value of the C<svnweb_url> attribute. Mutually exclusive with
+C<viewcvs_url>.
+
 =head3 viewcvs_url
 
   my $viewcvs_url = $notifier->viewcvs_url;
   $notifier = $notifier->viewcvs_url($viewcvs_url);
 
-Gets or sets the value of the C<viewcvs_url> attribute.
+Gets or sets the value of the C<viewcvs_url> attribute. Mutually exclusive
+with C<svnweb_url>.
 
 =head3 verbose
 

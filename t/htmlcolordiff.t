@@ -9,7 +9,7 @@ use File::Spec::Functions;
 if ($^O eq 'MSWin32') {
     plan skip_all => "SVN::Notify::HTML::ColorDiff not yet supported on Win32";
 } elsif (eval { require HTML::Entities }) {
-    plan tests => 146;
+    plan tests => 162;
 } else {
     plan skip_all => "SVN::Notify::HTML::ColorDiff requires HTML::Entities";
 }
@@ -239,16 +239,35 @@ like( $email, qr{Content-Transfer-Encoding: 8bit\n},
       'Check HTML file Content-Transfer-Encoding');
 
 ##############################################################################
-# Try view_cvs_url + HTML.
+# Try viewcvs_url + HTML.
 ##############################################################################
-ok( $notifier = SVN::Notify::HTML::ColorDiff->new(%args,
+ok( $notifier = SVN::Notify::HTML::ColorDiff->new(
+    %args,
      viewcvs_url => 'http://svn.example.com/?rev=%s&view=rev',
 ),
-    "Construct new HTML view_cvs_url notifier" );
+    "Construct new HTML viewcvs_url notifier" );
 isa_ok($notifier, 'SVN::Notify::HTML::ColorDiff');
 isa_ok($notifier, 'SVN::Notify');
-ok( $notifier->prepare, "Prepare HTML view_cvs_url" );
-ok( $notifier->execute, "Notify HTML view_cvs_url" );
+ok( $notifier->prepare, "Prepare HTML viewcvs_url" );
+ok( $notifier->execute, "Notify HTML viewcvs_url" );
+
+# Check the output.
+$email = get_output();
+like( $email,
+      qr|<dt>Revision</dt>\s+<dd><a href="http://svn\.example\.com/\?rev=111\&amp;view=rev">111</a></dd>\n|,
+      'Check for HTML URL');
+
+##############################################################################
+# Try svnweb_url + HTML.
+##############################################################################
+ok( $notifier = SVN::Notify::HTML::ColorDiff->new(
+    %args,
+     svnweb_url => 'http://svn.example.com/?rev=%s&view=rev',
+), "Construct new HTML svnweb_url notifier" );
+isa_ok($notifier, 'SVN::Notify::HTML::ColorDiff');
+isa_ok($notifier, 'SVN::Notify');
+ok( $notifier->prepare, "Prepare HTML svnweb_url" );
+ok( $notifier->execute, "Notify HTML svnweb_url" );
 
 # Check the output.
 $email = get_output();
@@ -259,8 +278,10 @@ like( $email,
 ##############################################################################
 # Try charset.
 ##############################################################################
-ok( $notifier = SVN::Notify::HTML::ColorDiff->new(%args, charset => 'ISO-8859-1'),
-    "Construct new charset notifier" );
+ok( $notifier = SVN::Notify::HTML::ColorDiff->new(
+    %args,
+    charset => 'ISO-8859-1'
+), "Construct new charset notifier" );
 isa_ok($notifier, 'SVN::Notify::HTML::ColorDiff');
 isa_ok($notifier, 'SVN::Notify');
 ok( $notifier->prepare, "Prepare charset" );
@@ -319,7 +340,7 @@ ok( $notifier = SVN::Notify::HTML::ColorDiff->new(
     bugzilla_url => 'http://bugzilla.mozilla.org/show_bug.cgi?id=%s',
     jira_url     => 'http://jira.atlassian.com/secure/ViewIssue.jspa?key=%s',
 ),
-    "Construct new complext notifier" );
+    "Construct new complex notifier" );
 isa_ok($notifier, 'SVN::Notify::HTML');
 isa_ok($notifier, 'SVN::Notify');
 ok( $notifier->prepare, "Prepare complex example" );
@@ -403,13 +424,44 @@ unlike( $email,
       "Check for no studlyCAPS Jira URL" );
 
 ##############################################################################
+# Major linkize and Bug tracking URLs, as well as complex diff.
+##############################################################################
+ok( $notifier = SVN::Notify::HTML::ColorDiff->new(
+    %args,
+    revision     => 444,
+    svnweb_url   => 'http://svn.example.com/index.cgi/revision/?rev=%s',
+),
+    "Construct new complext notifier" );
+isa_ok($notifier, 'SVN::Notify::HTML');
+isa_ok($notifier, 'SVN::Notify');
+ok( $notifier->prepare, "Prepare complex example" );
+ok( $notifier->execute, "Notify complex example" );
+
+$email = get_output();
+
+# Make sure multiple lines are still multiple!
+like($email, qr/link\.\n\nWe/, "Check for multiple lines" );
+
+# Check for SVNWeb URLs.
+like( $email,
+      qr|<dt>Revision</dt>\s+<dd><a href="http://svn\.example\.com/index\.cgi/revision/\?rev=444">444</a></dd>\n|,
+      'Check for main SVNWeb URL');
+like($email,
+     qr{<a href="http://svn\.example\.com/index\.cgi/revision/\?rev=6000">Revision 6000</a>\.},
+     "Check for first log mesage SVNWeb URL");
+like($email,
+     qr{<a href="http://svn\.example\.com/index\.cgi/revision/\?rev=6001">rev\n6001</a>\.},
+     "Check for split line log mesage SVNWeb URL");
+unlike($email,
+       qr{<a href="http://svn\.example\.com/index\.cgi/revision/\?rev=200">rev 200</a>,},
+       "Check for no rev 200 SVNWeb URL");
+
+##############################################################################
 # Functions.
 ##############################################################################
 
 sub get_output {
     my $outfile = catfile qw(t data output.txt);
     open CAP, "<$outfile" or die "Cannot open '$outfile': $!\n";
-    my $email = do { local $/;  <CAP>; };
-    close CAP;
-    return $email;
+    return join '', <CAP>;
 }

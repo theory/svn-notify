@@ -9,7 +9,7 @@ use File::Spec::Functions;
 if ($^O eq 'MSWin32') {
     plan skip_all => "SVN::Notify::HTML not yet supported on Win32";
 } elsif (eval { require HTML::Entities }) {
-    plan tests => 161;
+    plan tests => 171;
 } else {
     plan skip_all => "SVN::Notify::HTML requires HTML::Entities";
 }
@@ -251,16 +251,16 @@ like( $email, qr{Content-Transfer-Encoding: 8bit\n},
       'Check HTML file Content-Transfer-Encoding');
 
 ##############################################################################
-# Try view_cvs_url + HTML.
+# Try viewcvs_url + HTML.
 ##############################################################################
 ok( $notifier = SVN::Notify::HTML->new(%args,
      viewcvs_url => 'http://svn.example.com/?rev=%s&view=rev',
 ),
-    "Construct new HTML view_cvs_url notifier" );
+    "Construct new HTML viewcvs_url notifier" );
 isa_ok($notifier, 'SVN::Notify::HTML');
 isa_ok($notifier, 'SVN::Notify');
-ok( $notifier->prepare, "Prepare HTML view_cvs_url" );
-ok( $notifier->execute, "Notify HTML view_cvs_url" );
+ok( $notifier->prepare, "Prepare HTML viewcvs_url" );
+ok( $notifier->execute, "Notify HTML viewcvs_url" );
 
 # Check the output.
 $email = get_output();
@@ -372,7 +372,7 @@ ok( $notifier = SVN::Notify::HTML->new(
     bugzilla_url => 'http://bugzilla.mozilla.org/show_bug.cgi?id=%s',
     jira_url     => 'http://jira.atlassian.com/secure/ViewIssue.jspa?key=%s',
 ),
-    "Construct new complext notifier" );
+    "Construct new complex notifier" );
 isa_ok($notifier, 'SVN::Notify::HTML');
 isa_ok($notifier, 'SVN::Notify');
 ok( $notifier->prepare, "Prepare complex example" );
@@ -418,7 +418,7 @@ like($email,
      "Check for split line log mesage ViewCVS URL");
 unlike($email,
        qr{<a href="http://viewsvn\.bricolage\.cc/\?rev=200&amp;view=rev">rev 200</a>,},
-       "Check for no grev 200 ViewCVS URL");
+       "Check for no rev 200 ViewCVS URL");
 
 # Check for Bugzilla URLs.
 like( $email,
@@ -446,13 +446,44 @@ unlike( $email,
       "Check for no studlyCAPS Jira URL" );
 
 ##############################################################################
+# SVNWeb URL.
+##############################################################################
+ok( $notifier = SVN::Notify::HTML->new(
+    %args,
+    revision     => 444,
+    svnweb_url   => 'http://svn.example.com/index.cgi/revision/?rev=%s',
+),
+    "Construct new notifier for svnweb" );
+isa_ok($notifier, 'SVN::Notify::HTML');
+isa_ok($notifier, 'SVN::Notify');
+ok( $notifier->prepare, "Prepare svnweb example" );
+ok( $notifier->execute, "Notify svnweb example" );
+
+$email = get_output();
+
+# Make sure multiple lines are still multiple!
+like($email, qr/link\.\n\nWe/, "Check for multiple lines" );
+
+# Check for SVNWeb URLs.
+like( $email,
+      qr|<dt>Revision</dt>\s+<dd><a href="http://svn\.example\.com/index\.cgi/revision/\?rev=444">444</a></dd>\n|,
+      'Check for main SVNWeb URL');
+like($email,
+     qr{<a href="http://svn\.example\.com/index\.cgi/revision/\?rev=6000">Revision 6000</a>\.},
+     "Check for first log mesage SVNWeb URL");
+like($email,
+     qr{<a href="http://svn\.example\.com/index\.cgi/revision/\?rev=6001">rev\n6001</a>\.},
+     "Check for split line log mesage SVNWeb URL");
+unlike($email,
+       qr{<a href="http://svn\.example\.com/index\.cgi/revision/\?rev=200">rev 200</a>,},
+       "Check for no rev 200 SVNWeb URL");
+
+##############################################################################
 # Functions.
 ##############################################################################
 
 sub get_output {
     my $outfile = catfile qw(t data output.txt);
     open CAP, "<$outfile" or die "Cannot open '$outfile': $!\n";
-    my $email = do { local $/;  <CAP>; };
-    close CAP;
-    return $email;
+    return join '', <CAP>;
 }
