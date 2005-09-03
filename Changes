@@ -1,6 +1,6 @@
 Revision history for Perl extension SVN::Notify
 
-2.47
+2.47  2005-09-03T18:54:43
       - Fixed options tests to work correctly with older versions of
         Getopt::Long. Reported by Craig McElroy.
       - Slick new CSS treatment used for the HTML and HTML::ColorDiff emails.
