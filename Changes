@@ -1,5 +1,7 @@
 Revision history for Perl extension SVN::Notify
 
+2.49
+
 2.48  2005-09-06T19:14:35
       - Swiched from <span class="add"> and <span class="rem"> to <ins> and
         <del> elements in SVN::Notify::HTML::ColorDiff in order to make the
