@@ -63,21 +63,23 @@ sub output_css {
     my ($self, $out) = @_;
     $self->SUPER::output_css($out);
     print $out
-      qq(#patch h4 { font-family: verdana,arial,helvetica,sans-serif; ),
-          qq(font-size: 10pt; padding: 8px; background: #369; color: #fff; ),
-          qq(margin: 0; }\n),
-      qq(#patch .propset h4, #patch .binary h4 {margin: 0;}\n),
+      qq(#patch h4 {font-family: verdana,arial,helvetica,sans-serif;),
+          qq(font-size:10pt;padding:8px;background:#369;color:#fff;),
+          qq(margin:0;}\n),
+      qq(#patch .propset h4, #patch .binary h4 {margin:0;}\n),
       qq(#patch pre {padding:0;line-height:1.2em;margin:0;}\n),
-      qq(#patch .diff {background:#eeeeee;padding: 0 0 10px 0; overflow: auto;}\n),
-      qq(#patch .propset .diff, #patch .binary .diff  {padding: 10px 0;}\n),
+      qq(#patch .diff {width:100%;background:#eee;padding: 0 0 10px 0;),
+          qq(overflow:auto;}\n),
+      qq(#patch .propset .diff, #patch .binary .diff  {padding:10px 0;}\n),
       qq(#patch span {display:block;padding:0 10px;}\n),
       qq(#patch .modfile, #patch .addfile, #patch .delfile, #patch .propset, ),
-          qq(#patch .binary, #patch .copfile {border:1px solid #ccc; ),
+          qq(#patch .binary, #patch .copfile {border:1px solid #ccc;),
           qq(margin:10px 0;}\n),
-      qq(#patch .add {background:#ddffdd;}\n),
-      qq(#patch .rem {background:#ffdddd;}\n),
-      qq(#patch .lines, .info {color:#888888;background:#ffffff;}\n),
-      qq(.diff { width: 100%; }\n);
+      qq(#patch ins {background:#dfd;text-decoration:none;display:block;),
+          qq(padding:0 10px;}\n),
+      qq(#patch del {background:#fdd;text-decoration:none;display:block;),
+          qq(padding:0 10px;}\n),
+      qq(#patch .lines, .info {color:#888;background:#fff;}\n);
     return $self;
 }
 
@@ -118,7 +120,7 @@ sub output_diff {
             my $file = encode_entities($2);
             (my $id = $file) =~ s/[^\w_]//g;
 
-            print $out "</span>" if $in_span;
+            print $out "</$in_span>" if $in_span;
             print $out "</pre></div>\n" if $in_div;
 
             # Dump line.
@@ -133,7 +135,7 @@ sub output_diff {
                 print $out qq{<a id="$id"></a>\n<div class="binary"><h4>},
                   qq{$action: $file</h4>\n<pre class="diff">\n},
                   qq{<span class="cx">$before\n</span></pre></div>\n};
-                ($in_span, $in_div) = 0;
+                ($in_span, $in_div) = '';
                 next;
             }
 
@@ -158,38 +160,37 @@ sub output_diff {
             <$diff>;
 
             # Output the headers.
-            print $out "</span>" if $in_span;
+            print $out "</$in_span>" if $in_span;
             print $out "</pre></div>\n" if $in_div;
             print $out qq{<a id="$id"></a>\n<div class="propset">},
               qq{<h4>Property changes: $file</h4>\n<pre class="diff">\n};
             $in_div = 1;
             $in_span = '';
         } elsif ($line =~ /^\@\@/) {
-            print $out "</span>" if $in_span;
+            print $out "</$in_span>" if $in_span;
             print $out qq{<span class="lines">}, encode_entities($line),
               "\n</span>";
             $in_span = '';
         } elsif ($line =~ /^([-+])/) {
-            my $type = $1;
+            my $type = $1 eq '+' ? 'ins' : 'del';
             if ($in_span eq $type) {
                 print $out encode_entities($line), "\n";
             } else {
-                my $class = $type eq '+' ? 'add' : 'rem';
-                print $out "</span>" if $in_span;
-                print $out qq{<span class="$class">}, encode_entities($line), "\n";
+                print $out "</$in_span>" if $in_span;
+                print $out qq{<$type>}, encode_entities($line), "\n";
                 $in_span = $type;
             }
         } else {
             if ($in_span eq 'cx') {
                 print $out encode_entities($line), "\n";
             } else {
-                print $out "</span>" if $in_span;
+                print $out "</$in_span>" if $in_span;
                 print $out qq{<span class="cx">}, encode_entities($line), "\n";
-                $in_span = 'cx';
+                $in_span = 'span';
             }
         }
     }
-    print $out "</span>\n" if $in_span;
+    print $out "</$in_span>" if $in_span;
     print $out "</pre>\n</div>\n" if $in_div;
     print $out "</div>\n";
 

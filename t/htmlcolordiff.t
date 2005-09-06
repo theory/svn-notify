@@ -9,7 +9,7 @@ use File::Spec::Functions;
 if ($^O eq 'MSWin32') {
     plan skip_all => "SVN::Notify::HTML::ColorDiff not yet supported on Win32";
 } elsif (eval { require HTML::Entities }) {
-    plan tests => 162;
+    plan tests => 164;
 } else {
     plan skip_all => "SVN::Notify::HTML::ColorDiff requires HTML::Entities";
 }
@@ -63,7 +63,9 @@ for my $tag (qw(html head body dl)) {
 # Make sure we have styles and the appropriate div.
 like( $email, qr|<style type="text/css">|, "Check for <style> tag" );
 like( $email, qr/<\/style>/, "Check for </style> tag" );
-like( $email, qr/#patch .add {background:#ddffdd;}/, "Check for style" );
+like( $email,
+      qr/#patch ins {background:#dfd;text-decoration:none;display:block;padding:0 10px;}/,
+      'Check for style' );
 like( $email, qr/<div id="msg">/, "Check for msg div" );
 
 # Make sure we have headers for each of the four kinds of changes.
@@ -153,6 +155,10 @@ like( $email, qr{<a id="trunkParamsCallbackRequestlibParamsCallbackpm"></a>\n},
       "Check for added file div ID");
 like( $email, qr{<div class="addfile"><h4>Added: trunk/Params-CallbackRequest/lib/Params/Callback.pm \(600 => 601\)</h4>},
       "Check for added diff file header" );
+like( $email, qr{<ins>\+    \{ isa        =&gt; \$ap_req_class,\n</ins>},
+      'Check for an insert element.');
+like( $email, qr{<del>-    \{ isa        =&gt; 'Apache',\n</del>},
+      'Check for a del element');
 
 # Make sure that it's not attached.
 unlike( $email, qr{Content-Type: multipart/mixed; boundary=},
