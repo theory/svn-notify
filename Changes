@@ -1,5 +1,7 @@
 Revision history for Perl extension SVN::Notify
 
+2.50
+
 2.49  2005-09-29T17:26:14
       - Now require Getopt::Long 2.34 so that the --to-regex-map option works
         correctly when it is used only once on the command-line.
