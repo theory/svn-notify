@@ -37,7 +37,7 @@ my $build = $class->new(
     create_makefile_pl => 'passthrough',
     add_to_cleanup     => ['t/data/output.txt'],
     script_files       => [ 'bin/svnnotify' ],
-    requires           => { Getopt::Long        => 0 },
+    requires           => { Getopt::Long        => '2.34' },
     build_requires     => { Test::Simple        => '0.17',
                             Module::Build       => '0.26',
                           },

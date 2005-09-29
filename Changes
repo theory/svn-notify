@@ -1,6 +1,8 @@
 Revision history for Perl extension SVN::Notify
 
 2.49
+      - Now require Getopt::Long 2.34 so that the --to-regex-map option works
+        correctly when it is used only once on the command-line.
 
 2.48  2005-09-06T19:14:35
       - Swiched from <span class="add"> and <span class="rem"> to <ins> and
