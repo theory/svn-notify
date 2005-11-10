@@ -1,6 +1,6 @@
 Revision history for Perl extension SVN::Notify
 
-2.50
+2.50  2005-11-10T23:17:11
       - Added "ticket-url" and "ticket-regex" options to be used by those who
         want to match ticket identifers for systems other than RT, Bugzilla,
         GNATS, and JIRA. Based on a patch from Andrew O'Brien.
