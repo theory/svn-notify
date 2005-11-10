@@ -363,6 +363,24 @@ that appear to be GNATS PRs (such as "PR 1234") will be turned into links to
 the GnatsWeb server. The URL must have the "%s" format where the GNATS PR
 number should be put into the URL.
 
+=item ticket_url
+
+  svnnotify --ticket-url 'http://ticket.example.com/showticket.html?id=%s'
+
+The URL of a custom ticket system. If passed in, any strings in the log
+message that match C<ticket_regex> will be turned into links to the custom
+ticket system. The URL must have the "%s" format where the first match
+(usually the ticket identifier) in the regex should be put into the URL.
+
+=item ticket_regex
+
+  svnnotify --ticket-regex '\[?#\s*(\d+)\s*\]?'
+
+The regex to match a ticket tag of a custom ticket system. This should return
+a single match to be interpolated into the C<ticket_url> option. The example
+shown matches "[#1234]" or "#1234" or "[# 1234]". This regex should be as
+specific as possible, preferably wrapped in "\b" tags and the like.
+
 =item verbose
 
   svnnotify --verbose -V
@@ -536,6 +554,8 @@ sub get_options {
         "bugzilla-url|B=s"    => \$opts->{bugzilla_url},
         "jira-url|J=s"        => \$opts->{jira_url},
         "gnats-url|G=s"       => \$opts->{gnats_url},
+        "ticket-url=s"        => \$opts->{ticket_url},
+        "ticket-regex=s"      => \$opts->{ticket_regex},
         "verbose|V+"          => \$opts->{verbose},
         "help|h"              => \$opts->{help},
         "man|m"               => \$opts->{man},
@@ -1082,6 +1102,23 @@ sub output_log_message {
         }
      }
 
+    # Make custom ticketing system links.
+    if (my $url = $self->ticket_url) {
+        my $regex = $self->ticket_regex
+            or die q{Missing "ticket_regex" parameter to accompany }
+            . q{"ticket_url" parameter};
+        if (my @matches = $msg =~ /$regex/ig) {
+            print $out "\nTicket Links:\n-----------\n";
+            printf $out "    $url\n", $_ for @matches;
+        }
+    }
+
+    else {
+        die q{Missing "ticket_url" parameter to accompany }
+            . q{"ticket_regex" parameter}
+            if $self->ticket_regex;
+    }
+
     return $self;
 }
 
@@ -1212,13 +1249,40 @@ sub _dump_diff {
 
 ##############################################################################
 
-__PACKAGE__->_accessors(qw(repos_path revision to to_regex_map from
-                           user_domain svnlook sendmail charset language
-                           with_diff attach_diff reply_to subject_prefix
-                           subject_cx max_sub_length viewcvs_url svnweb_url
-                           rt_url bugzilla_url jira_url gnats_url verbose
-                           boundary user date message message_size subject
-                           files));
+__PACKAGE__->_accessors(qw(
+    repos_path
+    revision
+    to
+    to_regex_map
+    from
+    user_domain
+    svnlook
+    sendmail
+    charset
+    language
+    with_diff
+    attach_diff
+    reply_to
+    subject_prefix
+    subject_cx
+    max_sub_length
+    viewcvs_url
+    svnweb_url
+    rt_url
+    bugzilla_url
+    jira_url
+    gnats_url
+    ticket_url
+    ticket_regex
+    verbose
+    boundary
+    user
+    date
+    message
+    message_size
+    subject
+    files
+));
 
 ##############################################################################
 # This method is used to create accessors for the list of attributes passed to

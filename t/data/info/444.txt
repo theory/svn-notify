@@ -22,9 +22,11 @@ Next there's Bugzilla. We just say Bug # 1234 or bug 8, but not humbug 3.
 Again, we can go ahead and push this puppy to the limits, and write Bug
 #4321, where we again have the string split over two lines.
 
-And finally we have JIRA links. Here I just say TST-1234. But JIRA-
+And then we have JIRA links. Here I just say TST-1234. But JIRA-
 4321 won't match, because it needs to be a single string. Likewise,
 a string with studlyCAPS-1234 won't match.
+
+Next up, a custom ticket number, here [Custom # 54321]. Nice, eh?
 
 And finally, for the diff, there is a modified file, a modified file
 with a property set, a file with just a property set, a deleted file,

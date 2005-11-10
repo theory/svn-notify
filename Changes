@@ -1,6 +1,13 @@
 Revision history for Perl extension SVN::Notify
 
 2.50
+      - Added "ticket-url" and "ticket-regex" options to be used by those who
+        want to match ticket identifers for systems other than RT, Bugzilla,
+        GNATS, and JIRA. Based on a patch from Andrew O'Brien.
+      - Removed bogus 'use lib' line put into Makefile.PL by a prerelease
+        version of Module::Build.
+      - Fixed HTML tests to match either "'" or "&#39;", since HTML::Entities
+        can be configured differently on different systems.
 
 2.49  2005-09-29T17:26:14
       - Now require Getopt::Long 2.34 so that the --to-regex-map option works

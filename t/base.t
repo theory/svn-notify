@@ -9,7 +9,7 @@ use File::Spec::Functions;
 if ($^O eq 'MSWin32') {
     plan skip_all => "SVN::Notify not yet supported on Win32";
 } else {
-    plan tests => 155;
+    plan tests => 157;
 }
 
 BEGIN { use_ok('SVN::Notify') }
@@ -350,6 +350,8 @@ ok( $notifier = SVN::Notify->new(
     bugzilla_url => 'http://bugzilla.mozilla.org/show_bug.cgi?id=%s',
     jira_url     => 'http://jira.atlassian.com/secure/ViewIssue.jspa?key=%s',
     gnats_url    => 'http://gnats.example.com/gnatsweb.pl?cmd=view&pr=%s',
+    ticket_url   => 'http://ticket.example.com/id=%s',
+    ticket_regex => '\[?\s*Custom\s*#\s*(\d+)\s*\]?',
 ),
     "Construct new URL notifier" );
 isa_ok($notifier, 'SVN::Notify');
@@ -361,26 +363,30 @@ $email = get_output();
 # Check for application URLs.
 like( $email, qr|ViewCVS:\s+http://viewsvn\.bricolage\.cc/\?rev=222\&view=rev\n|,
       'Check for main ViewCVS URL');
-like($email, qr/ViewCVS Links:\n/, 'Check for ViewCVS URLs label' );
+like($email, qr/ViewCVS Links:\n/, 'Check for ViewCVS Links label' );
 like($email,
      qr{    http://viewsvn\.bricolage\.cc/\?rev=606&view=rev\n},
      "Check for log mesage ViewCVS URL");
-like($email, qr/RT Links:\n/, 'Check for ViewCVS URLs label' );
+like($email, qr/RT Links:\n/, 'Check for ViewCVS Links label' );
 like($email,
      qr{    http://rt\.cpan\.org/NoAuth/Bugs\.html\?id=4321\n},
      "Check for RT URL");
-like($email, qr/Bugzilla Links:\n/, 'Check for Bugzilla URLs label' );
+like($email, qr/Bugzilla Links:\n/, 'Check for Bugzilla Links label' );
 like( $email,
       qr{   http://bugzilla\.mozilla\.org/show_bug\.cgi\?id=709\n},
       "Check for Bugzilla URL" );
-like($email, qr/JIRA Links:\n/, 'Check for JIRA URLs label' );
+like($email, qr/JIRA Links:\n/, 'Check for JIRA Links label' );
 like( $email,
       qr{    http://jira\.atlassian\.com/secure/ViewIssue\.jspa\?key=TST-1608\n},
       "Check for Jira URL" );
-like($email, qr/GNATS Links:\n/, 'Check for GNATS URLs label' );
+like($email, qr/GNATS Links:\n/, 'Check for GNATS Links label' );
 like($email,
      qr{    http://gnats\.example\.com/gnatsweb\.pl\?cmd=view&pr=12345\n},
      "Check for GNATS URL");
+like($email, qr/Ticket Links:\n/, 'Check for Ticket Links label' );
+like($email,
+     qr{    http://ticket\.example\.com/id=4321\n},
+     "Check for custom ticket URL");
 
 ##############################################################################
 # Try leaving out the first line from the subject and removing part of the
