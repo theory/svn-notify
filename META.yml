@@ -28,3 +28,6 @@ provides:
     file: lib/SVN/Notify/HTML/ColorDiff.pm
     version: 2.50
 generated_by: Module::Build version 0.2703
+meta-spec:
+  url: http://module-build.sourceforge.net/META-spec-v1.2.html
+  version: 1.2

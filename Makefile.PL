@@ -17,7 +17,6 @@
       
       # Save this 'cause CPAN will chdir all over the place.
       my $cwd = Cwd::cwd();
-      my $makefile = File::Spec->rel2abs($0);
       
       CPAN::Shell->install('Module::Build::Compat')
 	or die " *** Cannot install without Module::Build.  Exiting ...\n";
@@ -25,7 +24,6 @@
       chdir $cwd or die "Cannot chdir() back to $cwd: $!";
     }
     eval "use Module::Build::Compat 0.02; 1" or die $@;
-    use lib '/Users/david/dev/Kineticode/trunk/SVN-Notify/_build/lib';
     Module::Build::Compat->run_build_pl(args => \@ARGV);
     require My::Builder;
     Module::Build::Compat->write_makefile(build_class => 'My::Builder');
