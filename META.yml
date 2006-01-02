@@ -1,6 +1,6 @@
 ---
 name: SVN-Notify
-version: 2.50
+version: 2.51
 author:
   - David Wheeler <david@kineticode.com>
 abstract: Subversion activity notification
@@ -9,25 +9,25 @@ resources:
   license: http://dev.perl.org/licenses/
 requires:
   Getopt::Long: 2.34
+build_requires:
+  Module::Build: 0.26
+  Test::Simple: 0.17
 recommends:
   HTML::Entities: 0
   Pod::Usage: 0
   Test::Pod: 1.2
   Test::Pod::Coverage: 1.06
-build_requires:
-  Module::Build: 0.26
-  Test::Simple: 0.17
 provides:
   SVN::Notify:
     file: lib/SVN/Notify.pm
-    version: 2.50
+    version: 2.51
   SVN::Notify::HTML:
     file: lib/SVN/Notify/HTML.pm
-    version: 2.50
+    version: 2.51
   SVN::Notify::HTML::ColorDiff:
     file: lib/SVN/Notify/HTML/ColorDiff.pm
-    version: 2.50
-generated_by: Module::Build version 0.2703
+    version: 2.51
+generated_by: Module::Build version 0.2704
 meta-spec:
   url: http://module-build.sourceforge.net/META-spec-v1.2.html
   version: 1.2
