@@ -1,5 +1,7 @@
 Revision history for Perl extension SVN::Notify
 
+2.52
+
 2.51  2006-01-02T23:28:11
       - Fixed ColorDiff HTML to once again be valid XHTML 1.1.
 
