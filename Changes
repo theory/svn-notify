@@ -1,6 +1,7 @@
 Revision history for Perl extension SVN::Notify
 
 2.51
+      - Fixed ColorDiff HTML to once again be valid XHTML 1.1.
 
 2.50  2005-11-10T23:27:22
       - Added "ticket-url" and "ticket-regex" options to be used by those who

@@ -215,7 +215,7 @@ like( $email, qr{Content-Type: multipart/mixed; boundary="(.*)"\n},
 like( $email,
       qr{Content-Disposition: attachment; filename=r111-theory.diff\n},
       "Check for html diff filename" );
-unlike( $email, qr{<pre>\nModified}, "Check for no pre tag" );
+unlike( $email, qr{<pre><span>\nModified}, "Check for no pre tag" );
 
 # Check for boundaries.
 is( scalar @{[$email =~ m{(--frank\n)}g]}, 2,

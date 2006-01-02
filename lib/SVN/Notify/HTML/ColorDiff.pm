@@ -121,7 +121,7 @@ sub output_diff {
             (my $id = $file) =~ s/[^\w_]//g;
 
             print $out "</$in_span>" if $in_span;
-            print $out "</pre></div>\n" if $in_div;
+            print $out "</span></pre></div>\n" if $in_div;
 
             # Dump line.
             <$diff>;
@@ -133,8 +133,8 @@ sub output_diff {
             if ($before =~ /^\(Binary files differ\)/) {
                 # Just output the whole file div.
                 print $out qq{<a id="$id"></a>\n<div class="binary"><h4>},
-                  qq{$action: $file</h4>\n<pre class="diff">\n},
-                  qq{<span class="cx">$before\n</span></pre></div>\n};
+                  qq{$action: $file</h4>\n<pre class="diff"><span>\n},
+                  qq{<span class="cx">$before\n</span></span></pre></div>\n};
                 ($in_span, $in_div) = '';
                 next;
             }
@@ -147,7 +147,7 @@ sub output_diff {
             # Output the headers.
             print $out qq{<a id="$id"></a>\n<div class="$class"><h4>$action: $file},
               " ($rev1 => $rev2)</h4>\n";
-            print $out qq{<pre class="diff">\n<span class="info">};
+            print $out qq{<pre class="diff"><span>\n<span class="info">};
             $in_div = 1;
             print $out encode_entities($_), "\n" for ($before, $after);
             print $out "</span>";
@@ -161,9 +161,9 @@ sub output_diff {
 
             # Output the headers.
             print $out "</$in_span>" if $in_span;
-            print $out "</pre></div>\n" if $in_div;
+            print $out "</span></pre></div>\n" if $in_div;
             print $out qq{<a id="$id"></a>\n<div class="propset">},
-              qq{<h4>Property changes: $file</h4>\n<pre class="diff">\n};
+              qq{<h4>Property changes: $file</h4>\n<pre class="diff"><span>\n};
             $in_div = 1;
             $in_span = '';
         } elsif ($line =~ /^\@\@/) {
@@ -191,7 +191,7 @@ sub output_diff {
         }
     }
     print $out "</$in_span>" if $in_span;
-    print $out "</pre>\n</div>\n" if $in_div;
+    print $out "</span></pre>\n</div>\n" if $in_div;
     print $out "</div>\n";
 
     close $diff or warn "Child process exited: $?\n";
