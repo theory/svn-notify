@@ -1,6 +1,6 @@
 Revision history for Perl extension SVN::Notify
 
-2.52
+2.52  2006-02-19T18:50:24
       - Now uses File::Spec->path to search for a validate sendmail or svnlook
         when they're not specified via their respetive command-line options or
         environment variables. Suggested by Andreas Koenig. Not that they
