@@ -38,14 +38,18 @@ my $build = $class->new(
     add_to_cleanup     => ['t/data/output.txt'],
     script_files       => [ 'bin/svnnotify' ],
     requires           => { Getopt::Long        => '2.34' },
-    build_requires     => { Test::Simple        => '0.17',
-                            Module::Build       => '0.26',
-                          },
-    recommends         => { Pod::Usage          => 0,
-                            HTML::Entities      => 0,
-                            Test::Pod           => 1.20,
-                            Test::Pod::Coverage => 1.06,
-                          },
+    build_requires     => {
+        Test::Simple        => '0.17',
+        Module::Build       => '0.26',
+        File::Spec          => 0,
+    },
+    recommends         => {
+        Pod::Usage          => 0,
+        HTML::Entities      => 0,
+        Test::Pod           => 1.20,
+        Test::Pod::Coverage => 1.06,
+        File::Spec          => 0,
+    },
 );
 $build->create_build_script;
 

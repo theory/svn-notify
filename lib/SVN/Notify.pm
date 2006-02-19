@@ -169,10 +169,14 @@ domain specified by the C<user_domain> parameter.
   svnnotify --svnlook /path/to/svnlook
   svnnotify --l /path/to/svnlook
 
-The location of the F<svnlook> executable. The default is
-F</usr/local/bin/svnlook>. Specify a different path or set the C<$SVNLOOK>
-environment variable if this is not the location of F<svnlook> on your
-box. It's important to provide a complete path to F<svnlook> because the
+The location of the F<svnlook> executable. If not specified, SVN::Notify will
+search through the directories in the C<$PATH> environment variable, plus in
+F</usr/local/bin> and F</usr/sbin>, for an F<svnlook> executable. Specify a
+full path to F<svnlook> via this option or by setting the C<$SVNLOOK>
+environment variable if F<svnlook> isn't in your path or to avoid loading
+L<File::Spec|File::Spec>.
+
+It's important to provide a complete path to F<svnlook> because the
 environment during the execution of F<post-commit> is anemic, with nary a
 C<$PATH> environment variable to be found. So if F<svnnotify> appears not to
 be working at all (and Subversion seems loathe to log when it dies!), make
@@ -184,11 +188,13 @@ executable.
   svnnotify --sendmail /path/to/sendmail
   svnnotify --s /path/to/sendmail
 
-The location of the F<sendmail> executable. The default is
-F</usr/sbin/sendmail>. Specify a different path or set the C<$SENDMAIL>
-environment variable if this is not the location of F<sendmail> on your box.
-The same caveats as applied to the location of the F<svnlook> executable
-apply here.
+The location of the F<sendmail> executable. If not specified, SVN::Notify will
+search through the directories in the C<$PATH> environment variable, plus in
+F</usr/local/bin> and F</usr/sbin>, for an F<sendmail> executable. Specify a
+full path to F<sendmail> via this option or by setting the C<$SENDMAIL>
+environment variable if F<sendmail> isn't in your path or to avoid loading
+L<File::Spec|File::Spec>. The same caveats as applied to the location of the
+F<svnlook> executable apply here.
 
 =item charset
 
@@ -429,8 +435,8 @@ sub new {
       unless $params{to} || $params{to_regex_map};
 
     # Set up default values.
-    $params{svnlook}   ||= $ENV{SVNLOOK}  || '/usr/local/bin/svnlook';
-    $params{sendmail}  ||= $ENV{SENDMAIL} || '/usr/sbin/sendmail';
+    $params{svnlook}   ||= $ENV{SVNLOOK}  || _find_exe('svnlook');
+    $params{sendmail}  ||= $ENV{SENDMAIL} || _find_exe('sendmail');
     $params{with_diff} ||= $params{attach_diff};
     $params{verbose}   ||= 0;
     $params{charset}   ||= 'UTF-8';
@@ -1548,6 +1554,20 @@ sub _read_pipe {
 ##############################################################################
 
 sub _dbpnt { print __PACKAGE__, ": $_[1]\n" }
+
+##############################################################################
+# This function is used to search the path for an executable.
+##############################################################################
+
+sub _find_exe {
+    my $exe = shift;
+    require File::Spec;
+    for my $path (File::Spec->path, '/usr/local/bin', '/usr/sbin') {
+        $path = File::Spec->catfile($path, $exe);
+        return $path if -x $path && -f _;
+    }
+    return;
+}
 
 1;
 __END__

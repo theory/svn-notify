@@ -1,6 +1,11 @@
 Revision history for Perl extension SVN::Notify
 
 2.52
+      - Now uses File::Spec->path to search for a validate sendmail or svnlook
+        when they're not specified via their respetive command-line options or
+        environment variables. Suggested by Andreas Koenig. Not that they
+        should probably be explicitly set anyway, as the PATH environment
+        variable tends to be non-existent when running under Apache.
 
 2.51  2006-01-02T23:28:11
       - Fixed ColorDiff HTML to once again be valid XHTML 1.1.

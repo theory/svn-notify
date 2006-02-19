@@ -9,7 +9,7 @@ use File::Spec::Functions;
 if ($^O eq 'MSWin32') {
     plan skip_all => "SVN::Notify not yet supported on Win32";
 } else {
-    plan tests => 157;
+    plan tests => 158;
 }
 
 BEGIN { use_ok('SVN::Notify') }
@@ -432,6 +432,12 @@ like( $email, qr{Subject: \[111\] Class\n},
       "Check subject header for stripped cx and no log message line" );
 
 ##############################################################################
+# Test file_exe
+##############################################################################
+is SVN::Notify::_find_exe('testsvnlook'),  catfile($dir, "testsvnlook$ext"),
+    '_find_exe should find the test script';
+
+##############################################################################
 # Functions.
 ##############################################################################
 
@@ -439,4 +445,10 @@ sub get_output {
     my $outfile = catfile qw(t data output.txt);
     open CAP, "<$outfile" or die "Cannot open '$outfile': $!\n";
     return join '', <CAP>;
+}
+
+# This is so that we know where _find_exe() will search.
+MOCKFILESPEC: {
+    package File::Spec;
+    sub path { 'foo', 'bar', $dir }
 }
