@@ -138,11 +138,12 @@ sub start_body {
         ($lang ? qq{ xml:lang="$lang"} : ()),
       qq{>\n<head><style type="text/css"><!--\n};
     $self->output_css($out);
-    print $out qq{--></style>\n<title>}, encode_entities($self->subject),
+    print $out qq{--></style>\n<title>},
+        encode_entities($self->subject, '<>&"'),
       qq{</title>\n</head>\n<body>\n\n<div id="msg">\n};
     if (my $header = $self->header) {
         print $out '<div id="header">',
-            ( $header =~ /^</  ? $header : encode_entities($header) ),
+            ( $header =~ /^</  ? $header : encode_entities($header, '<>&"') ),
             "</div>\n";
     }
     return $self;
@@ -167,7 +168,7 @@ sub output_css {
         qq(padding: 6px; color: #fff; }\n),
       qq(#msg dt { float: left; width: 6em; font-weight: bold; }\n),
       qq(#msg dt:after { content:':';}\n),
-      q(#msg dl, #msg dt, #msg ul, #msg li { font-family: ),
+      q(#msg dl, #msg dt, #msg ul, #msg li, #header, #footer { font-family: ),
           qq(verdana,arial,helvetica,sans-serif; font-size: 10pt;  }\n),
       qq(#msg dl a { font-weight: bold}\n),
       qq(#msg dl a:link    { color:#fc3; }\n),
@@ -203,7 +204,7 @@ sub output_metadata {
 
     my $rev = $self->revision;
     if (my $url = $self->svnweb_url || $self->viewcvs_url) {
-        $url = encode_entities($url);
+        $url = encode_entities($url, '<>&"');
         # Make the revision number a URL.
         printf $out qq{<a href="$url">$rev</a>}, $rev;
     } else {
@@ -212,8 +213,8 @@ sub output_metadata {
     }
 
     print $out "</dd>\n",
-      "<dt>Author</dt> <dd>", encode_entities($self->user), "</dd>\n",
-      "<dt>Date</dt> <dd>", encode_entities($self->date), "</dd>\n",
+      "<dt>Author</dt> <dd>", encode_entities($self->user, '<>&"'), "</dd>\n",
+      "<dt>Date</dt> <dd>", encode_entities($self->date, '<>&"'), "</dd>\n",
       "</dl>\n\n";
 
     return $self;
@@ -236,7 +237,7 @@ sub output_log_message {
     $self->_dbpnt( "Outputting log message as HTML") if $self->verbose > 1;
 
     # Assemble the message.
-    my $msg = encode_entities(join("\n", @{$self->message}));
+    my $msg = encode_entities(join("\n", @{$self->message}), '<>&"');
 
     # Turn URLs and email addresses into links.
     if ($self->linkize) {
@@ -255,31 +256,31 @@ sub output_log_message {
 
     # Make SVNWeb/ViewCVS links.
     if (my $url = $self->svnweb_url || $self->viewcvs_url) {
-        $url = encode_entities($url);
+        $url = encode_entities($url, '<>&"');
         $msg =~ s|\b(rev(?:ision)?\s*#?\s*(\d+))\b|sprintf qq{<a href="$url">$1</a>}, $2|ige;
     }
 
     # Make Bugzilla links.
     if (my $url = $self->bugzilla_url) {
-        $url = encode_entities($url);
+        $url = encode_entities($url, '<>&"');
         $msg =~ s|\b(bug\s*#?\s*(\d+))\b|sprintf qq{<a href="$url">$1</a>}, $2|ige;
     }
 
     # Make RT links.
     if (my $url = $self->rt_url) {
-        $url = encode_entities($url);
+        $url = encode_entities($url, '<>&"');
         $msg =~ s|\b((?:rt-)?ticket:?\s*#?\s*(\d+))\b|sprintf qq{<a href="$url">$1</a>}, $2|ige;
     }
 
     # Make JIRA links.
     if (my $url = $self->jira_url) {
-        $url = encode_entities($url);
+        $url = encode_entities($url, '<>&"');
         $msg =~ s|\b([A-Z]+-\d+)\b|sprintf qq{<a href="$url">$1</a>}, $1|ge;
     }
 
     # Make GNATS links.
     if (my $url = $self->gnats_url) {
-        $url = encode_entities($url);
+        $url = encode_entities($url, '<>&"');
         $msg =~ s|\b(PR\s*(\d+))\b|sprintf qq{<a href="$url">$1</a>}, $2|ge;
     }
 
@@ -288,7 +289,7 @@ sub output_log_message {
         my $regex = $self->ticket_regex
             or die q{Missing "ticket_regex" parameter to accompany }
             . q{"ticket_url" parameter};
-        $url = encode_entities($url);
+        $url = encode_entities($url, '<>&"');
         $msg =~ s|$regex|sprintf qq{<a href="$url">$1</a>}, $2|ige;
     }
 
@@ -331,7 +332,7 @@ sub output_file_lists {
         print $out "<h3>$map->{$type}</h3>\n<ul>\n";
         if ($self->with_diff && !$self->attach_diff) {
             for (@{ $files->{$type} }) {
-                my $file = encode_entities($_);
+                my $file = encode_entities($_, '<>&"');
                 if ($file =~ m{/$}) {
                     # Directories don't link to the diff.
                     print $out qq{<li>$file</li>\n};
@@ -342,7 +343,7 @@ sub output_file_lists {
                 }
             }
         } else {
-            print $out "  <li>" . encode_entities($_) . "</li>\n"
+            print $out "  <li>" . encode_entities($_, '<>&"') . "</li>\n"
               for @{ $files->{$type} };
         }
         print $out "</ul>\n\n";
@@ -371,7 +372,7 @@ sub end_body {
     $self->_dbpnt( "Ending body") if $self->verbose > 2;
     if (my $footer = $self->footer) {
         print $out '<div id="footer">',
-            ( $footer =~ /^</  ? $footer : encode_entities($footer) ),
+            ( $footer =~ /^</  ? $footer : encode_entities($footer, '<>&"') ),
             "</div>\n";
     }
     print $out "\n</div>" unless $self->with_diff && !$self->attach_diff;
@@ -405,12 +406,12 @@ sub output_diff {
             && !$seen{$2}++)
         {
             my $action = $1;
-            my $file = encode_entities($2);
+            my $file = encode_entities($2, '<>&"');
             (my $id = $file) =~ s/[^\w_]//g;
             print $out qq{<a id="$id">$action: $file</a>\n};
         }
         else {
-            print $out encode_entities($_), "\n";
+            print $out encode_entities($_, '<>&"'), "\n";
         }
     }
     print $out "</pre></div>\n";

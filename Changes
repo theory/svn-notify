@@ -9,6 +9,13 @@ Revision history for Perl extension SVN::Notify
         IDs "header" or "footer" as appropriate.
       - Fixed the executable-searching algorithm added in 2.52 to add ".exe"
         to the name of the executable being searched for if $^O eq 'MSWin32'.
+      - Fixed encoding issues so that, under Perl 5.8 and later, the IO layer
+        is set on file handles so as to encode input and decode output in the
+        character set specified by the 'charset' attribute. CPAN # 16050,
+        reported by Michael Zehrer.
+      - Added a second argument to all calls to encode_entities() in
+        SVN::Notify::HTML and SVN::Notify::HTML::ColorDiff so that only '>'.
+        '<', '&', and '"' are escaped.
 
 2.52  2006-02-19T18:50:24
       - Now uses File::Spec->path to search for a validate sendmail or svnlook

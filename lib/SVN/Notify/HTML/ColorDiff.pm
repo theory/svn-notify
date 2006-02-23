@@ -117,7 +117,7 @@ sub output_diff {
         if ($line =~ /^(Modified|Added|Deleted|Copied): (.*)/) {
             my $class = $types{my $action = $1};
             ++$seen{$2};
-            my $file = encode_entities($2);
+            my $file = encode_entities($2, '<>&"');
             (my $id = $file) =~ s/[^\w_]//g;
 
             print $out "</$in_span>" if $in_span;
@@ -149,12 +149,12 @@ sub output_diff {
               " ($rev1 => $rev2)</h4>\n";
             print $out qq{<pre class="diff"><span>\n<span class="info">};
             $in_div = 1;
-            print $out encode_entities($_), "\n" for ($before, $after);
+            print $out encode_entities($_, '<>&"'), "\n" for ($before, $after);
             print $out "</span>";
             $in_span = '';
         } elsif ($line =~ /^Property changes on: (.*)/ && !$seen{$1}) {
             # It's just property changes.
-            my $file = encode_entities($1);
+            my $file = encode_entities($1, '<>&"');
             (my $id = $file) =~ s/[^\w_]//g;
             # Dump line.
             <$diff>;
@@ -168,24 +168,25 @@ sub output_diff {
             $in_span = '';
         } elsif ($line =~ /^\@\@/) {
             print $out "</$in_span>" if $in_span;
-            print $out qq{<span class="lines">}, encode_entities($line),
+            print $out qq{<span class="lines">}, encode_entities($line, '<>&"'),
               "\n</span>";
             $in_span = '';
         } elsif ($line =~ /^([-+])/) {
             my $type = $1 eq '+' ? 'ins' : 'del';
             if ($in_span eq $type) {
-                print $out encode_entities($line), "\n";
+                print $out encode_entities($line, '<>&"'), "\n";
             } else {
                 print $out "</$in_span>" if $in_span;
-                print $out qq{<$type>}, encode_entities($line), "\n";
+                print $out qq{<$type>}, encode_entities($line, '<>&"'), "\n";
                 $in_span = $type;
             }
         } else {
             if ($in_span eq 'cx') {
-                print $out encode_entities($line), "\n";
+                print $out encode_entities($line, '<>&"'), "\n";
             } else {
                 print $out "</$in_span>" if $in_span;
-                print $out qq{<span class="cx">}, encode_entities($line), "\n";
+                print $out qq{<span class="cx">},
+                    encode_entities($line, '<>&"'), "\n";
                 $in_span = 'span';
             }
         }

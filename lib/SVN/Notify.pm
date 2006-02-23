@@ -3,7 +3,8 @@ package SVN::Notify;
 # $Id$
 
 use strict;
-use constant WIN32 => $^O eq 'MSWin32';
+use constant WIN32  => $^O eq 'MSWin32';
+use constant PERL58 => $] > 5.007;
 $SVN::Notify::VERSION = '2.53';
 
 =begin comment
@@ -1567,7 +1568,8 @@ sub _pipe {
     die "Cannot fork: $!\n" unless defined $pid;
 
     if ($pid) {
-        # Parent process. Return the file handle.
+        # Parent process. Set the encoing layer and return the file handle.
+        binmode(PIPE, ':encoding(' . $self->charset . ')') if PERL58;
         return *PIPE;
     } else {
         # Child process. Execute the commands.

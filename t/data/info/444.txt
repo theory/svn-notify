@@ -32,4 +32,6 @@ And finally, for the diff, there is a modified file, a modified file
 with a property set, a file with just a property set, a deleted file,
 and an added file.
 
+Oh, and did I mention that we need to properly support “Unicode characters”?
+
 Enjoy!

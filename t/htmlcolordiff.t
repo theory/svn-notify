@@ -82,7 +82,7 @@ like( $email,
       'Check Date');
 
 # Check that the log message is there.
-like( $email, qr{<pre>Did this, that, and the other\. And then I did some more\. Some\nit was done on a second line\. Go figure\.</pre>}, 'Check for HTML log message' );
+like( $email, qr{<pre>Did this, that, and the other\. And then I did some more\. Some\nit was done on a second line\. “Go figure”\.</pre>}, 'Check for HTML log message' );
 
 # Make sure that Class/Meta.pm is listed twice, once for modification and once
 # for its attribute being set.
@@ -334,6 +334,39 @@ like( $email, qr{<div class="propset"><h4>Property changes: trunk/activitymail/t
       "Check for modified file header" );
 
 ##############################################################################
+# SVNWeb URL.
+##############################################################################
+ok( $notifier = SVN::Notify::HTML::ColorDiff->new(
+    %args,
+    revision     => 444,
+    svnweb_url   => 'http://svn.example.com/index.cgi/revision/?rev=%s',
+),
+    "Construct new complext notifier" );
+isa_ok($notifier, 'SVN::Notify::HTML');
+isa_ok($notifier, 'SVN::Notify');
+ok( $notifier->prepare, "Prepare complex example" );
+ok( $notifier->execute, "Notify complex example" );
+
+$email = get_output();
+
+# Make sure multiple lines are still multiple!
+like($email, qr/link\.\n\nWe/, "Check for multiple lines" );
+
+# Check for SVNWeb URLs.
+like( $email,
+      qr|<dt>Revision</dt>\s+<dd><a href="http://svn\.example\.com/index\.cgi/revision/\?rev=444">444</a></dd>\n|,
+      'Check for main SVNWeb URL');
+like($email,
+     qr{<a href="http://svn\.example\.com/index\.cgi/revision/\?rev=6000">Revision 6000</a>\.},
+     "Check for first log mesage SVNWeb URL");
+like($email,
+     qr{<a href="http://svn\.example\.com/index\.cgi/revision/\?rev=6001">rev\n6001</a>\.},
+     "Check for split line log mesage SVNWeb URL");
+unlike($email,
+       qr{<a href="http://svn\.example\.com/index\.cgi/revision/\?rev=200">rev 200</a>,},
+       "Check for no rev 200 SVNWeb URL");
+
+##############################################################################
 # Major linkize and Bug tracking URLs, as well as complex diff.
 ##############################################################################
 ok( $notifier = SVN::Notify::HTML::ColorDiff->new(
@@ -347,6 +380,10 @@ ok( $notifier = SVN::Notify::HTML::ColorDiff->new(
     jira_url     => 'http://jira.atlassian.com/secure/ViewIssue.jspa?key=%s',
     ticket_url   => 'http://ticket.example.com/id=%s',
     ticket_regex => '\[?\s*(Custom\s*#\s*(\d+))\s*\]?',
+    header       => 'This commit is brought to you by Kineticode. '
+                  . 'Setting knowledge in motion.',
+    footer       => '<span>Copyright &reg; Kineticode, Inc., 2004-2006. '
+                  . 'Some rights reserved.</span>',
 ),
     "Construct new complex notifier" );
 isa_ok($notifier, 'SVN::Notify::HTML');
@@ -435,39 +472,6 @@ unlike( $email,
 like( $email,
       qr{<a href="http://ticket\.example\.com/id=54321">Custom # 54321</a>},
       "Check for custom ticket URL" );
-
-##############################################################################
-# SVNWeb URL.
-##############################################################################
-ok( $notifier = SVN::Notify::HTML::ColorDiff->new(
-    %args,
-    revision     => 444,
-    svnweb_url   => 'http://svn.example.com/index.cgi/revision/?rev=%s',
-),
-    "Construct new complext notifier" );
-isa_ok($notifier, 'SVN::Notify::HTML');
-isa_ok($notifier, 'SVN::Notify');
-ok( $notifier->prepare, "Prepare complex example" );
-ok( $notifier->execute, "Notify complex example" );
-
-$email = get_output();
-
-# Make sure multiple lines are still multiple!
-like($email, qr/link\.\n\nWe/, "Check for multiple lines" );
-
-# Check for SVNWeb URLs.
-like( $email,
-      qr|<dt>Revision</dt>\s+<dd><a href="http://svn\.example\.com/index\.cgi/revision/\?rev=444">444</a></dd>\n|,
-      'Check for main SVNWeb URL');
-like($email,
-     qr{<a href="http://svn\.example\.com/index\.cgi/revision/\?rev=6000">Revision 6000</a>\.},
-     "Check for first log mesage SVNWeb URL");
-like($email,
-     qr{<a href="http://svn\.example\.com/index\.cgi/revision/\?rev=6001">rev\n6001</a>\.},
-     "Check for split line log mesage SVNWeb URL");
-unlike($email,
-       qr{<a href="http://svn\.example\.com/index\.cgi/revision/\?rev=200">rev 200</a>,},
-       "Check for no rev 200 SVNWeb URL");
 
 ##############################################################################
 # Functions.
