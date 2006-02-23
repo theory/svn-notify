@@ -166,21 +166,23 @@ appropriate C<< <style> >> tags.
 sub output_css {
     my ($self, $out) = @_;
     print $out
-      qq(#msg dl { border: 1px #006 solid; background: #369; ),
+      q(#msg dl { border: 1px #006 solid; background: #369; ),
         qq(padding: 6px; color: #fff; }\n),
       qq(#msg dt { float: left; width: 6em; font-weight: bold; }\n),
       qq(#msg dt:after { content:':';}\n),
-      qq(#msg dl, #msg dt, #msg ul, #msg li { font-family: ),
+      q(#msg dl, #msg dt, #msg ul, #msg li { font-family: ),
           qq(verdana,arial,helvetica,sans-serif; font-size: 10pt;  }\n),
       qq(#msg dl a { font-weight: bold}\n),
       qq(#msg dl a:link    { color:#fc3; }\n),
       qq(#msg dl a:active  { color:#ff0; }\n),
       qq(#msg dl a:visited { color:#cc6; }\n),
-      qq(h3 { font-family: verdana,arial,helvetica,sans-serif; ),
+      q(h3 { font-family: verdana,arial,helvetica,sans-serif; ),
           qq(font-size: 10pt; font-weight: bold; }\n),
-      qq(#msg pre { overflow: auto; background: #ffc; ),
+      q(#msg pre { overflow: auto; background: #ffc; ),
           qq(border: 1px #fc0 solid; padding: 6px; }\n),
       qq(#msg ul, pre { overflow: auto; }\n),
+      q(#header, #footer { color: #fff; background: #636; ),
+      qq(border: 1px #300 solid; padding: 6px; }\n),
       qq(#patch { width: 100%; }\n);
     return $self;
 }
