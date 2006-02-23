@@ -3,6 +3,7 @@ package SVN::Notify;
 # $Id$
 
 use strict;
+use constant WIN32 => $^O eq 'MSWin32';
 $SVN::Notify::VERSION = '2.53';
 
 =begin comment
@@ -1602,10 +1603,11 @@ sub _dbpnt { print __PACKAGE__, ": $_[1]\n" }
 
 sub _find_exe {
     my $exe = shift;
+    $exe .= '.exe' if WIN32;
     require File::Spec;
     for my $path (File::Spec->path, '/usr/local/bin', '/usr/sbin') {
         $path = File::Spec->catfile($path, $exe);
-        return $path if -x $path && -f _;
+        return $path if -f $path && -x _;
     }
     return;
 }

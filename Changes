@@ -7,6 +7,8 @@ Revision history for Perl extension SVN::Notify
         which case it will be assumed to be valid HTML and will therefore not
         be escaped. Either way, it will be output between <div> tags with the
         IDs "header" or "footer" as appropriate.
+      - Fixed the executable-searching algorithm added in 2.52 to add ".exe"
+        to the name of the executable being searched for if $^O eq 'MSWin32'.
 
 2.52  2006-02-19T18:50:24
       - Now uses File::Spec->path to search for a validate sendmail or svnlook
