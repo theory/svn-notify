@@ -1,6 +1,12 @@
 Revision history for Perl extension SVN::Notify
 
 2.53
+      - Added 'header' and 'footer' attributes and command-line options to
+        specify text to be put at the head and foot of each message. For HTML
+        messages, the text will be escaped, unless it starts with "<", in
+        which case it will be assumed to be valid HTML and will therefore not
+        be escaped. Either way, it will be output between <div> tags with the
+        IDs "header" or "footer" as appropriate.
 
 2.52  2006-02-19T18:50:24
       - Now uses File::Spec->path to search for a validate sendmail or svnlook

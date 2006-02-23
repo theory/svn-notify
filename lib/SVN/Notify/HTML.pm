@@ -124,8 +124,8 @@ specified in the C<< <html> >> tag.
 
 If the C<header> attribute is set, C<start_body()> outputs it between
 C<< <div> >> tags with the ID "header". Furthermore, if the header happens to
-start with the character "E<lt>", C<start_body()> assumes that it contains raw
-HTML and therefore will not escape it.
+start with the character "E<lt>", C<start_body()> assumes that it contains
+valid HTML and therefore will not escape it.
 
 =cut
 
@@ -142,10 +142,7 @@ sub start_body {
       qq{</title>\n</head>\n<body>\n\n<div id="msg">\n};
     if (my $header = $self->header) {
         print $out '<div id="header">',
-            ($header =~ /^</
-                 ? $header
-                 : '<pre>' . encode_entities($header) . '</pre>'
-            ),
+            ( $header =~ /^</  ? $header : encode_entities($header) ),
             "</div>\n";
     }
     return $self;
@@ -364,7 +361,7 @@ complete, and before any call to C<output_attached_diff()>.
 
 If the C<footer> attribute is set, C<end_body()> outputs it between
 C<< <div> >> tags with the ID "footer". Furthermore, if the footer happens to
-end with the character "E<lt>", C<end_body()> assumes that it contains raw
+end with the character "E<lt>", C<end_body()> assumes that it contains valid
 HTML and therefore will not escape it.
 
 =cut
@@ -374,10 +371,7 @@ sub end_body {
     $self->_dbpnt( "Ending body") if $self->verbose > 2;
     if (my $footer = $self->footer) {
         print $out '<div id="footer">',
-            ($footer =~ /^</
-                 ? $footer
-                 : '<pre>' . encode_entities($footer) . '</pre>'
-            ),
+            ( $footer =~ /^</  ? $footer : encode_entities($footer) ),
             "</div>\n";
     }
     print $out "\n</div>" unless $self->with_diff && !$self->attach_diff;

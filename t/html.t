@@ -508,11 +508,11 @@ ok $notifier->execute, 'Notify header and footer checking';
 
 # Check the output.
 $email = get_output();
-like $email, qr{<div id="header"><pre>This is the &amp;header</pre></div>\n<dl>},
+like $email, qr{<div id="header">This is the &amp;header</div>\n<dl>},
       'Check for the header';
 
 like $email,
-    qr{<div id="footer"><pre>This is the &amp;footer</pre></div>\s+</div>\s+</body>},
+    qr{<div id="footer">This is the &amp;footer</div>\s+</div>\s+</body>},
     'Check for the footer';
 
 ##############################################################################
