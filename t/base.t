@@ -9,7 +9,7 @@ use File::Spec::Functions;
 if ($^O eq 'MSWin32') {
     plan skip_all => "SVN::Notify not yet supported on Win32";
 } else {
-    plan tests => 158;
+    plan tests => 168;
 }
 
 BEGIN { use_ok('SVN::Notify') }
@@ -70,6 +70,8 @@ isa_ok($notifier->message, 'ARRAY', "Check message accessor" );
 isa_ok($notifier->files, 'HASH', "Check files accessor" );
 is($notifier->subject, '[111] Did this, that, and the other.',
    "Check subject accessor" );
+is($notifier->header, undef, 'Check header accessor');
+is($notifier->footer, undef, 'Check footer accessor');
 
 # Send the notification.
 ok( $notifier->execute, "Notify" );
@@ -430,6 +432,28 @@ is( $notifier->subject, '[111] Class',
 $email = get_output();
 like( $email, qr{Subject: \[111\] Class\n},
       "Check subject header for stripped cx and no log message line" );
+
+##############################################################################
+# Try header and footer.
+##############################################################################
+ok( $notifier = SVN::Notify->new(
+    %args,
+    header => 'This is the header',
+    footer => 'This is the footer',
+), 'Construct new header and foot notifier' );
+
+isa_ok $notifier, 'SVN::Notify';
+is $notifier->header, 'This is the header', 'Check the header';
+is $notifier->footer, 'This is the footer', 'Check the footer';
+ok $notifier->prepare, 'Prepare header and footer checking';
+ok $notifier->execute, 'Notify header and footer checking';
+
+# Check the output.
+$email = get_output();
+like $email, qr{This is the header\n\nRevision: 111},
+      'Check for the header';
+
+like $email, qr/This is the footer\s+\Z/, 'Check for the footer';
 
 ##############################################################################
 # Test file_exe

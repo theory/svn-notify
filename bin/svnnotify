@@ -92,6 +92,8 @@ Fake-out Pod::Usage
   -G --gnats-url URL           Include links to specified Gnats URL.
      --ticket-regex REGEX      Regex matching a custom ticket identifiers.
      --ticket-url URL          URL for linking to custom ticket identifers.
+     --header HEADER           Text header to display before body.
+     --footer FOOTER           Text footer to display at end of body.
   -V --verbose                 Incremental verbose mode.
   -h --help                    Print this usage statement and exit.
   -m --man                     Print the complete documentation and exit.

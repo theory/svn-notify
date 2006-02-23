@@ -9,7 +9,7 @@ use File::Spec::Functions;
 if ($^O eq 'MSWin32') {
     plan skip_all => "SVN::Notify::HTML not yet supported on Win32";
 } elsif (eval { require HTML::Entities }) {
-    plan tests => 173;
+    plan tests => 191;
 } else {
     plan skip_all => "SVN::Notify::HTML requires HTML::Entities";
 }
@@ -489,6 +489,56 @@ like($email,
 unlike($email,
        qr{<a href="http://svn\.example\.com/index\.cgi/revision/\?rev=200">rev 200</a>,},
        "Check for no rev 200 SVNWeb URL");
+
+##############################################################################
+# Try header and footer.
+##############################################################################
+ok $notifier = SVN::Notify::HTML->new(
+    %args,
+    header => 'This is the &header',
+    footer => 'This is the &footer',
+), 'Construct new header and foot notifier';
+
+isa_ok($notifier, 'SVN::Notify::HTML');
+isa_ok $notifier, 'SVN::Notify';
+is $notifier->header, 'This is the &header', 'Check the header';
+is $notifier->footer, 'This is the &footer', 'Check the footer';
+ok $notifier->prepare, 'Prepare header and footer checking';
+ok $notifier->execute, 'Notify header and footer checking';
+
+# Check the output.
+$email = get_output();
+like $email, qr{<div id="header"><pre>This is the &amp;header</pre></div>\n<dl>},
+      'Check for the header';
+
+like $email,
+    qr{<div id="footer"><pre>This is the &amp;footer</pre></div>\s+</div>\s+</body>},
+    'Check for the footer';
+
+##############################################################################
+# Try HTML header and footer.
+##############################################################################
+ok $notifier = SVN::Notify::HTML->new(
+    %args,
+    header => '<p>&laquo;Welcome!&raquo;</p>',
+    footer => '<p>Copyright &reg; 2006</p>',
+), 'Construct new HTML header and foot notifier';
+
+isa_ok($notifier, 'SVN::Notify::HTML');
+isa_ok $notifier, 'SVN::Notify';
+is $notifier->header, '<p>&laquo;Welcome!&raquo;</p>', 'Check the header';
+is $notifier->footer, '<p>Copyright &reg; 2006</p>', 'Check the footer';
+ok $notifier->prepare, 'Prepare HTML header and footer checking';
+ok $notifier->execute, 'Notify HTML header and footer checking';
+
+# Check the output.
+$email = get_output();
+like $email, qr{<div id="header"><p>&laquo;Welcome!&raquo;</p></div>\n<dl>},
+      'Check for the header';
+
+like $email,
+    qr{<div id="footer"><p>Copyright &reg; 2006</p></div>\s+</div>\s+</body>},
+    'Check for the footer';
 
 ##############################################################################
 # Functions.

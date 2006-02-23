@@ -122,6 +122,11 @@ opening C<< <html> >>, C<< <head> >>, C<< <style> >>, and C<< <body> >>
 tags. Note that if the C<language> attribute is set to a value, it will be
 specified in the C<< <html> >> tag.
 
+If the C<header> attribute is set, C<start_body()> outputs it between
+C<< <div> >> tags with the ID "header". Furthermore, if the header happens to
+start with the character "E<lt>", C<start_body()> assumes that it contains raw
+HTML and therefore will not escape it.
+
 =cut
 
 sub start_body {
@@ -135,6 +140,14 @@ sub start_body {
     $self->output_css($out);
     print $out qq{--></style>\n<title>}, encode_entities($self->subject),
       qq{</title>\n</head>\n<body>\n\n<div id="msg">\n};
+    if (my $header = $self->header) {
+        print $out '<div id="header">',
+            ($header =~ /^</
+                 ? $header
+                 : '<pre>' . encode_entities($header) . '</pre>'
+            ),
+            "</div>\n";
+    }
     return $self;
 }
 
@@ -347,11 +360,24 @@ Closes out the body of the email by outputting the closing C<< </body> >> and
 C<< </html> >> tags. Designed to be called when the body of the message is
 complete, and before any call to C<output_attached_diff()>.
 
+If the C<footer> attribute is set, C<end_body()> outputs it between
+C<< <div> >> tags with the ID "footer". Furthermore, if the footer happens to
+end with the character "E<lt>", C<end_body()> assumes that it contains raw
+HTML and therefore will not escape it.
+
 =cut
 
 sub end_body {
     my ($self, $out) = @_;
     $self->_dbpnt( "Ending body") if $self->verbose > 2;
+    if (my $footer = $self->footer) {
+        print $out '<div id="footer">',
+            ($footer =~ /^</
+                 ? $footer
+                 : '<pre>' . encode_entities($footer) . '</pre>'
+            ),
+            "</div>\n";
+    }
     print $out "\n</div>" unless $self->with_diff && !$self->attach_diff;
     print $out "\n</body>\n</html>\n";
     return $self;

@@ -42,6 +42,8 @@ my %params = (
     help           => undef,
     man            => undef,
     version        => undef,
+    header         => undef,
+    footer         => undef,
 );
 
 while (my ($k, $v) = each %testopts) {
