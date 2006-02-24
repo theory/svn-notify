@@ -1,6 +1,6 @@
 Revision history for Perl extension SVN::Notify
 
-2.53
+2.53  2006-02-24T21:30:48
       - Added 'header' and 'footer' attributes and command-line options to
         specify text to be put at the head and foot of each message. For HTML
         messages, the text will be escaped, unless it starts with "<", in
