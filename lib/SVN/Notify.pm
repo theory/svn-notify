@@ -451,8 +451,8 @@ sub new {
       unless $params{to} || $params{to_regex_map};
 
     # Set up default values.
-    $params{svnlook}   ||= $ENV{SVNLOOK}  || _find_exe('svnlook');
-    $params{sendmail}  ||= $ENV{SENDMAIL} || _find_exe('sendmail');
+    $params{svnlook}   ||= $ENV{SVNLOOK}  || $class->find_exe('svnlook');
+    $params{sendmail}  ||= $ENV{SENDMAIL} || $class->find_exe('sendmail');
     $params{with_diff} ||= $params{attach_diff};
     $params{verbose}   ||= 0;
     $params{charset}   ||= 'UTF-8';
@@ -620,6 +620,31 @@ the hash reference returned by this method:
 =cut
 
 sub file_label_map { \%map }
+
+##############################################################################
+
+=head3 find_exe
+
+  my $exe = SVN::Notify->find_exe($exe_name);
+
+This method searches through the system path, as well as the extra directories
+F</usr/local/bin> and F</usr/sbin> (because they're common paths for
+C<svnlook> and C<sendmail> for an executable file with the name C<$exe_name>.
+The first one it finds is returned with its full path. If none is found,
+C<find_exe()> returns undef.
+
+=cut
+
+sub find_exe {
+    my ($class, $exe) = @_;
+    $exe .= '.exe' if WIN32;
+    require File::Spec;
+    for my $path ( File::Spec->path, @{ ['/usr/local/bin', '/usr/sbin'] } ) {
+        $path = File::Spec->catfile($path, $exe);
+        return $path if -f $path && -x _;
+    }
+    return;
+}
 
 ##############################################################################
 
@@ -1598,21 +1623,6 @@ sub _read_pipe {
 ##############################################################################
 
 sub _dbpnt { print __PACKAGE__, ": $_[1]\n" }
-
-##############################################################################
-# This function is used to search the path for an executable.
-##############################################################################
-
-sub _find_exe {
-    my $exe = shift;
-    $exe .= '.exe' if WIN32;
-    require File::Spec;
-    for my $path (File::Spec->path, '/usr/local/bin', '/usr/sbin') {
-        $path = File::Spec->catfile($path, $exe);
-        return $path if -f $path && -x _;
-    }
-    return;
-}
 
 1;
 __END__
