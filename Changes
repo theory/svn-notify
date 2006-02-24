@@ -16,6 +16,10 @@ Revision history for Perl extension SVN::Notify
       - Added a second argument to all calls to encode_entities() in
         SVN::Notify::HTML and SVN::Notify::HTML::ColorDiff so that only '>'.
         '<', '&', and '"' are escaped.
+      - Fixed a bug in the _find_exe() function that was attempting to modify
+        a constant variable. Patch from John Peacock.
+      - Turned the _find_exe() function into the find_exe() class method,
+        since subclasses (such as SVN::Notify::Mirror) might want to use it.
 
 2.52  2006-02-19T18:50:24
       - Now uses File::Spec->path to search for a validate sendmail or svnlook

@@ -458,8 +458,8 @@ like $email, qr/This is the footer\s+\Z/, 'Check for the footer';
 ##############################################################################
 # Test file_exe
 ##############################################################################
-is SVN::Notify::_find_exe('testsvnlook'),  catfile($dir, "testsvnlook$ext"),
-    '_find_exe should find the test script';
+is +SVN::Notify->find_exe('testsvnlook'),  catfile($dir, "testsvnlook$ext"),
+    'find_exe should find the test script';
 
 ##############################################################################
 # Functions.
