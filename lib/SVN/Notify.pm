@@ -639,9 +639,9 @@ sub find_exe {
     my ($class, $exe) = @_;
     $exe .= '.exe' if WIN32;
     require File::Spec;
-    for my $path ( File::Spec->path, @{ ['/usr/local/bin', '/usr/sbin'] } ) {
-        $path = File::Spec->catfile($path, $exe);
-        return $path if -f $path && -x _;
+    for my $path ( File::Spec->path, qw(/usr/local/bin /usr/bin /usr/sbin) ) {
+        my $file = File::Spec->catfile($path, $exe);
+        return $file if -f $file && -x _;
     }
     return;
 }

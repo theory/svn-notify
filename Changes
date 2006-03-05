@@ -1,6 +1,8 @@
 Revision history for Perl extension SVN::Notify
 
 2.54
+      - Added "/usr/bin" to the list of paths searched for executables.
+        Suggested by Nacho Barrientos.
 
 2.53  2006-02-24T21:30:48
       - Added 'header' and 'footer' attributes and command-line options to
