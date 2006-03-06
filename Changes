@@ -1,6 +1,6 @@
 Revision history for Perl extension SVN::Notify
 
-2.54
+2.54  2006-03-06T00:33:42
       - Added "/usr/bin" to the list of paths searched for executables.
         Suggested by Nacho Barrientos.
       - Added 'max-diff-size' option. Patch from David Burley/SourceForge.
