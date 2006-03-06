@@ -1673,7 +1673,13 @@ __END__
 
 =item L<SVN::Notify::HTML|SVN::Notify::HTML>
 
+=item L<SVN::Notify::HTML::ColorDiff|SVN::Notify::HTML::ColorDiff>
+
 Subclasses SVN::Notify.
+
+=item L<https://sourceforge.net/docs/E09#svn_notify>
+
+SourceForge.net support for SVN::Notify.
 
 =back
 
