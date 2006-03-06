@@ -9,7 +9,7 @@ use File::Spec::Functions;
 if ($^O eq 'MSWin32') {
     plan skip_all => "SVN::Notify not yet supported on Win32";
 } else {
-    plan tests => 168;
+    plan tests => 177;
 }
 
 BEGIN { use_ok('SVN::Notify') }
@@ -454,6 +454,29 @@ like $email, qr{This is the header\n\nRevision: 111},
       'Check for the header';
 
 like $email, qr/This is the footer\s+\Z/, 'Check for the footer';
+
+##############################################################################
+# Try max_diff_size
+##############################################################################
+ok $notifier = SVN::Notify->new(
+    %args,
+    max_diff_length => 1024,
+    with_diff       => 1,
+), 'Construct new max_diff_length notifier';
+
+isa_ok $notifier, 'SVN::Notify';
+is $notifier->max_diff_length, 1024, 'max_diff_hlength should be set';
+ok $notifier->with_diff, 'with_diff should be set';
+ok $notifier->prepare, 'Prepare max_diff_length checking';
+ok $notifier->execute, 'Notify max_diff_length checking';
+
+# Check the output.
+$email = get_output();
+like $email, qr{mod_perl::VERSION < 1.99 \? 'Apache' : 'Apache::RequestRec';},
+    'Check for the last diff line';
+unlike $email, qr{ BEGIN }, 'Check for missing extra line';
+like $email, qr{Diff output truncated at 1024 characters.},
+    'Check for truncation message';
 
 ##############################################################################
 # Test file_exe

@@ -314,6 +314,16 @@ shorter. This could potentially be quite long. To prevent the subject from
 being over a certain number of characters, specify a maximum length here, and
 SVN::Notify will truncate the subject to the last word under that length.
 
+=item max_diff_length
+
+  svnnotify --max-diff-length 1024
+
+The maximum length of the diff (attached or in the body). The diff output is
+truncated at the last line under the maximum character count specified and
+then outputs an additional line indicating that the maximum diff size was
+reached and output truncated. This is helpful when a large diff output could
+cause a message to bounce due to message size.
+
 =item handler
 
   svnnotify --handler HTML
@@ -551,39 +561,40 @@ sub get_options {
 
     # Get options.
     Getopt::Long::GetOptions(
-        "repos-path|p=s"      => \$opts->{repos_path},
-        "revision|r=s"        => \$opts->{revision},
-        "to|t=s"              => \$opts->{to},
-        "to-regex-map|x=s%"   => \$opts->{to_regex_map},
-        "from|f=s"            => \$opts->{from},
-        "user-domain|D=s"     => \$opts->{user_domain},
-        "svnlook|l=s"         => \$opts->{svnlook},
-        "sendmail|s=s"        => \$opts->{sendmail},
-        "charset|c=s"         => \$opts->{charset},
-        "language|g=s"        => \$opts->{language},
-        "with-diff|d"         => \$opts->{with_diff},
-        "attach-diff|a"       => \$opts->{attach_diff},
-        "reply-to|R=s"        => \$opts->{reply_to},
-        "subject-prefix|P=s"  => \$opts->{subject_prefix},
-        "subject-cx|C"        => \$opts->{subject_cx},
-        "strip-cx-regex|X=s@" => \$opts->{strip_cx_regex},
-        "no-first-line|O"     => \$opts->{no_first_line},
-        "max-sub-length|i=i"  => \$opts->{max_sub_length},
-        "handler|H=s"         => \$opts->{handler},
-        "viewcvs-url|U=s"     => \$opts->{viewcvs_url},
-        "svnweb-url|S=s"      => \$opts->{svnweb_url},
-        "rt-url|T=s"          => \$opts->{rt_url},
-        "bugzilla-url|B=s"    => \$opts->{bugzilla_url},
-        "jira-url|J=s"        => \$opts->{jira_url},
-        "gnats-url|G=s"       => \$opts->{gnats_url},
-        "ticket-url=s"        => \$opts->{ticket_url},
-        "ticket-regex=s"      => \$opts->{ticket_regex},
-        "verbose|V+"          => \$opts->{verbose},
-        "help|h"              => \$opts->{help},
-        "man|m"               => \$opts->{man},
-        "version|v"           => \$opts->{version},
-        "header=s"            => \$opts->{header},
-        "footer=s"            => \$opts->{footer},
+        'repos-path|p=s'      => \$opts->{repos_path},
+        'revision|r=s'        => \$opts->{revision},
+        'to|t=s'              => \$opts->{to},
+        'to-regex-map|x=s%'   => \$opts->{to_regex_map},
+        'from|f=s'            => \$opts->{from},
+        'user-domain|D=s'     => \$opts->{user_domain},
+        'svnlook|l=s'         => \$opts->{svnlook},
+        'sendmail|s=s'        => \$opts->{sendmail},
+        'charset|c=s'         => \$opts->{charset},
+        'language|g=s'        => \$opts->{language},
+        'with-diff|d'         => \$opts->{with_diff},
+        'attach-diff|a'       => \$opts->{attach_diff},
+        'reply-to|R=s'        => \$opts->{reply_to},
+        'subject-prefix|P=s'  => \$opts->{subject_prefix},
+        'subject-cx|C'        => \$opts->{subject_cx},
+        'strip-cx-regex|X=s@' => \$opts->{strip_cx_regex},
+        'no-first-line|O'     => \$opts->{no_first_line},
+        'max-sub-length|i=i'  => \$opts->{max_sub_length},
+        'max-diff-length|e=i' => \$opts->{max_diff_length},
+        'handler|H=s'         => \$opts->{handler},
+        'viewcvs-url|U=s'     => \$opts->{viewcvs_url},
+        'svnweb-url|S=s'      => \$opts->{svnweb_url},
+        'rt-url|T=s'          => \$opts->{rt_url},
+        'bugzilla-url|B=s'    => \$opts->{bugzilla_url},
+        'jira-url|J=s'        => \$opts->{jira_url},
+        'gnats-url|G=s'       => \$opts->{gnats_url},
+        'ticket-url=s'        => \$opts->{ticket_url},
+        'ticket-regex=s'      => \$opts->{ticket_regex},
+        'verbose|V+'          => \$opts->{verbose},
+        'help|h'              => \$opts->{help},
+        'man|m'               => \$opts->{man},
+        'version|v'           => \$opts->{version},
+        'header=s'            => \$opts->{header},
+        'footer=s'            => \$opts->{footer},
     ) or return;
 
     # Load a subclass if one has been specified.
@@ -1291,15 +1302,33 @@ sub end_message {
 ##############################################################################
 # This method actually dumps the output of C<svnlook diff>. It's a separate
 # method because output_attached_diff() and output_diff() do essentially the
-# same thing, so they can both call it.
+# same thing, so they can both call it. The diff output will be truncated at
+# max_diff_length, if specified.
 ##############################################################################
 
 sub _dump_diff {
     my ($self, $out, $diff) = @_;
 
-    while (<$diff>) {
-        s/[\n\r]+$//;
-        print $out "$_\n";
+    if (my $max = $self->{max_diff_length}) {
+        my $length = 0;
+        while (<$diff>) {
+            s/[\n\r]+$//;
+            if (($length += length) < $max) {
+                print $out "$_\n";
+            }
+            else {
+                print $out
+                    "\n\@\@ Diff output truncated at $max characters. \@\@\n";
+                last;
+            }
+        }
+    }
+
+    else {
+        while (<$diff>) {
+            s/[\n\r]+$//;
+            print $out "$_\n";
+        }
     }
     close $diff or warn "Child process exited: $?\n";
     return $self;
@@ -1324,6 +1353,7 @@ __PACKAGE__->_accessors(qw(
     subject_prefix
     subject_cx
     max_sub_length
+    max_diff_length
     viewcvs_url
     svnweb_url
     rt_url
@@ -1477,6 +1507,13 @@ Gets or sets the value of the C<subject_cx> attribute.
   $notifier = $notifier->max_sub_length($max_sub_length);
 
 Gets or sets the value of the C<max_sub_length> attribute.
+
+=head3 max_diff_length
+
+  my $max_diff_length = $notifier->max_diff_length;
+  $notifier = $notifier->max_diff_length($max_diff_length);
+
+Gets or set the value of the C<max_diff_length> attribute.
 
 =head3 svnweb_url
 

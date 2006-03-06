@@ -3,6 +3,7 @@ Revision history for Perl extension SVN::Notify
 2.54
       - Added "/usr/bin" to the list of paths searched for executables.
         Suggested by Nacho Barrientos.
+      - Added 'max-diff-size' option. Patch from David Burley/SourceForge.
 
 2.53  2006-02-24T21:30:48
       - Added 'header' and 'footer' attributes and command-line options to
@@ -10,7 +11,8 @@ Revision history for Perl extension SVN::Notify
         messages, the text will be escaped, unless it starts with "<", in
         which case it will be assumed to be valid HTML and will therefore not
         be escaped. Either way, it will be output between <div> tags with the
-        IDs "header" or "footer" as appropriate.
+        IDs "header" or "footer" as appropriate. Based on a patch from David
+        Burley/SourceForge.
       - Fixed the executable-searching algorithm added in 2.52 to add ".exe"
         to the name of the executable being searched for if $^O eq 'MSWin32'.
       - Fixed encoding issues so that, under Perl 5.8 and later, the IO layer
