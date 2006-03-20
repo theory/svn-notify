@@ -1,6 +1,9 @@
 Revision history for Perl extension SVN::Notify
 
 2.55
+      - Added the 'io-layer' option to specify an alternate IO layer. Will be
+        most useful for those with repositories containing text in multiple
+        encodings, where it should be set to "raw".
 
 2.54  2006-03-06T00:33:42
       - Added "/usr/bin" to the list of paths searched for executables.

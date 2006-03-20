@@ -21,6 +21,7 @@ my %params = (
     from            => undef,
     user_domain     => undef,
     charset         => undef,
+    io_layer        => undef,
     language        => undef,
     with_diff       => undef,
     attach_diff     => undef,

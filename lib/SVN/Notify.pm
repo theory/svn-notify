@@ -207,6 +207,19 @@ The character set typically used on the repository for log messages, file
 names, and file contents. Used to specify the character set in the email
 Content-Type headers. Defaults to "UTF-8".
 
+=item io_layer
+
+  svnnotify --io-layer raw
+  svnnotify -o bytes
+
+The Perl IO layer to use for inputting and outputting data. See
+L<perlio|perlio> for details. Defaults to "encoding($charset)". If your
+repository uses different character encodings, C<charset> should be set to
+whatever is the most common character encoding, and C<io_layer> is best set to
+C<raw>. In that case, some characters might not look right in the commit
+messaage (because an email can manage only one character encoding at a time),
+but then C<svnnotify> won't get stuck inssuing a slew of warnings.
+
 =item language
 
   svnnotify --language fr
@@ -466,6 +479,7 @@ sub new {
     $params{with_diff} ||= $params{attach_diff};
     $params{verbose}   ||= 0;
     $params{charset}   ||= 'UTF-8';
+    $params{io_layer}  ||= "encoding($params{charset})";
 
     # svnweb_url and viewcvs_url are mutually exlusive.
     if ($params{svnweb_url} && $params{svnweb_url} !~ /%s/) {
@@ -570,6 +584,7 @@ sub get_options {
         'svnlook|l=s'         => \$opts->{svnlook},
         'sendmail|s=s'        => \$opts->{sendmail},
         'charset|c=s'         => \$opts->{charset},
+        'io-layer|o=s'        => \$opts->{io_layer},
         'language|g=s'        => \$opts->{language},
         'with-diff|d'         => \$opts->{with_diff},
         'attach-diff|a'       => \$opts->{attach_diff},
@@ -1349,6 +1364,7 @@ __PACKAGE__->_accessors(qw(
     svnlook
     sendmail
     charset
+    io_layer
     language
     with_diff
     attach_diff
@@ -1461,6 +1477,13 @@ Gets or sets the value of the C<sendmail> attribute.
   $notifier = $notifier->charset($charset);
 
 Gets or sets the value of the C<charset> attribute.
+
+=head3 io_layer
+
+  my $io_layer = $notifier->io_layer;
+  $notifier = $notifier->io_layer($io_layer);
+
+Gets or sets the value of the C<io_layer> attribute.
 
 =head3 language
 
@@ -1629,16 +1652,16 @@ sub _pipe {
     # Safer version of backtick (see perlipc(1)).
     # XXX Use Win32::Process on Win32? This doesn't seem to work as-is on Win32.
     local *PIPE;
-    my $pid = open(PIPE, $mode);
+    my $pid = open PIPE, $mode;
     die "Cannot fork: $!\n" unless defined $pid;
 
     if ($pid) {
         # Parent process. Set the encoing layer and return the file handle.
-        binmode(PIPE, ':encoding(' . $self->charset . ')') if PERL58;
+        binmode PIPE, ":$self->{io_layer}" if PERL58;
         return *PIPE;
     } else {
         # Child process. Execute the commands.
-        exec(@_) or die "Cannot exec $_[0]: $!\n";
+        exec @_ or die "Cannot exec $_[0]: $!\n";
         # Not reached.
     }
 }
