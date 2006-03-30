@@ -747,7 +747,7 @@ sub prepare_recipients {
         $regexen = {};
     }
 
-    my ($len, $cx);
+    my $cx;
     my $fh = $self->_pipe('-|', $self->{svnlook}, 'dirs-changed',
                           $self->{repos_path}, '-r', $self->{revision});
 
@@ -766,10 +766,12 @@ sub prepare_recipients {
         if ($self->{subject_cx}) {
             # XXX Do we need to set utf8 here?
             my $l = length;
-            ($len, $cx) = ($l, $_) unless defined $len && $len < $l;
-            $self->_dbpnt( qq{Context is "$cx"}) if $self->{verbose} > 1;
+            $cx ||= $_;
+            $cx =~ s{[/\\]?[^/\\]+$}{} until !$cx || /^$cx/;
         }
     }
+    $self->_dbpnt( qq{Context is "$cx"})
+        if $self->{subject_cx} && $self->{verbose} > 1;
     close $fh or warn "Child process exited: $?\n";
     $self->{to} = join ', ', @to;
     $self->{cx} = $cx;

@@ -4,6 +4,9 @@ Revision history for Perl extension SVN::Notify
       - Added the 'io-layer' option to specify an alternate IO layer. Will be
         most useful for those with repositories containing text in multiple
         encodings, where it should be set to "raw".
+      - Fixed the context output in the subject for the '--subject-cx' option
+        so that it's smarter about determining the longest common path.
+        Reported by Max Horn.
 
 2.54  2006-03-06T00:33:42
       - Added "/usr/bin" to the list of paths searched for executables.
