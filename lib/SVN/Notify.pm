@@ -345,8 +345,10 @@ cause a message to bounce due to message size.
 Specify the subclass of SVN::Notify to be constructed and returned, and
 therefore to handle the notification. Of course you can just use a subclass
 directly, but this parameter is designed to make it easy to just use
-C<< SVN::Notify->new >> without worrying about loading subclasses, such as
-in F<svnnotify>.
+C<< SVN::Notify->new >> without worrying about loading subclasses, such as in
+F<svnnotify>. Be sure to read the documentation for your subclass of choice,
+as there may be additional parameters and existing parameters may behave
+differently.
 
 =item svnweb_url
 
