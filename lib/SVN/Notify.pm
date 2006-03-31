@@ -735,8 +735,9 @@ sub prepare_recipients {
     $self->_dbpnt( "Preparing recipients list") if $self->{verbose};
     return $self unless $self->{to_regex_map} || $self->{subject_cx};
     my @to = $self->{to} ? ($self->{to}) : ();
-    my $regexen = delete $self->{to_regex_map};
+    my $regexen = $self->{to_regex_map};
     if ($regexen) {
+        $regexen = {%$regexen};
         $self->_dbpnt( "Compiling regex_map regular expressions")
           if $self->{verbose} > 1;
         for (values %$regexen) {
