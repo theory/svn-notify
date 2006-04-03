@@ -5,7 +5,7 @@ package SVN::Notify;
 use strict;
 use constant WIN32  => $^O eq 'MSWin32';
 use constant PERL58 => $] > 5.007;
-$SVN::Notify::VERSION = '2.55';
+$SVN::Notify::VERSION = '2.56';
 
 =begin comment
 
@@ -1742,7 +1742,7 @@ David Wheeler <david@kineticode.com>
 
 =head1 Copyright and License
 
-Copyright (c) 2004-2005 Kineticode, Inc. All Rights Reserved.
+Copyright (c) 2004-2006 Kineticode, Inc. All Rights Reserved.
 
 This module is free software; you can redistribute it and/or modify it under the
 same terms as Perl itself.

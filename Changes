@@ -1,5 +1,7 @@
 Revision history for Perl extension SVN::Notify
 
+2.56
+
 2.55  2006-04-03T23:11:11
       - Added the 'io-layer' option to specify an alternate IO layer. Will be
         most useful for those with repositories containing text in multiple
