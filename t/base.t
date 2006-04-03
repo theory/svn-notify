@@ -9,7 +9,7 @@ use File::Spec::Functions;
 if ($^O eq 'MSWin32') {
     plan skip_all => "SVN::Notify not yet supported on Win32";
 } else {
-    plan tests => 181;
+    plan tests => 182;
 }
 
 BEGIN { use_ok('SVN::Notify') }
@@ -206,14 +206,17 @@ is( scalar @{[$email =~ m{(--[^-\s]+--)}g]}, 1,
 ##############################################################################
 # Try to_regex_map.
 ##############################################################################
-ok( $notifier = SVN::Notify->new(%args, to_regex_map => {
+my $regex_map = {
     'one@example.com'  => 'AccessorBuilder',
     'two@example.com'  => '^/trunk',
     'none@example.com' => '/branches',
-}), "Construct new regex_map notifier" );
+};
+ok( $notifier = SVN::Notify->new(%args, to_regex_map => $regex_map),
+    "Construct new regex_map notifier" );
 isa_ok($notifier, 'SVN::Notify');
 ok( $notifier->prepare, "Prepare to_regex_map" );
 ok( $notifier->execute, "Notify to_regex_map" );
+is keys %$regex_map, 3, 'The regex map hash should be unchanged';
 
 # Check the output.
 $email = get_output();

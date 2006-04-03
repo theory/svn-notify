@@ -7,7 +7,7 @@ Revision history for Perl extension SVN::Notify
       - Fixed the context output in the subject for the '--subject-cx' option
         so that it's smarter about determining the longest common path.
         Reported by Max Horn.
-      - No longer modifying the values of the 'to_regex_map' hash, so as not
+      - No longer modifying the values of the 'to-regex-map' hash, so as not
         to mess with folks who might be passing it as a hash to more than one
         call to new(). Reported by Darby Felton.
       - Added a 'meta http-equiv="content-type"' tag to HTML output that
