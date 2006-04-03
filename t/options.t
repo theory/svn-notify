@@ -67,6 +67,7 @@ is_deeply($opts, \%params, "Check results");
 $params{bugzilla_url} = 'url';
 $params{handler} = 'HTML';
 $params{linkize} = undef;
+$params{css_url} = undef;
 
 # Use the --handler option to load the HTML subclass and make sure that
 # its options are properly parsed out of @ARGV.

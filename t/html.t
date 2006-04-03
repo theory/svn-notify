@@ -9,7 +9,7 @@ use File::Spec::Functions;
 if ($^O eq 'MSWin32') {
     plan skip_all => "SVN::Notify::HTML not yet supported on Win32";
 } elsif (eval { require HTML::Entities }) {
-    plan tests => 191;
+    plan tests => 194;
 } else {
     plan skip_all => "SVN::Notify::HTML requires HTML::Entities";
 }
@@ -68,6 +68,10 @@ for my $tag (qw(html head body title dl)) {
 
 # Make sure we have styles and the appropriate div.
 like( $email, qr|<style type="text/css">|, "Check for <style> tag" );
+unlike( $email, qr|<link rel="stylesheet"|,
+        'There should be no link rel="stylesheet" tag');
+like( $email, qr|<meta http-equiv="content-type" content="text/html; charset=utf-8" />|,
+      'There should be a meta http-equiv tag');
 like( $email, qr/<\/style>/, "Check for </style> tag" );
 like( $email,
       qr/#msg dl { border: 1px #006 solid; background: #369; padding: 6px; color: #fff; }/,
@@ -105,9 +109,9 @@ unlike( $email, qr{Modified: trunk/Params-CallbackRequest/Changes},
         "Check for html diff" );
 
 ##############################################################################
-# Make sure that handler delegation works.
+# Make sure that handler delegation and css_url works.
 ##############################################################################
-ok( $notifier = SVN::Notify->new(%args, handler => 'HTML'),
+ok( $notifier = SVN::Notify->new(%args, handler => 'HTML', css_url => 'foo.css'),
     "Construct new HTML notifier" );
 isa_ok($notifier, 'SVN::Notify::HTML');
 isa_ok($notifier, 'SVN::Notify');
@@ -126,6 +130,8 @@ like( $email, qr{Content-Type: text/html; charset=UTF-8\n},
       'Check HTML Content-Type' );
 like( $email, qr{Content-Transfer-Encoding: 8bit\n},
       'Check HTML Content-Transfer-Encoding');
+like( $email, qr|<link rel="stylesheet" type="text/css" href="foo.css" />|,
+        'There should be a link rel="stylesheet" tag');
 
 ##############################################################################
 # Include HTML diff and language.

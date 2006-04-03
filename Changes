@@ -10,6 +10,16 @@ Revision history for Perl extension SVN::Notify
       - No longer modifying the values of the 'to_regex_map' hash, so as not
         to mess with folks who might be passing it as a hash to more than one
         call to new(). Reported by Darby Felton.
+      - Added a 'meta http-equiv="content-type"' tag to HTML output that
+        includes the character set to help some clients in the proper display
+        of the characters in an HTML email. I'm not sure if any clients
+        actually need this help, but it certainly can't hurt!
+      - Added the '--css-url' option to specify an alternate style sheet for
+        HTML emails. SVN::Notify::HTML's own CSS is left in the email, as
+        well, so the specified style sheet can just override the default,
+        rather than have to style everything itself. Yes, it takes advantage
+        of the "cascading" feature of cascading style sheets! Based on a
+        suggestion by Steve James.
 
 2.54  2006-03-06T00:33:42
       - Added "/usr/bin" to the list of paths searched for executables.
