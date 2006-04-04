@@ -1,6 +1,26 @@
 Revision history for Perl extension SVN::Notify
 
 2.56
+      - Abstracted creation of the diff file handle into the new diff_handle()
+        method.
+      - Documented use of diff_handle() in the output() method.
+      - Added optional second argument to output() to optionally suppress the
+        output of the email headers. This argument is used by the new
+        Alternative subclass.
+      - Added SVN::Notify::Alternative, which allows multiple versions of a
+        commit email to be sent, such as text/plain plus HTML. The multiple
+        versions are assembled into a single email message using the
+        multipart/alternative media type. For those who want HTML messages but
+        must support users that can only read plain text or rely on archives
+        that ignore HTML messages, this can be very useful. Based on an
+        implementation by Jukka Zitting.
+      - Fixed use_ok() tests that weren't running at all.
+      - Added an extra newline to separate the file list from an inline diff
+        in the plain text format where <--with-diff> has been specified.
+      - Moved the "multipart/mixed" content-type header generation from
+        output_headers() to output_content_type(), not only because this makes
+        more sense, but also because it makes attachments behave better when
+        using SVN::Notify::Alternative.
 
 2.55  2006-04-03T23:11:11
       - Added the 'io-layer' option to specify an alternate IO layer. Will be

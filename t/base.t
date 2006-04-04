@@ -9,10 +9,10 @@ use File::Spec::Functions;
 if ($^O eq 'MSWin32') {
     plan skip_all => "SVN::Notify not yet supported on Win32";
 } else {
-    plan tests => 182;
+    plan tests => 183;
 }
 
-BEGIN { use_ok('SVN::Notify') }
+use_ok('SVN::Notify');
 
 my $ext = $^O eq 'MSWin32' ? '.bat' : '';
 
@@ -93,7 +93,7 @@ like( $email, qr{Content-Transfer-Encoding: 8bit\n},
 # Make sure we have headers for each of the four kinds of changes.
 for my $header ('Log Message', 'Modified Paths', 'Added Paths',
                 'Removed Paths', 'Property Changed') {
-    like( $email, qr/$header/, $header);
+    like( $email, qr/^$header/m, $header);
 }
 
 # Check that we have the commit metatdata.

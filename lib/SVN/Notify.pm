@@ -953,26 +953,29 @@ sub execute {
 =head3 output
 
   $notifier->output($file_handle);
+  $notifier->output($file_handle, $no_headers);
 
 Called internally by C<execute()> to output a complete email message. The file
 handle passed is a piped connection to F<sendmail>, so that C<output()> and
-its related methods can print directly to sendmail.
+its related methods can print directly to sendmail. The optional second
+argument, if true, will suppress the output of the email headers.
 
 Really C<output()> is a simple wrapper around a number of other method calls.
 It is thus essentially a shortcut for:
 
-    $notifier->output_headers($out);
+    $notifier->output_headers($out) unless $no_headers;
     $notifier->output_content_type($out);
     $notifier->start_body($out);
     $notifier->output_metadata($out);
     $notifier->output_log_message($out);
     $notifier->output_file_lists($out);
     if ($notifier->with_diff) {
+        my $diff_handle = $self->diff_handle;
         if ($notifier->attach_diff) {
             $notifier->end_body($out);
-            $notifier->output_attached_diff($out);
+            $notifier->output_attached_diff($out, $diff_handle);
         } else {
-            $notifier->output_diff($out);
+            $notifier->output_diff($out, $diff_handle);
             $notifier->end_body($out);
         }
     } else {
@@ -983,9 +986,9 @@ It is thus essentially a shortcut for:
 =cut
 
 sub output {
-    my ($self, $out) = @_;
+    my ($self, $out, $no_headers) = @_;
     $self->_dbpnt( "Outputting notification message") if $self->{verbose} > 1;
-    $self->output_headers($out);
+    $self->output_headers($out) unless $no_headers;
     $self->output_content_type($out);
     $self->start_body($out);
     $self->output_metadata($out);
@@ -993,11 +996,7 @@ sub output {
     $self->output_file_lists($out);
     if ($self->{with_diff}) {
         # Get a handle on the diff output.
-        my $diff = $self->_pipe(
-            '-|'   => $self->{svnlook},
-            'diff' => $self->{repos_path},
-            '-r'   => $self->{revision}
-        );
+        my $diff = $self->diff_handle;
         if ($self->{attach_diff}) {
             $self->end_body($out);
             $self->output_attached_diff($out, $diff);
@@ -1019,10 +1018,8 @@ sub output {
 
   $notifier->output_headers($file_handle);
 
-Outputs the headers for the notification message. If the C<attach_diff>
-parameter was set to true, then a boundary string will be generated and the
-Content-Type set to "multipart/mixed" and stored as the C<boundary>
-attribute.
+Outputs the headers for the notification message headers. Should be called
+only once for a single email message.
 
 =cut
 
@@ -1035,9 +1032,34 @@ sub output_headers {
       "To: $self->{to}\n",
       "Subject: $self->{subject}\n";
     print $out "Reply-To: $self->{reply_to}\n" if $self->{reply_to};
-    print $out "X-Mailer: SVN::Notify " . $self->VERSION .
-      ": http://search.cpan.org/dist/SVN-Notify/\n";
+    print $out "X-Mailer: SVN::Notify ", $self->VERSION,
+               ": http://search.cpan.org/dist/SVN-Notify/\n";
 
+    return $self;
+}
+
+##############################################################################
+
+=head3 output_content_type
+
+  $notifier->output_content_type($file_handle);
+
+Outputs the content type and transfer encoding headers. These demarcate the
+body of the message. If the C<attach_diff> parameter was set to true, then a
+boundary string will be generated and the Content-Type set to
+"multipart/mixed" and stored as the C<boundary> attribute.
+
+Arter that, this method outputs the content type returned by
+C<content_type()>, the character set specified by the C<charset> attribute,
+and a Content-Transfer-Encoding of "8bit". Subclasses can either rely on this
+functionality or override this method to provide their own content type
+headers.
+
+=cut
+
+sub output_content_type {
+    my ($self, $out) = @_;
+    $self->_dbpnt( "Outputting content type") if $self->{verbose} > 2;
     # Output the content type.
     if ($self->{attach_diff}) {
         # We need a boundary string.
@@ -1050,27 +1072,6 @@ sub output_headers {
           qq{Content-Type: multipart/mixed; boundary="$self->{boundary}"\n\n};
     }
 
-    return $self;
-}
-
-##############################################################################
-
-=head3 output_content_type
-
-  $notifier->output_content_type($file_handle);
-
-Outputs the content type and transfer encoding headers. These demarcate the
-body of the message. This method outputs the content type returned by
-C<content_type()>, the character set specified by the C<charset> attribute,
-and a Content-Transfer-Encoding of "8bit". Subclasses can either rely on this
-functionality or override this method to provide their own content type
-headers.
-
-=cut
-
-sub output_content_type {
-    my ($self, $out) = @_;
-    $self->_dbpnt( "Outputting content type") if $self->{verbose} > 2;
     my $ctype = $self->content_type;
     print $out "--$self->{boundary}\n" if $self->{attach_diff};
     print $out "Content-Type: $ctype; charset=$self->{charset}\n",
@@ -1242,6 +1243,7 @@ sub output_file_lists {
         print $out "\n$map->{$type}:\n$dash{$type}\n";
         print $out "    $_\n" for @{ $files->{$type} };
     }
+    print $out "\n";
 }
 
 ##############################################################################
@@ -1260,7 +1262,7 @@ C<output_attached_diff()>.
 sub end_body {
     my ($self, $out) = @_;
     $self->_dbpnt( "Ending body") if $self->{verbose} > 2;
-    print $out $self->{footer} ? "\n$self->{footer}\n\n" : "\n\n";
+    print $out $self->{footer} ? "\n$self->{footer}\n" : "\n";
     return $self;
 }
 
@@ -1320,6 +1322,28 @@ sub end_message {
     my ($self, $out) = @_;
     print $out "--$self->{boundary}--\n" if $self->{attach_diff};
     return $self;
+}
+
+##############################################################################
+
+=head3 diff_handle
+
+  my $diff = $notifier->diff_handle;
+  while (<$diff>) { print }
+
+Returns a file handle reference providing access to the the commit diff. It
+will usually be passed as the second argument to C<output_diff()> or
+C<output_attached_diff()>.
+
+=cut
+
+sub diff_handle {
+    my $self = shift;
+    return $self->_pipe(
+        '-|'   => $self->{svnlook},
+        'diff' => $self->{repos_path},
+        '-r'   => $self->{revision}
+    );
 }
 
 ##############################################################################

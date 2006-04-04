@@ -9,12 +9,12 @@ use File::Spec::Functions;
 if ($^O eq 'MSWin32') {
     plan skip_all => "SVN::Notify::HTML::ColorDiff not yet supported on Win32";
 } elsif (eval { require HTML::Entities }) {
-    plan tests => 165;
+    plan tests => 166;
 } else {
     plan skip_all => "SVN::Notify::HTML::ColorDiff requires HTML::Entities";
 }
 
-BEGIN { use_ok('SVN::Notify::HTML::ColorDiff') }
+use_ok('SVN::Notify::HTML::ColorDiff');
 
 my $ext = $^O eq 'MSWin32' ? '.bat' : '';
 

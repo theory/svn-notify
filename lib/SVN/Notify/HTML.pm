@@ -63,9 +63,7 @@ in SVN::Notify, but when using F<svnnotify>, specify C<--handler HTML>.
 
 =head3 new
 
-=head3 new
-
-  my $notifier = SVN::Notify->new(%params);
+  my $notifier = SVN::Notify::HTML->new(%params);
 
 Constructs and returns a new SVN::Notify object. All parameters supported by
 SVN::Notity are supported here, but SVN::Notify::HTML supports a few
