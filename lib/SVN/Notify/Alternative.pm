@@ -157,6 +157,9 @@ sub output {
 
 =head2 Accessors
 
+In addition to those supported by L<SVN::Notify|SVN::Notify/Accessors>,
+SVN::Notify::Alternative supports the following accessors:
+
 =head3 alternatives
 
   my $alts = $notify->alternatives;

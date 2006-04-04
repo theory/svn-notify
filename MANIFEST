@@ -2,12 +2,14 @@ bin/svnnotify
 Build.PL
 Changes
 lib/SVN/Notify.pm
+lib/SVN/Notify/Alternative.pm
 lib/SVN/Notify/HTML.pm
 lib/SVN/Notify/HTML/ColorDiff.pm
 Makefile.PL
 MANIFEST			This list of files
 META.yml
 README
+t/alt.t
 t/base.t
 t/bin/testsendmail
 t/bin/testsendmail.bat

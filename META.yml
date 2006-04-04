@@ -23,6 +23,9 @@ provides:
   SVN::Notify:
     file: lib/SVN/Notify.pm
     version: 2.56
+  SVN::Notify::Alternative:
+    file: lib/SVN/Notify/Alternative.pm
+    version: 1.0
   SVN::Notify::HTML:
     file: lib/SVN/Notify/HTML.pm
     version: 2.56

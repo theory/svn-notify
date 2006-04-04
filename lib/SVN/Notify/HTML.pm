@@ -438,6 +438,29 @@ sub output_diff {
     return $self;
 }
 
+##############################################################################
+
+=head2 Accessors
+
+In addition to those supported by L<SVN::Notify|SVN::Notify/Accessors>,
+SVN::Notify::HTML supports the following accessors:
+
+=head3 linkize
+
+  my $linkize = $notifier->linkize;
+  $notifier = $notifier->linkize($linkize);
+
+Gets or sets the value of the C<linkize> attribute.
+
+=head3 css_url
+
+  my $css_url = $notifier->css_url;
+  $notifier = $notifier->css_url($css_url);
+
+Gets or sets the value of the C<css_url> attribute.
+
+=cut
+
 1;
 __END__
 
