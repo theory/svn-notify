@@ -5,7 +5,7 @@ package SVN::Notify;
 use strict;
 use constant WIN32  => $^O eq 'MSWin32';
 use constant PERL58 => $] > 5.007;
-$SVN::Notify::VERSION = '2.56';
+$SVN::Notify::VERSION = '2.57';
 
 =begin comment
 
