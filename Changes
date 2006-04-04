@@ -18,7 +18,7 @@ Revision history for Perl extension SVN::Notify
         implementation by Jukka Zitting.
       - Fixed use_ok() tests that weren't running at all.
       - Added an extra newline to separate the file list from an inline diff
-        in the plain text format where <--with-diff> has been specified.
+        in the plain text format where '--with-diff' has been specified.
       - Moved the "multipart/mixed" content-type header generation from
         output_headers() to output_content_type(), not only because this makes
         more sense, but also because it makes attachments behave better when
