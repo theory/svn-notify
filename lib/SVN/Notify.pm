@@ -1681,6 +1681,11 @@ sub _pipe {
     # Safer version of backtick (see perlipc(1)).
     # XXX Use Win32::Process on Win32? This doesn't seem to work as-is on Win32.
     local *PIPE;
+    if (WIN32) {
+        my $cmd = $mode eq '-|' ? join(q{ }, @_) . '|' : '|' . join q{ }, @_;
+        open PIPE, $cmd or die "Cannot fork: $!\n";
+        return *PIPE;
+    }
     my $pid = open PIPE, $mode;
     die "Cannot fork: $!\n" unless defined $pid;
 

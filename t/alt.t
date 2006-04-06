@@ -3,14 +3,8 @@
 # $Id: base.t 2771 2006-04-03 23:10:02Z theory $
 
 use strict;
-use Test::More;
+use Test::More tests => 77;
 use File::Spec::Functions;
-
-if ($^O eq 'MSWin32') {
-    plan skip_all => "SVN::Notify not yet supported on Win32";
-} else {
-    plan tests => 77;
-}
 
 use_ok 'SVN::Notify::Alternative' or die;
 

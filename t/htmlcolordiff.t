@@ -6,9 +6,7 @@ use strict;
 use Test::More;
 use File::Spec::Functions;
 
-if ($^O eq 'MSWin32') {
-    plan skip_all => "SVN::Notify::HTML::ColorDiff not yet supported on Win32";
-} elsif (eval { require HTML::Entities }) {
+if (eval { require HTML::Entities }) {
     plan tests => 166;
 } else {
     plan skip_all => "SVN::Notify::HTML::ColorDiff requires HTML::Entities";
