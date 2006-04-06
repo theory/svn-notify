@@ -1,5 +1,7 @@
 Revision history for Perl extension SVN::Notify
 
+2.58
+
 2.57  2006-04-06T22:36:18
       - Finally ported to Win32. It was actually a simple matter of changing
         how command pipes are created.
