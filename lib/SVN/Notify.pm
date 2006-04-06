@@ -952,7 +952,7 @@ sub execute {
     return $self unless $self->{to};
 
     my $out = $self->{smtp}
-        ? SVN::Notify::SMTP->new($self)
+        ? SVN::Notify::SMTP->get_handle($self)
         : $self->_pipe('|-', $self->{sendmail}, '-oi', '-t');
 
     # Output the message.
@@ -1746,7 +1746,7 @@ sub _dbpnt { print __PACKAGE__, ": $_[1]\n" }
 
 package SVN::Notify::SMTP;
 
-sub new {
+sub new_handle {
     my ($class, $notifier) = @_;
     require Net::SMTP;
     my $smtp = Net::SMTP->new($notifier->{smtp});

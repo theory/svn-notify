@@ -18,8 +18,9 @@
       # Save this 'cause CPAN will chdir all over the place.
       my $cwd = Cwd::cwd();
       
-      CPAN::Shell->install('Module::Build::Compat')
-	or die " *** Cannot install without Module::Build.  Exiting ...\n";
+      CPAN::Shell->install('Module::Build::Compat');
+      CPAN::Shell->expand("Module", "Module::Build::Compat")->uptodate
+	or die "Couldn't install Module::Build, giving up.\n";
       
       chdir $cwd or die "Cannot chdir() back to $cwd: $!";
     }
