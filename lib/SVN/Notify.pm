@@ -1702,7 +1702,6 @@ sub _pipe {
     $self->_dbpnt( "Piping execution of '" . join("', '", @_) . "'")
       if $self->{verbose};
     # Safer version of backtick (see perlipc(1)).
-    # XXX Use Win32::Process on Win32? This doesn't seem to work as-is on Win32.
     local *PIPE;
     if (WIN32) {
         my $cmd = $mode eq '-|' ? join(q{ }, @_) . '|' : '|' . join q{ }, @_;
@@ -1746,7 +1745,7 @@ sub _dbpnt { print __PACKAGE__, ": $_[1]\n" }
 
 package SVN::Notify::SMTP;
 
-sub new_handle {
+sub get_handle {
     my ($class, $notifier) = @_;
     require Net::SMTP;
     my $smtp = Net::SMTP->new($notifier->{smtp});
