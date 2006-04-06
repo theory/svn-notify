@@ -1749,6 +1749,8 @@ sub get_handle {
     my ($class, $notifier) = @_;
     require Net::SMTP;
     my $smtp = Net::SMTP->new($notifier->{smtp});
+    binmode tied(*{ $smtp->tied_fh }), ":$notifier->{io_layer}"
+        if SVN::Notify::PERL58;
     $smtp->mail($notifier->{from});
     $smtp->to($notifier->{to});
     $smtp->data;
