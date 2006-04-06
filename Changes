@@ -5,6 +5,9 @@ Revision history for Perl extension SVN::Notify
       - Added 'smtp' option to enable sending messages to an SMTP server
         rather than to the local 'sendmail' application. This is essential for
         Windows support.
+      - Added --io-layer to the usage statement in 'svnnotify'.
+      - Fixed single-dash arguments in documentaion so that they're all
+        documented with a single dash in SVN::Notify.
 
 2.56  2006-04-04T23:16:37
       - Abstracted creation of the diff file handle into the new diff_handle()
