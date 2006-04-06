@@ -1,7 +1,8 @@
 Revision history for Perl extension SVN::Notify
 
-2.57
-      - Finally ported to Win32.
+2.57  2006-04-06T22:36:18
+      - Finally ported to Win32. It was actually a simple matter of changing
+        how command pipes are created.
       - Added 'smtp' option to enable sending messages to an SMTP server
         rather than to the local 'sendmail' application. This is essential for
         Windows support.
