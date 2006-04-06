@@ -9,7 +9,7 @@ Revision history for Perl extension SVN::Notify
         rather than to the local 'sendmail' application. This is essential for
         Windows support.
       - Added --io-layer to the usage statement in 'svnnotify'.
-      - Fixed single-dash arguments in documentaion so that they're all
+      - Fixed single-dash arguments in documentation so that they're all
         documented with a single dash in SVN::Notify.
 
 2.56  2006-04-04T23:16:37
