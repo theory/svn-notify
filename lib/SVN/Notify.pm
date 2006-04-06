@@ -44,7 +44,7 @@ Use the class in a custom script:
 
 This class may be used for sending email messages for Subversion repository
 activity. There are a number of different modes supported, and SVN::Notify is
-fully subclassable, to easily add new functionality. By default, A list of all
+fully subclassable to easily add new functionality. By default, A list of all
 the files affected by the commit will be assembled and listed in a single
 message. An additional option allows diffs to be calculated for the changes
 and either appended to the message or added as an attachment. See the
@@ -62,10 +62,12 @@ everything executes properly.
 =cut
 
 # Map the svnlook changed codes to nice labels.
-my %map = ( U => 'Modified Paths',
-            A => 'Added Paths',
-            D => 'Removed Paths',
-            _ => 'Property Changed');
+my %map = (
+    U => 'Modified Paths',
+    A => 'Added Paths',
+    D => 'Removed Paths',
+    _ => 'Property Changed',
+);
 
 ##############################################################################
 
@@ -169,7 +171,7 @@ domain specified by the C<user_domain> parameter.
 =item svnlook
 
   svnnotify --svnlook /path/to/svnlook
-  svnnotify --l /path/to/svnlook
+  svnnotify -l /path/to/svnlook
 
 The location of the F<svnlook> executable. If not specified, SVN::Notify will
 search through the directories in the C<$PATH> environment variable, plus in
@@ -188,15 +190,25 @@ executable.
 =item sendmail
 
   svnnotify --sendmail /path/to/sendmail
-  svnnotify --s /path/to/sendmail
+  svnnotify -s /path/to/sendmail
 
-The location of the F<sendmail> executable. If not specified, SVN::Notify will
-search through the directories in the C<$PATH> environment variable, plus in
-F</usr/local/bin> and F</usr/sbin>, for an F<sendmail> executable. Specify a
-full path to F<sendmail> via this option or by setting the C<$SENDMAIL>
-environment variable if F<sendmail> isn't in your path or to avoid loading
+The location of the F<sendmail> executable. If neither the C<sendmail> nor the
+C<smtp> parameter is specified, SVN::Notify will search through the
+directories in the C<$PATH> environment variable, plus in F</usr/local/bin>
+and F</usr/sbin>, for an F<sendmail> executable. Specify a full path to
+F<sendmail> via this option or by setting the C<$SENDMAIL> environment
+variable if F<sendmail> isn't in your path or to avoid loading
 L<File::Spec|File::Spec>. The same caveats as applied to the location of the
 F<svnlook> executable apply here.
+
+=item smtp
+
+  svnnotify --smtp smtp.example.com
+
+The address for an SMTP server through which to send the notification email.
+If unspecified, SVN::Notify will use F<sendmail> to send the message. If
+F<sendmail> is not installed locally (such as on Windows boxes!), you I<must>
+specify an SMTP server.
 
 =item charset
 
@@ -253,7 +265,7 @@ implicitly sets the C<with_diff> parameter to a true value.
 =item reply_to
 
   svnnotify --reply-to devlist@example.com
-  svnnotify --R developers@example.net
+  svnnotify -R developers@example.net
 
 The email address to use in the "Reply-To" header of the notification email.
 No "Reply-To" header will be added to the email if no value is specified for
@@ -295,7 +307,7 @@ Pass an array reference if calling C<new()> directly.
 =item no_first_line
 
   svnnotify --no-first-line
-  svnnotify --O
+  svnnotify -O
 
 Omits the first line of the log message from the subject. This is most useful
 when used in combination with the C<subject_cx> parameter, so that just the
@@ -477,11 +489,12 @@ sub new {
 
     # Set up default values.
     $params{svnlook}   ||= $ENV{SVNLOOK}  || $class->find_exe('svnlook');
-    $params{sendmail}  ||= $ENV{SENDMAIL} || $class->find_exe('sendmail');
     $params{with_diff} ||= $params{attach_diff};
     $params{verbose}   ||= 0;
     $params{charset}   ||= 'UTF-8';
     $params{io_layer}  ||= "encoding($params{charset})";
+    $params{sendmail}  ||= $ENV{SENDMAIL} || $class->find_exe('sendmail')
+        unless $params{smtp};
 
     # svnweb_url and viewcvs_url are mutually exlusive.
     if ($params{svnweb_url} && $params{svnweb_url} !~ /%s/) {
@@ -585,6 +598,7 @@ sub get_options {
         'user-domain|D=s'     => \$opts->{user_domain},
         'svnlook|l=s'         => \$opts->{svnlook},
         'sendmail|s=s'        => \$opts->{sendmail},
+        'smtp=s'              => \$opts->{smtp},
         'charset|c=s'         => \$opts->{charset},
         'io-layer|o=s'        => \$opts->{io_layer},
         'language|g=s'        => \$opts->{language},
@@ -926,9 +940,9 @@ sub prepare_subject {
   $notifier->execute;
 
 Sends the notification message. This involves opening a file handle to
-F<sendmail> and passing it to C<output()>. This is the main method used to
-send notifications or execute any other actions in response to Subversion
-activity.
+F<sendmail> or a tied file handle connected to an SMTP server and passing it
+to C<output()>. This is the main method used to send notifications or execute
+any other actions in response to Subversion activity.
 
 =cut
 
@@ -937,8 +951,9 @@ sub execute {
     $self->_dbpnt( "Sending message") if $self->{verbose};
     return $self unless $self->{to};
 
-    # Safe pipe to sendmail. See perlipc(1).
-    my $out = $self->_pipe('|-', $self->{sendmail}, '-oi', '-t');
+    my $out = $self->{smtp}
+        ? SVN::Notify::SMTP->new($self)
+        : $self->_pipe('|-', $self->{sendmail}, '-oi', '-t');
 
     # Output the message.
     $self->output($out);
@@ -956,9 +971,9 @@ sub execute {
   $notifier->output($file_handle, $no_headers);
 
 Called internally by C<execute()> to output a complete email message. The file
-handle passed is a piped connection to F<sendmail>, so that C<output()> and
-its related methods can print directly to sendmail. The optional second
-argument, if true, will suppress the output of the email headers.
+a file handle, so that C<output()> and its related methods can print directly
+to the email message. The optional second argument, if true, will suppress the
+output of the email headers.
 
 Really C<output()> is a simple wrapper around a number of other method calls.
 It is thus essentially a shortcut for:
@@ -1392,6 +1407,7 @@ __PACKAGE__->_accessors(qw(
     user_domain
     svnlook
     sendmail
+    smtp
     charset
     io_layer
     language
@@ -1499,6 +1515,13 @@ Gets or sets the value of the C<svnlook> attribute.
   $notifier = $notifier->sendmail($sendmail);
 
 Gets or sets the value of the C<sendmail> attribute.
+
+=head3 smtp
+
+  my $smtp = $notifier->smtp;
+  $notifier = $notifier->smtp($smtp);
+
+Gets or sets the value of the C<smtp> attribute.
 
 =head3 charset
 
@@ -1721,6 +1744,32 @@ sub _read_pipe {
 
 sub _dbpnt { print __PACKAGE__, ": $_[1]\n" }
 
+package SVN::Notify::SMTP;
+
+sub new {
+    my ($class, $notifier) = @_;
+    require Net::SMTP;
+    my $smtp = Net::SMTP->new($notifier->{smtp});
+    $smtp->mail($notifier->{from});
+    $smtp->to($notifier->{to});
+    $smtp->data;
+    tie local(*SMTP), $class, $smtp;
+    return *SMTP;
+}
+
+sub TIEHANDLE {
+    my ($class, $smtp) = @_;
+    bless \$smtp, $class;
+}
+
+sub PRINT  { ${+shift}->datasend(@_) }
+sub PRINTF { ${+shift}->datasend(sprintf shift, @_) }
+sub CLOSE  {
+    my $self = shift;
+    $$self->dataend;
+    $$self->quit;
+}
+
 1;
 __END__
 
@@ -1743,18 +1792,6 @@ SourceForge.net support for SVN::Notify.
 =head1 Bugs
 
 Please send bug reports to <bug-svn-notify@rt.cpan.org>.
-
-=head1 To Do
-
-=over
-
-=item *
-
-Port to Win32. I think it just needs to use Win32::Process to manage
-communication with F<svnlook> and F<sendmail>. See comments in the source
-code.
-
-=back
 
 =head1 Author
 

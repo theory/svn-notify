@@ -67,12 +67,12 @@ Fake-out Pod::Usage
   -f --from ADDRESS            Email address to use in the From header.
   -D --user-domain DOMAIN      Domain name to append to the username to
                                complete the email address in the From header.
-  -l --svnlook SVNLOOK         Location of the svnlook executable. Defaults
-                               to "/usr/local/bin/svnlook".
-  -s --sendmail SENDMAIL       Location of the sendmail executable. Defaults
-                               to "/usr/sbin/sendmail".
+  -l --svnlook SVNLOOK         Location of the svnlook executable.
+  -s --sendmail SENDMAIL       Location of the sendmail executable.
+     --smtp ADDRESS            Address for an SMTP server.
   -c --charset CHARSET         The character set of the log message and the
                                repository files.
+     --io-layer                Perl IO layer to use for input and output.
   -d --with-diff               Include the diff in the message.
   -a --attach-diff             Attach the diff to the message.
   -R --reply-to ADDRESS        Address for use in the Reply-To header.

@@ -1,8 +1,10 @@
 Revision history for Perl extension SVN::Notify
 
 2.57
-      - Finally ported to Win32, although you will need sendmail to get it to
-        actually work. See 
+      - Finally ported to Win32.
+      - Added 'smtp' option to enable sending messages to an SMTP server
+        rather than to the local 'sendmail' application. This is essential for
+        Windows support.
 
 2.56  2006-04-04T23:16:37
       - Abstracted creation of the diff file handle into the new diff_handle()

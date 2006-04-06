@@ -17,6 +17,7 @@ my %testopts = (
 );
 
 my %params = (
+    smtp            => undef,
     to_regex_map    => undef,
     from            => undef,
     user_domain     => undef,
