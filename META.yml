@@ -16,6 +16,7 @@ build_requires:
 recommends:
   File::Spec: 0
   HTML::Entities: 0
+  Net::SMTP: 0
   Pod::Usage: 0
   Test::Pod: 1.2
   Test::Pod::Coverage: 1.06

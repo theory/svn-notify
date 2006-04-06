@@ -1,5 +1,6 @@
 use Module::Build;
 use Config;
+use strict;
 
 my $class = Module::Build->subclass(
     class => 'My::Builder',
@@ -13,16 +14,14 @@ my $class = Module::Build->subclass(
                  my @scripts;
                  my $to_dir = $self->localize_file_path("t/scripts");
                  for my $base (qw(testsvnlook testsendmail)) {
-                     for my $suf ('', '.bat') {
-                         my $script = "$to_dir/$base$suf";
-                         push @scripts, $self->localize_file_path($script);
-                         my $orig = $self->localize_file_path("t/bin/$base$suf");
-                         $self->copy_if_modified(
-                             from    => $orig,
-                             to_dir  => $to_dir,
-                             flatten => 1,
-                         );
-                     }
+                     my $script = "$to_dir/$base";
+                     push @scripts, $self->localize_file_path($script);
+                     my $orig = $self->localize_file_path("t/bin/$base");
+                     $self->copy_if_modified(
+                         from    => $orig,
+                         to_dir  => $to_dir,
+                         flatten => 1,
+                     );
                  }
                  $self->fix_shebang_line(@scripts);
                  $self->make_executable(@scripts);
@@ -36,19 +35,20 @@ my $build = $class->new(
     license            => 'perl',
     create_makefile_pl => 'passthrough',
     add_to_cleanup     => ['t/data/output.txt'],
-    script_files       => [ 'bin/svnnotify' ],
-    requires           => { Getopt::Long        => '2.34' },
+    script_files       => ['bin/svnnotify'],
+    requires           => { 'Getopt::Long' => '2.34' },
     build_requires     => {
-        Test::Simple        => '0.17',
-        Module::Build       => '0.26',
-        File::Spec          => 0,
+        'Test::Simple'  => '0.17',
+        'Module::Build' => '0.26',
+        'File::Spec'    => 0,
     },
-    recommends         => {
-        Pod::Usage          => 0,
-        HTML::Entities      => 0,
-        Test::Pod           => 1.20,
-        Test::Pod::Coverage => 1.06,
-        File::Spec          => 0,
+    recommends => {
+        'Pod::Usage'          => 0,
+        'HTML::Entities'      => 0,
+        'Net::SMTP'           => 0,
+        'Test::Pod'           => 1.20,
+        'Test::Pod::Coverage' => 1.06,
+        'File::Spec'          => 0,
     },
 );
 $build->create_build_script;
