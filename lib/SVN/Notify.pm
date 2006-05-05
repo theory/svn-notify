@@ -229,9 +229,9 @@ The password for SMTP authentication. Use in parallel with C<smtp_user>.
   svnnotify --smtp-authtype authtype
 
 The authentication method to use for authenticating to the SMTP server. The
-available athentication types include "PLAIN", "NTLM", "CRAM_MD5", and others.
-Consult the L<Authen::SASL|Authen::SASL> documentation for a complete list.
-Defaults to "PLAIN".
+available authentication types include "PLAIN", "NTLM", "CRAM_MD5", and
+others. Consult the L<Authen::SASL|Authen::SASL> documentation for a complete
+list. Defaults to "PLAIN".
 
 =item charset
 

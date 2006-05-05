@@ -1,6 +1,7 @@
 Revision history for Perl extension SVN::Notify
 
 2.59
+      - Fixed a few typos, with thanks to Marshall "Eagle Eyes" Roch.
 
 2.58  2006-05-05T20:44:05
       - Improved documentation of '--ticket-regex', since it seemed to confuse
@@ -8,7 +9,7 @@ Revision history for Perl extension SVN::Notify
         for the push.
       - SVN::Notify::HTML now allows '--ticket-regex' to capture only one
         string, in which case it will be used both for the link text and for
-        the tickget number passed to the '--ticket-url' format string.
+        the ticket number passed to the '--ticket-url' format string.
       - Added support for SMTP authentication using Net::SMTP_auth. Use the
         '--smtp-user', '--smtp-pass', and '--smtp-authtype' options to take
         advantage of this feature. Patch from Eric Lemes.
