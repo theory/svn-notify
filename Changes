@@ -1,6 +1,12 @@
 Revision history for Perl extension SVN::Notify
 
 2.58
+      - Improved documentation of '--ticket-regex', since it seemed to confuse
+        people using it with SVN::Notify::HTML. Thanks to Dominic Giampaolo
+        for the push.
+      - SVN::Notify::HTML now allows '--ticket-regex' to capture only one
+        string, in which case it will be used both for the link text and for
+        the tickget number passed to the '--ticket-url' format string.
 
 2.57  2006-04-06T22:36:18
       - Finally ported to Win32. It was actually a simple matter of changing

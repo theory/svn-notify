@@ -438,7 +438,9 @@ ticket system. The URL must have the "%s" format where the first match
 The regex to match a ticket tag of a custom ticket system. This should return
 a single match to be interpolated into the C<ticket_url> option. The example
 shown matches "[#1234]" or "#1234" or "[# 1234]". This regex should be as
-specific as possible, preferably wrapped in "\b" tags and the like.
+specific as possible, preferably wrapped in "\b" to match word boundaries. If
+you're using L<SVN::Notify::HTML|SVN::Notify::HTML>, be sure to read its
+documentation for a different syntax for C<ticket_regex>!
 
 =item verbose
 

@@ -93,13 +93,46 @@ override the default settings. This approach nicely takes advantage of the
 
 =item ticket_regex
 
-  svnnotify --ticket-regex '\[?\s*(Ticket\s*#\s*(\d+))\s*\]?'
+  svnnotify --ticket-regex '(BUG-(\d+))'
 
 This attribute is inherited from L<SVN::Notify|SVN::Notify>, but its semantics
 are slightly different: it should return I<two> matches instead of one: the
-text to linkify and the ticket ID itself. The example shown matches
-("[Ticket#1234]", "1234") or ("[ Ticket # 1234 ]", "1234"). Make your regex as
-specific as possible, preferably wrapped in "\b" tags and the like.
+text to linkify and the ticket ID itself. For example, '(BUG-(\d+))' will
+match "BUG-1234567", and "BUG-1234567" will be used for the link text, while
+"1234567" will be used to fill in the C<ticket_url> format string. The first
+set of parentheses capture the whole string, while the parentheses around
+C<\d+> match the number only. Also note that it is wise to use "\b" on either
+side of the regular expression to insure that you don't get spurious matches.
+So a better version would be '\b(BUG-(\d+))\b'.
+
+As a fallback, if your regular expression returns only a single match string,
+it will be used both for the link text and for the the ticket URL generated
+from C<ticket_url>. For example, '\bBUG-(\d+)\b' would make a link only of the
+number in 'BUG-1234567', as only the number has been captured by the regular
+expression. But two matches are of course recommended (and likely to work
+better, as well).
+
+You can use more complicated regular expressions if commit messages are likely
+to format ticket numbers in various ways. For example, this regular
+expression:
+
+  \b\[?\s*(Ticket\s*#\s*(\d+))\s*\]?\b'
+
+Will match:
+
+   String Matched           Link Text        Ticket Number
+  --------------------|--------------------|---------------
+   [Ticket#1234]         [Ticket#1234]       1234
+   [ Ticket # 1234 ]     [ Ticket # 1234 ]   1234
+   Ticket #1234          Ticket #1234        1234
+   Ticket # 1234         Ticket  #1234       1234
+
+In any of these cases, you can see that the match is successful, properly
+creates the link text (simply using the text as typed in by the committer, and
+correctly extracts the ticket number for use in the URL.
+
+To learn more about the power of Regular expressions, I highly recommend
+_Mastering Regular Expressions, Second Edition_, by Jeffrey Friedl.
 
 =back
 
@@ -308,7 +341,7 @@ sub output_log_message {
             or die q{Missing "ticket_regex" parameter to accompany }
             . q{"ticket_url" parameter};
         $url = encode_entities($url, '<>&"');
-        $msg =~ s|$regex|sprintf qq{<a href="$url">$1</a>}, $2|ige;
+        $msg =~ s{$regex}{ sprintf qq{<a href="$url">$1</a>}, $2 || $1 }ige;
     }
 
     else {
