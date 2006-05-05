@@ -7,6 +7,10 @@ Revision history for Perl extension SVN::Notify
       - SVN::Notify::HTML now allows '--ticket-regex' to capture only one
         string, in which case it will be used both for the link text and for
         the tickget number passed to the '--ticket-url' format string.
+      - Added support for SMTP authentication using Net::SMTP_auth. Use the
+        '--smtp-user', '--smtp-pass', and '--smtp-authtype' options to take
+        advantage of this feature. Patch from Eric Lemes.
+      - Specifying '--verbose' two or more times now turns on SMTP debugging.
 
 2.57  2006-04-06T22:36:18
       - Finally ported to Win32. It was actually a simple matter of changing

@@ -3,7 +3,7 @@
 # $Id: base.t 2771 2006-04-03 23:10:02Z theory $
 
 use strict;
-use Test::More tests => 25;
+use Test::More tests => 36;
 use File::Spec::Functions;
 
 use_ok 'SVN::Notify' or die;
@@ -65,6 +65,40 @@ like $smtp->{datasend},
     qr/Did this, that, and the other\. And then I did some more\. Some\nit was done on a second line\./,
     'Check for log message';
 
+##############################################################################
+# Test authentication and Debug.
+$args{smtp_user}     = 'theory';
+$args{smtp_pass}     = 'w00t!';
+$args{smtp_authtype} = 'NTLM';
+$args{verbose}       = 2;
+$smtp = {};
+
+do {
+    # Silence debugging.
+    local $^W;
+    *SVN::Notify::_dbpnt = sub {};
+};
+
+ok $notifier = SVN::Notify->new(%args),
+    'Create new authenticating SMTP notifier';
+isa_ok $notifier, 'SVN::Notify', 'it';
+ok $notifier->prepare, 'Prepare notifier';
+do {
+    # I can't quite get the file handle stuff right in tied_fh below, so
+    # just silence warnings for now.
+    local $^W;
+    ok $notifier->execute, 'Execute notifier';
+};
+
+is_deeply $smtp->{new}, ['smtp.example.com', Debug => 1],
+    'The SMTP object should be instantiated with SMTP address and Debug on';
+is $smtp->{mail}, 'theory', 'Mail should be initiated by user "theory"';
+is $smtp->{to}, 'test@example.com', 'Mail should be from the right address';
+ok $smtp->{data}, 'data() should have been called';
+ok $smtp->{dataend}, 'dataend() should have been called';
+ok $smtp->{quit}, 'quit() should have been called';
+is $smtp->{auth}, 'NTLM,theory,w00t!', 'auth() should have been called';
+
 # This class mocks Net::SMTP for testing purposes.
 package Net::SMTP;
 BEGIN { $INC{'Net/SMTP.pm'} = __FILE__; }
@@ -85,3 +119,8 @@ sub tied_fh {
     $smtp->{tied_fh} = 1;
     return \local *STDOUT;
 }
+
+package Net::SMTP_auth;
+use base 'Net::SMTP';
+BEGIN { $INC{'Net/SMTP_auth.pm'} = __FILE__; }
+sub auth { shift; $smtp->{auth} = join ',', @_ }

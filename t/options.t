@@ -18,6 +18,9 @@ my %testopts = (
 
 my %params = (
     smtp            => undef,
+    smtp_user       => undef,
+    smtp_pass       => undef,
+    smtp_authtype   => undef,
     to_regex_map    => undef,
     from            => undef,
     user_domain     => undef,

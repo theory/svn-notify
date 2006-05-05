@@ -46,6 +46,7 @@ my $build = $class->new(
         'Pod::Usage'          => 0,
         'HTML::Entities'      => 0,
         'Net::SMTP'           => 0,
+        'Net::SMTP_auth'      => 0,
         'Test::Pod'           => 1.20,
         'Test::Pod::Coverage' => 1.06,
         'File::Spec'          => 0,

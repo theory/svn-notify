@@ -210,6 +210,29 @@ If unspecified, SVN::Notify will use F<sendmail> to send the message. If
 F<sendmail> is not installed locally (such as on Windows boxes!), you I<must>
 specify an SMTP server.
 
+=item smtp_user
+
+  svnnotify --smtp-user myuser
+
+The user name for SMTP authentication. If this option is specified,
+SVN::Notify will use L<Net::SMTP_auth|Net::SMTP_auth> to send the notification
+message, and will of course authenticate to the SMTP server.
+
+=item smtp_pass
+
+  svnnotify --smtp-pass mypassword
+
+The password for SMTP authentication. Use in parallel with C<smtp_user>.
+
+=item smtp_authtype
+
+  svnnotify --smtp-authtype authtype
+
+The authentication method to use for authenticating to the SMTP server. The
+available athentication types include "PLAIN", "NTLM", "CRAM_MD5", and others.
+Consult the L<Authen::SASL|Authen::SASL> documentation for a complete list.
+Defaults to "PLAIN".
+
 =item charset
 
   svnnotify --charset UTF-8
@@ -490,12 +513,13 @@ sub new {
       unless $params{to} || $params{to_regex_map};
 
     # Set up default values.
-    $params{svnlook}   ||= $ENV{SVNLOOK}  || $class->find_exe('svnlook');
-    $params{with_diff} ||= $params{attach_diff};
-    $params{verbose}   ||= 0;
-    $params{charset}   ||= 'UTF-8';
-    $params{io_layer}  ||= "encoding($params{charset})";
-    $params{sendmail}  ||= $ENV{SENDMAIL} || $class->find_exe('sendmail')
+    $params{svnlook}        ||= $ENV{SVNLOOK}  || $class->find_exe('svnlook');
+    $params{with_diff}      ||= $params{attach_diff};
+    $params{verbose}        ||= 0;
+    $params{charset}        ||= 'UTF-8';
+    $params{io_layer}       ||= "encoding($params{charset})";
+    $params{smtp_authtype}  ||= 'PLAIN';
+    $params{sendmail}       ||= $ENV{SENDMAIL} || $class->find_exe('sendmail')
         unless $params{smtp};
 
     # svnweb_url and viewcvs_url are mutually exlusive.
@@ -628,6 +652,9 @@ sub get_options {
         'version|v'           => \$opts->{version},
         'header=s'            => \$opts->{header},
         'footer=s'            => \$opts->{footer},
+        'smtp-user=s'         => \$opts->{smtp_user},
+        'smtp-pass=s'         => \$opts->{smtp_pass},
+        'smtp-authtype=s'     => \$opts->{smtp_authtype},
     ) or return;
 
     # Load a subclass if one has been specified.
@@ -1749,8 +1776,26 @@ package SVN::Notify::SMTP;
 
 sub get_handle {
     my ($class, $notifier) = @_;
-    require Net::SMTP;
-    my $smtp = Net::SMTP->new($notifier->{smtp});
+
+    # Load Net::SMTP or the appropriate subclass.
+    my $smtp_class = do {
+        if ($notifier->{smtp_user}) {
+            require Net::SMTP_auth;
+            'Net::SMTP_auth';
+        } else {
+            require Net::SMTP;
+            'Net::SMTP';
+        }
+    };
+
+    my $smtp = $smtp_class->new(
+        $notifier->{smtp},
+        ( $notifier->{verbose} > 1 ? ( Debug => 1 ) : ())
+    );
+
+    $smtp->auth( @{ $notifier }{qw(smtp_authtype smtp_user smtp_pass)} )
+        if $notifier->{smtp_user};
+
     binmode tied(*{ $smtp->tied_fh }), ":$notifier->{io_layer}"
         if SVN::Notify::PERL58;
     $smtp->mail($notifier->{from});

@@ -70,6 +70,9 @@ Fake-out Pod::Usage
   -l --svnlook SVNLOOK         Location of the svnlook executable.
   -s --sendmail SENDMAIL       Location of the sendmail executable.
      --smtp ADDRESS            Address for an SMTP server.
+     --stmp-user USERNAME      Username for authenticating to a SMTP server.
+     --smtp-pass PASSWORD      Password for authenticating to a SMTP server.
+     --smtp-authtype AUTHTYPE  Type of SMTP authentication.
   -c --charset CHARSET         The character set of the log message and the
                                repository files.
      --io-layer                Perl IO layer to use for input and output.
