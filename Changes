@@ -1,5 +1,7 @@
 Revision history for Perl extension SVN::Notify
 
+2.59
+
 2.58  2006-05-05T20:44:05
       - Improved documentation of '--ticket-regex', since it seemed to confuse
         people using it with SVN::Notify::HTML. Thanks to Dominic Giampaolo
