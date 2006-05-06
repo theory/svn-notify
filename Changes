@@ -2,6 +2,13 @@ Revision history for Perl extension SVN::Notify
 
 2.59
       - Fixed a few typos, with thanks to Marshall "Eagle Eyes" Roch.
+      - Now throw an exception if 'sendmail' is not specified or cannot be
+        found and 'smtp' is not specified. Reported by Eric Lemes.
+      - Fixed processing of commad-line arguments under Windows. Reported by
+        Eric Lemes. This means that SVN::Notify has now been confirmed to
+        actually *work* on Windows.
+      - An exception will now be thrown if a Net::SMTP object cannot be
+        created. Reported by Eric Lemes.
 
 2.58  2006-05-05T20:44:05
       - Improved documentation of '--ticket-regex', since it seemed to confuse

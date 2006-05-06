@@ -522,6 +522,9 @@ sub new {
     $params{sendmail}       ||= $ENV{SENDMAIL} || $class->find_exe('sendmail')
         unless $params{smtp};
 
+    die qq{Cannot find sendmail and no "smtp" parameter specified}
+        unless $params{sendmail} || $params{smtp};
+
     # svnweb_url and viewcvs_url are mutually exlusive.
     if ($params{svnweb_url} && $params{svnweb_url} !~ /%s/) {
         warn "--svnweb-url must have '%s' format\n";
@@ -1728,12 +1731,14 @@ Gets or set the value of the C<footer> attribute.
 
 sub _pipe {
     my ($self, $mode) = (shift, shift);
-    $self->_dbpnt( "Piping execution of '" . join("', '", @_) . "'")
+    $self->_dbpnt( q{Piping execution of "} . join(q{" "}, @_) . q{"})
       if $self->{verbose};
     # Safer version of backtick (see perlipc(1)).
     local *PIPE;
     if (WIN32) {
-        my $cmd = $mode eq '-|' ? join(q{ }, @_) . '|' : '|' . join q{ }, @_;
+        my $cmd = $mode eq '-|'
+            ? q{"}  . join(q{" "}, @_) . q{"|}
+            : q{|"} . join(q{" "}, @_) . q{"};
         open PIPE, $cmd or die "Cannot fork: $!\n";
         return *PIPE;
     }
@@ -1791,7 +1796,7 @@ sub get_handle {
     my $smtp = $smtp_class->new(
         $notifier->{smtp},
         ( $notifier->{verbose} > 1 ? ( Debug => 1 ) : ())
-    );
+    ) or die "Unable to create $smtp_class object: $!";
 
     $smtp->auth( @{ $notifier }{qw(smtp_authtype smtp_user smtp_pass)} )
         if $notifier->{smtp_user};
