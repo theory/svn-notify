@@ -9,6 +9,9 @@ Revision history for Perl extension SVN::Notify
         actually *work* on Windows.
       - An exception will now be thrown if a Net::SMTP object cannot be
         created. Reported by Eric Lemes.
+      - Added note for Windows users about setting environment variables
+        required by SVN::Notify. Thanks to Eric Lemes <ericlemes@gmail.com>
+        for figuring these things out!
 
 2.58  2006-05-05T20:44:05
       - Improved documentation of '--ticket-regex', since it seemed to confuse

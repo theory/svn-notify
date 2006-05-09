@@ -59,6 +59,22 @@ details. Make sure that you specify the complete path to F<svnnotify>, as well
 as to F<svnlook> and F<sendmail> in the options passed to F<svnnotify> so that
 everything executes properly.
 
+=head2 Windows Usage
+
+Go get SVN::Notify to work properly in a F<post-commit> script, you must set
+the following environment variables, as they will likley not be present inside
+Apache:
+
+=over
+
+=item PATH=C:\perl\bin
+
+=item OS=Windows_NT
+
+=item SystemRoot=C:\WINDOWS
+
+=back
+
 =cut
 
 # Map the svnlook changed codes to nice labels.
