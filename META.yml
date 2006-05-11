@@ -1,6 +1,6 @@
 ---
 name: SVN-Notify
-version: 2.58_01
+version: 2.59
 author:
   - 'David Wheeler <david@kineticode.com>'
 abstract: Subversion activity notification
@@ -24,7 +24,7 @@ recommends:
 provides:
   SVN::Notify:
     file: lib/SVN/Notify.pm
-    version: 2.58_01
+    version: 2.59
   SVN::Notify::Alternative:
     file: lib/SVN/Notify/Alternative.pm
     version: 1.0
