@@ -1,5 +1,7 @@
 Revision history for Perl extension SVN::Notify
 
+2.60
+
 2.59  2006-05-11T17:23:12
       - Fixed a few typos, with thanks to Marshall "Eagle Eyes" Roch.
       - Now throw an exception if 'sendmail' is not specified or cannot be
