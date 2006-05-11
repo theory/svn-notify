@@ -11,7 +11,9 @@ Revision history for Perl extension SVN::Notify
         created. Reported by Eric Lemes.
       - Added note for Windows users about setting environment variables
         required by SVN::Notify. Thanks to Eric Lemes <ericlemes@gmail.com>
-        for figuring these things out!
+        for figuring these things out!\
+      - Added link to Eric Lemes's tutorial for installing Apache, Subversion,
+        and SVN::Notify on Windows.
 
 2.58  2006-05-05T20:44:05
       - Improved documentation of '--ticket-regex', since it seemed to confuse

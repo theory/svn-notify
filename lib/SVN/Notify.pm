@@ -75,6 +75,9 @@ Apache:
 
 =back
 
+See L<http://svn.haxx.se/users/archive-2006-05/0593.shtml> for more detailed
+information on getting SVN::NOtify running on Windows.
+
 =cut
 
 # Map the svnlook changed codes to nice labels.
@@ -1855,6 +1858,10 @@ Subclasses SVN::Notify.
 =item L<https://sourceforge.net/docs/E09#svn_notify>
 
 SourceForge.net support for SVN::Notify.
+
+=item L<http://svn.haxx.se/users/archive-2006-05/0593.shtml>
+
+Tutorial for installing Apache, Subversion, and SVN::Notify on Windows.
 
 =back
 
