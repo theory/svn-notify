@@ -1,0 +1,15 @@
+Modified: trunk/Params-CallbackRequest/Changes
+===================================================================
+--- trunk/Params-CallbackRequest/Changes        2004-04-20 08:33:35 UTC (rev 600)
++++ trunk/Params-CallbackRequest/Changes        2004-04-20 12:42:29 UTC (rev 601)
+@@ -1,6 +1,7 @@
+ Revision history for Perl extension Params::CallbackRequest.
+ 
+ 1.13  
++      - Apache 2 compatability added thanks to Fred Moyer.
+ 
+ 1.12  2004-03-15T15:27:54
+       - No longer using a Params::Validate callback to transform a value,
+
+Added: trunk/Params-CallbackRequest/lib/Params/Callback.pm
+

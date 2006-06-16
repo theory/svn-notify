@@ -3,7 +3,7 @@
 # $Id$
 
 use strict;
-use Test::More tests => 189;
+use Test::More tests => 196;
 use File::Spec::Functions;
 
 use_ok('SVN::Notify');
@@ -48,6 +48,8 @@ is($notifier->io_layer, 'encoding(UTF-8)', 'Check IO layer');
 is($notifier->language, undef, "Check language accessor" );
 is($notifier->with_diff, $args{with_diff}, "Check with_diff accessor" );
 is($notifier->attach_diff, $args{attach_diff}, "Check attach_diff accessor" );
+is($notifier->diff_switches, $args{diff_switches},
+   "Check diff_switches accessor" );
 is($notifier->reply_to, $args{reply_to}, "Check reply_to accessor" );
 is($notifier->subject_prefix, $args{subject_prefix},
    "Check subject_prefix accessor" );
@@ -476,6 +478,27 @@ like $email, qr{This is the header\n\nRevision: 111},
       'Check for the header';
 
 like $email, qr/This is the footer\s+\Z/, 'Check for the footer';
+
+##############################################################################
+# Try diff-switches
+##############################################################################
+ok( $notifier = SVN::Notify->new(
+    %args,
+    revision      => '111',
+    with_diff     => 1,
+    diff_switches => '--no-diff-added',
+), 'Construct new diff_switches notifier' );
+
+isa_ok $notifier, 'SVN::Notify';
+is $notifier->diff_switches, '--no-diff-added', 'Check diff_switches()';
+ok $notifier->prepare, 'Prepare header and footer checking';
+ok $notifier->execute, 'Notify header and footer checking';
+
+# Check the output.
+$email = get_output();
+like $email,
+    qr{Added:\s+trunk/Params-CallbackRequest/lib/Params/Callback\.pm\s+\Z},
+    'Make sure the added file is omitted from the diff';
 
 ##############################################################################
 # Try max_diff_size

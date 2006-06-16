@@ -304,6 +304,16 @@ file, named for the user who triggered the commit and the date and time UTC at
 which the commit took place. Specifying this parameter to a true value
 implicitly sets the C<with_diff> parameter to a true value.
 
+=item diff_switches
+
+  svnnotify --diff-switches '--no-diff-added'
+  svnnotify -w '--no-diff-deleted'
+
+Switches to pass to C<svnlook diff>, such as C<--no-diff-deleted> and
+C<--no-diff-added>. And who knows, maybe someday it will support the same
+options as C<svn diff>, such as C<--diff-cmd> and C<--extensions>. Only
+relevant when used with C<with_diff> or C<attach_diff>.
+
 =item reply_to
 
   svnnotify --reply-to devlist@example.com
@@ -663,6 +673,7 @@ sub get_options {
         'language|g=s'        => \$opts->{language},
         'with-diff|d'         => \$opts->{with_diff},
         'attach-diff|a'       => \$opts->{attach_diff},
+        'diff-switches|w=s'   => \$opts->{diff_switches},
         'reply-to|R=s'        => \$opts->{reply_to},
         'subject-prefix|P=s'  => \$opts->{subject_prefix},
         'subject-cx|C'        => \$opts->{subject_cx},
@@ -1413,7 +1424,8 @@ sub diff_handle {
     return $self->_pipe(
         '-|'   => $self->{svnlook},
         'diff' => $self->{repos_path},
-        '-r'   => $self->{revision}
+        '-r'   => $self->{revision},
+                  $self->{diff_switches} || (),
     );
 }
 
@@ -1469,6 +1481,7 @@ __PACKAGE__->_accessors(qw(
     language
     with_diff
     attach_diff
+    diff_switches
     reply_to
     subject_prefix
     subject_cx
@@ -1617,6 +1630,13 @@ Gets or sets the value of the C<with_diff> attribute.
   $notifier = $notifier->attach_diff($attach_diff);
 
 Gets or sets the value of the C<attach_diff> attribute.
+
+=head3 diff_switches
+
+  my $diff_switches = $notifier->diff_switches;
+  $notifier = $notifier->diff_switches($diff_switches);
+
+Gets or sets the value of the C<diff_switches> attribute.
 
 =head3 reply_to
 

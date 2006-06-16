@@ -75,9 +75,10 @@ Fake-out Pod::Usage
      --smtp-authtype AUTHTYPE  Type of SMTP authentication.
   -c --charset CHARSET         The character set of the log message and the
                                repository files.
-     --io-layer                Perl IO layer to use for input and output.
+  -o --io-layer                Perl IO layer to use for input and output.
   -d --with-diff               Include the diff in the message.
   -a --attach-diff             Attach the diff to the message.
+  -w --diff-switches SWITCHES  Switches to pass to C<svnlook diff>.
   -R --reply-to ADDRESS        Address for use in the Reply-To header.
   -P --subject-prefix PREFIX   String to prepend to the subject.
   -C --subject-cx              Include the context of the commit in the

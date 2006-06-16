@@ -29,6 +29,7 @@ my %params = (
     language        => undef,
     with_diff       => undef,
     attach_diff     => undef,
+    diff_switches   => undef,
     reply_to        => undef,
     subject_prefix  => undef,
     subject_cx      => undef,

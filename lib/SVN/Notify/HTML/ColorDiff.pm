@@ -123,8 +123,14 @@ sub output_diff {
             print $out "</$in_span>" if $in_span;
             print $out "</span></pre></div>\n" if $in_div;
 
-            # Dump line.
-            <$diff>;
+            # Dump line, but check it's content.
+            if (<$diff> !~ /^=/) {
+                # Looks like they used --no-diff-added or --no-diff-deleted.
+                ($in_span, $in_div) = '';
+                print $out qq{<a id="$id"></a>\n<div class="$class">},
+                    qq{<h4>$action: $file</h4></div>\n};
+                next;
+            }
 
             # Get the revision numbers.
             my $before = <$diff>;

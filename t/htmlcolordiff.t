@@ -7,7 +7,7 @@ use Test::More;
 use File::Spec::Functions;
 
 if (eval { require HTML::Entities }) {
-    plan tests => 166;
+    plan tests => 172;
 } else {
     plan skip_all => "SVN::Notify::HTML::ColorDiff requires HTML::Entities";
 }
@@ -177,6 +177,26 @@ like( $email,
 like( $email,
       qr|<li><a href="#trunkClassMetalibClassMetaTypepm">trunk/Class-Meta/lib/Class/Meta/Type\.pm</a></li>|,
       "Check for linked property change file");
+
+##############################################################################
+# Include HTML diff with diff_switches.
+##############################################################################
+ok $notifier = SVN::Notify::HTML::ColorDiff->new(
+    %args,
+    with_diff => 1,
+    diff_switches => '--no-diff-added',
+), 'Construct new HTML diff_switches notifier';
+isa_ok($notifier, 'SVN::Notify::HTML::ColorDiff');
+isa_ok($notifier, 'SVN::Notify');
+ok( $notifier->prepare, 'Single method call prepare' );
+ok( $notifier->execute, 'HTML diff_switches notify' );
+
+# Get the output.
+$email = get_output();
+
+like $email,
+    qr{<div class="addfile"><h4>Added:\s+trunk/Params-CallbackRequest/lib/Params/Callback\.pm</h4></div>\n</div>\s+</body>},
+    'Check for added diff file header without body';
 
 ##############################################################################
 # Attach diff.
