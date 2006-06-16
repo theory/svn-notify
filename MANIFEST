@@ -8,6 +8,7 @@ lib/SVN/Notify/HTML/ColorDiff.pm
 Makefile.PL
 MANIFEST			This list of files
 META.yml
+new_stuff.patch
 README
 t/alt.t
 t/base.t
@@ -19,6 +20,7 @@ t/data/changed/111.txt
 t/data/changed/222.txt
 t/data/changed/333.txt
 t/data/changed/444.txt
+t/data/diff-noadd/111.txt
 t/data/diff/111.txt
 t/data/diff/333.txt
 t/data/diff/444.txt
