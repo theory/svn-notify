@@ -1,5 +1,7 @@
 Revision history for Perl extension SVN::Notify
 
+2.61
+
 2.60  2006-06-16T22:42:48
       - HTML output now creates a link from a directory name to its place in
         the diff if the type of diff for the directory is a property change.
