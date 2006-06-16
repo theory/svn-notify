@@ -263,8 +263,18 @@ sub output_metadata {
         print $out $rev;
     }
 
+    # Output the committer and a URL, if there is one.
+    print $out "</dd>\n<dt>Author</dt> <dd>";
+    my $user = encode_entities($self->user, '<>&"');
+    if (my $url = $self->author_url) {
+        $url = encode_entities($url, '<>&"');
+        printf $out qq{<a href="$url">$user</a>}, $user;
+    } else {
+        # Just output the username
+        print $out $user;
+    }
+
     print $out "</dd>\n",
-      "<dt>Author</dt> <dd>", encode_entities($self->user, '<>&"'), "</dd>\n",
       "<dt>Date</dt> <dd>", encode_entities($self->date, '<>&"'), "</dd>\n",
       "</dl>\n\n";
 
@@ -384,8 +394,8 @@ sub output_file_lists {
         if ($self->with_diff && !$self->attach_diff) {
             for (@{ $files->{$type} }) {
                 my $file = encode_entities($_, '<>&"');
-                if ($file =~ m{/$}) {
-                    # Directories don't link to the diff.
+                if ($file =~ m{/$} && $type ne '_') {
+                    # Directories don't link, unless it's a prop change.
                     print $out qq{<li>$file</li>\n};
                 } else {
                     # Strip out letters illegal for IDs.

@@ -1,6 +1,10 @@
 Revision history for Perl extension SVN::Notify
 
 2.60
+      - HTML output now creates a link from a directory name to its place in
+        the diff if the type of diff for the directory is a property change.
+        Patch from Lamar Goddard.
+      - Added --author-url option. Based on a patch from Lamar Goddard.
 
 2.59  2006-05-11T17:23:12
       - Fixed a few typos, with thanks to Marshall "Eagle Eyes" Roch.

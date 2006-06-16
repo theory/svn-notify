@@ -3,7 +3,7 @@
 # $Id$
 
 use strict;
-use Test::More tests => 183;
+use Test::More tests => 189;
 use File::Spec::Functions;
 
 use_ok('SVN::Notify');
@@ -56,6 +56,7 @@ is($notifier->max_sub_length, $args{max_sub_length},
    "Check max_sub_length accessor" );
 is($notifier->viewcvs_url, $args{viewcvs_url}, "Check viewcvs_url accessor" );
 is($notifier->svnweb_url, $args{svnweb_url}, "Check svnweb_url accessor" );
+is($notifier->author_url, $args{author_url}, "Check author_url accessor" );
 is($notifier->verbose, 0, "Check verbose accessor" );
 is($notifier->user, 'theory', "Check user accessor" );
 is($notifier->date, '2004-04-20 01:33:35 -0700 (Tue, 20 Apr 2004)',
@@ -331,6 +332,22 @@ ok( $notifier->execute, "Notify svnweb_url" );
 $email = get_output();
 like( $email, qr|SVNWeb:\s+http://svn\.example\.com/\?rev=111\&view=rev\n|,
       'Check for URL');
+
+##############################################################################
+# Try author_url.
+##############################################################################
+ok( $notifier = SVN::Notify->new(
+    %args,
+    author_url => 'http://svn.example.com/~%s/',
+   ), "Construct new author_url notifier" );
+isa_ok($notifier, 'SVN::Notify');
+ok( $notifier->prepare, "Prepare author_url" );
+ok( $notifier->execute, "Notify author_url" );
+
+# Check the output.
+$email = get_output();
+like( $email, qr|Author:\s+theory\n\s+http://svn\.example\.com/~theory/\n|,
+      'Check for author URL');
 
 ##############################################################################
 # Try charset.

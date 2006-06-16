@@ -7,7 +7,7 @@ use Test::More;
 use File::Spec::Functions;
 
 if (eval { require HTML::Entities }) {
-    plan tests => 195;
+    plan tests => 201;
 } else {
     plan skip_all => "SVN::Notify::HTML requires HTML::Entities";
 }
@@ -493,6 +493,27 @@ like($email,
 unlike($email,
        qr{<a href="http://svn\.example\.com/index\.cgi/revision/\?rev=200">rev 200</a>,},
        "Check for no rev 200 SVNWeb URL");
+
+##############################################################################
+# Author URL.
+##############################################################################
+ok( $notifier = SVN::Notify::HTML->new(
+    %args,
+    revision     => 444,
+    author_url   => 'http://svn.example.com/~%s/',
+),
+    "Construct new notifier for author URL" );
+isa_ok($notifier, 'SVN::Notify::HTML');
+isa_ok($notifier, 'SVN::Notify');
+ok( $notifier->prepare, "Prepare author URL example" );
+ok( $notifier->execute, "Notify author URL example" );
+
+$email = get_output();
+
+# Check for Author URL.
+like( $email,
+      qr|<dt>Author</dt>\s+<dd><a href="http://svn\.example\.com/~theory/">theory</a></dd>\n|,
+      'Check for Author URL');
 
 ##############################################################################
 # Try header and footer.

@@ -404,6 +404,15 @@ F<svnnotify>. Be sure to read the documentation for your subclass of choice,
 as there may be additional parameters and existing parameters may behave
 differently.
 
+=item author_url
+
+  svnnotify --author-url 'http://svn.example.com/changelog/~author=%s/repos'
+  svnnotify --A 'mailto:%s@example.com'
+
+If a URL is specified for this parameter, then it will be used to create a
+link for the current author. The URL can have the "%s" format where the
+author's username should be put into the URL.
+
 =item svnweb_url
 
   svnnotify --svnweb-url 'http://svn.example.com/index.cgi/revision/?rev=%s'
@@ -660,6 +669,7 @@ sub get_options {
         'max-sub-length|i=i'  => \$opts->{max_sub_length},
         'max-diff-length|e=i' => \$opts->{max_diff_length},
         'handler|H=s'         => \$opts->{handler},
+        'author-url|A=s'      => \$opts->{author_url},
         'viewcvs-url|U=s'     => \$opts->{viewcvs_url},
         'svnweb-url|S=s'      => \$opts->{svnweb_url},
         'rt-url|T=s'          => \$opts->{rt_url},
@@ -1171,18 +1181,23 @@ sub start_body {
   $notifier->output_metadata($file_handle);
 
 This method outputs the metadata of the commit, including the revision number,
-author (user), and date of the revision. If the C<viewcvs_url> or
-C<svnweb_url> attributes have been set, then the appropriate URL(s) for the
+author (user), and date of the revision. If the C<author_url>, C<viewcvs_url>,
+or C<svnweb_url> attributes have been set, then the appropriate URL(s) for the
 revision will also be output.
 
 =cut
 
 sub output_metadata {
     my ($self, $out) = @_;
-    print $out
-      "Revision: $self->{revision}\n",
-      "Author:   $self->{user}\n",
-      "Date:     $self->{date}\n";
+    print $out "Revision: $self->{revision}\n";
+
+    # Output the Author any any relevant URL.
+    print $out "Author:   $self->{user}\n";
+    if (my $url = $self->{author_url}) {
+        printf $out "          $url\n", $self->{user};
+    }
+
+    print $out "Date:     $self->{date}\n";
 
     # svnweb_url and viewcvs_url are mutually exlusive.
     if ($self->{svnweb_url}) {
@@ -1469,6 +1484,7 @@ __PACKAGE__->_accessors(qw(
     subject_cx
     max_sub_length
     max_diff_length
+    author_url
     viewcvs_url
     svnweb_url
     rt_url
@@ -1643,6 +1659,13 @@ Gets or sets the value of the C<max_sub_length> attribute.
   $notifier = $notifier->max_diff_length($max_diff_length);
 
 Gets or set the value of the C<max_diff_length> attribute.
+
+=head3 author_url
+
+  my $author_url = $notifier->author_url;
+  $notifier = $notifier->author_url($author_url);
+
+Gets or sets the value of the C<author_url> attribute.
 
 =head3 svnweb_url
 
