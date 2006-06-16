@@ -413,25 +413,29 @@ If a URL is specified for this parameter, then it will be used to create a
 link for the current author. The URL can have the "%s" format where the
 author's username should be put into the URL.
 
+=item revision_url
+
+  svnnotify --revision-url 'http://svn.example.com/changelog/?cs=%s'
+  svnnotify -U 'http://svn.example.com/changelog/?cs=%s'
+
+If a URL is specified for this parameter, then it will be used to create a
+link to the Subversion browser URL corresponding to the current revision
+number. It will also be used to create links to any other revision numbers
+mentioned in the commit message. The URL must have the "%s" format where the
+Subversion revision number should be put into the URL.
+
 =item svnweb_url
 
   svnnotify --svnweb-url 'http://svn.example.com/index.cgi/revision/?rev=%s'
   svnnotify -S 'http://svn.example.net/index.cgi/revision/?rev=%s'
 
-If a URL is specified for this parameter, then it will be used to create a
-link to the L<SVN::Web|SVN::Web> URL corresponding to the current revision
-number. The URL must have the "%s" format where the Subversion revision number
-should be put into the URL. Mutually exclusive with C<viewcvs_url>.
+Deprecated. Use C<revision_url> instead.
 
 =item viewcvs_url
 
   svnnotify --viewcvs-url 'http://svn.example.com/viewcvs/?rev=%s&view=rev'
-  svnnotify -U 'http://svn.example.net/viewcvs?rev=%s&view=rev'
 
-If a URL is specified for this parameter, then it will be used to create a
-link to the ViewCVS URL corresponding to the current revision number. The URL
-must have the "%s" format where the Subversion revision number should be put
-into the URL. Mutually exclusive with C<svnweb_url>.
+Deprecated. Use C<revision_url> instead.
 
 =item rt_url
 
@@ -553,14 +557,12 @@ sub new {
     die qq{Cannot find sendmail and no "smtp" parameter specified}
         unless $params{sendmail} || $params{smtp};
 
-    # svnweb_url and viewcvs_url are mutually exlusive.
-    if ($params{svnweb_url} && $params{svnweb_url} !~ /%s/) {
-        warn "--svnweb-url must have '%s' format\n";
-        $params{svnweb_url} .= '/revision/?rev=%s&view=rev'
-    }
-    if ($params{viewcvs_url} && $params{viewcvs_url} !~ /%s/) {
-        warn "--viewcvs-url must have '%s' format\n";
-        $params{viewcvs_url} .= '?rev=%s&view=rev'
+    # Set up the revision URL.
+    $params{revision_url} ||= delete $params{svnweb_url}
+                          ||  delete $params{viewcvs_url};
+    if ($params{revision_url} && $params{revision_url} !~ /%s/) {
+        warn "--revision-url must have '%s' format\n";
+        $params{revision_url} .= '/revision/?rev=%s&view=rev'
     }
 
     # Make it so!
@@ -670,8 +672,6 @@ sub get_options {
         'max-diff-length|e=i' => \$opts->{max_diff_length},
         'handler|H=s'         => \$opts->{handler},
         'author-url|A=s'      => \$opts->{author_url},
-        'viewcvs-url|U=s'     => \$opts->{viewcvs_url},
-        'svnweb-url|S=s'      => \$opts->{svnweb_url},
         'rt-url|T=s'          => \$opts->{rt_url},
         'bugzilla-url|B=s'    => \$opts->{bugzilla_url},
         'jira-url|J=s'        => \$opts->{jira_url},
@@ -687,6 +687,7 @@ sub get_options {
         'smtp-user=s'         => \$opts->{smtp_user},
         'smtp-pass=s'         => \$opts->{smtp_pass},
         'smtp-authtype=s'     => \$opts->{smtp_authtype},
+        'revision-url|U|svnweb-url|S|viewcvs-url=s' => \$opts->{revision_url},
     ) or return;
 
     # Load a subclass if one has been specified.
@@ -1182,14 +1183,17 @@ sub start_body {
 
 This method outputs the metadata of the commit, including the revision number,
 author (user), and date of the revision. If the C<author_url>, C<viewcvs_url>,
-or C<svnweb_url> attributes have been set, then the appropriate URL(s) for the
-revision will also be output.
+or C<revision_url> attributes have been set, then the appropriate URL(s) for
+the revision will also be output.
 
 =cut
 
 sub output_metadata {
     my ($self, $out) = @_;
     print $out "Revision: $self->{revision}\n";
+    if (my $url = $self->{revision_url}) {
+        printf $out "          $url\n", $self->{revision};
+    }
 
     # Output the Author any any relevant URL.
     print $out "Author:   $self->{user}\n";
@@ -1199,12 +1203,6 @@ sub output_metadata {
 
     print $out "Date:     $self->{date}\n";
 
-    # svnweb_url and viewcvs_url are mutually exlusive.
-    if ($self->{svnweb_url}) {
-        printf $out "SVNWeb:   $self->{svnweb_url}\n", $self->{revision};
-    } elsif ($self->{viewcvs_url}) {
-        printf $out "ViewCVS:  $self->{viewcvs_url}\n", $self->{revision};
-    }
 
     print $out "\n";
     return $self;
@@ -1226,18 +1224,10 @@ sub output_log_message {
     my $msg = join "\n", @{$self->{message}};
     print $out "Log Message:\n-----------\n$msg\n";
 
-    # Make SVN::Web links. Mutually exclusive with viewcvs.
-    if (my $url = $self->svnweb_url) {
+    # Make Revision links. Mutually exclusive with viewcvs.
+    if (my $url = $self->{revision_url}) {
         if (my @matches = $msg =~ /\b(?:rev(?:ision)?\s*#?\s*(\d+))\b/ig) {
-            print $out "\nSVNWeb Links:\n-------------\n";
-            printf $out "    $url\n", $_ for @matches;
-        }
-    }
-
-    # Make ViewCVS links. Mutually exclusive with svnweb.
-    elsif ($url = $self->viewcvs_url) { # No my; $url is still in scope.
-        if (my @matches = $msg =~ /\b(?:rev(?:ision)?\s*#?\s*(\d+))\b/ig) {
-            print $out "\nViewCVS Links:\n-------------\n";
+            print $out "\nRevision Links:\n--------------\n";
             printf $out "    $url\n", $_ for @matches;
         }
     }
@@ -1485,8 +1475,7 @@ __PACKAGE__->_accessors(qw(
     max_sub_length
     max_diff_length
     author_url
-    viewcvs_url
-    svnweb_url
+    revision_url
     rt_url
     bugzilla_url
     jira_url
@@ -1523,6 +1512,10 @@ sub _accessors {
         };
     }
 }
+
+# Aliases for deprecated attributes.
+sub svnweb_url  { shift->revision_url(@_) }
+sub viewcvs_url { shift->revision_url(@_) }
 
 =head2 Accessors
 
@@ -1667,21 +1660,20 @@ Gets or set the value of the C<max_diff_length> attribute.
 
 Gets or sets the value of the C<author_url> attribute.
 
+=head3 revision_url
+
+  my $revision_url = $notifier->revision_url;
+  $notifier = $notifier->revision_url($revision_url);
+
+Gets or sets the value of the C<revision_url> attribute.
+
 =head3 svnweb_url
 
-  my $svnweb_url = $notifier->svnweb_url;
-  $notifier = $notifier->svnweb_url($svnweb_url);
-
-Gets or sets the value of the C<svnweb_url> attribute. Mutually exclusive with
-C<viewcvs_url>.
+Deprecated. Pleas use C<revision_url()>, instead.
 
 =head3 viewcvs_url
 
-  my $viewcvs_url = $notifier->viewcvs_url;
-  $notifier = $notifier->viewcvs_url($viewcvs_url);
-
-Gets or sets the value of the C<viewcvs_url> attribute. Mutually exclusive
-with C<svnweb_url>.
+Deprecated. Pleas use C<revision_url()>, instead.
 
 =head3 verbose
 

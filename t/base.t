@@ -314,7 +314,7 @@ ok( $notifier->execute, "Notify viewcvs_url" );
 
 # Check the output.
 $email = get_output();
-like( $email, qr|ViewCVS:\s+http://svn\.example\.com/\?rev=111\&view=rev\n|,
+like( $email, qr|Revision:\s+111\n\s+http://svn\.example\.com/\?rev=111\&view=rev\n|,
       'Check for URL');
 
 ##############################################################################
@@ -330,7 +330,7 @@ ok( $notifier->execute, "Notify svnweb_url" );
 
 # Check the output.
 $email = get_output();
-like( $email, qr|SVNWeb:\s+http://svn\.example\.com/\?rev=111\&view=rev\n|,
+like( $email, qr|Revision:\s+111\n\s+http://svn\.example\.com/\?rev=111\&view=rev\n|,
       'Check for URL');
 
 ##############################################################################
@@ -385,9 +385,9 @@ ok( $notifier->execute, "Notify URL" );
 $email = get_output();
 
 # Check for application URLs.
-like( $email, qr|ViewCVS:\s+http://viewsvn\.bricolage\.cc/\?rev=222\&view=rev\n|,
+like( $email, qr|Revision:\s+222\n\s+http://viewsvn\.bricolage\.cc/\?rev=222\&view=rev\n|,
       'Check for main ViewCVS URL');
-like($email, qr/ViewCVS Links:\n/, 'Check for ViewCVS Links label' );
+like($email, qr/Revision Links:\n/, 'Check for ViewCVS Links label' );
 like($email,
      qr{    http://viewsvn\.bricolage\.cc/\?rev=606&view=rev\n},
      "Check for log mesage ViewCVS URL");

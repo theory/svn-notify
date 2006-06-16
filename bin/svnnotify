@@ -90,8 +90,7 @@ Fake-out Pod::Usage
   -e --max-diff-length LENGTH  Maximum size of the diff output.
   -H --handler HANDLER         The notification handler, such as "HTML".
   -A --author-url URL          Include link to specified author URL.
-  -S --svnweb-url URL          Include links to specified SVN::Web URL.
-  -U --viewcvs-url URL         Include links to specified ViewCVS URL.
+  -U --revision-url URL        Include links to specified Revision URL.
   -T --rt-url URL              Include links to specified Request Tracker URL.
   -B --bugzilla-url URL        Include links to specified Bugzilla URL.
   -J --jira-url URL            Include links to specified JIRA URL.

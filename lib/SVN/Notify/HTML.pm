@@ -244,8 +244,8 @@ sub output_css {
 
 This method outputs a definition list containting the metadata of the commit,
 including the revision number, author (user), and date of the revision. If the
-C<svnweb_url> or C<viewcvs_url> attribute has been set, then the appropriate
-URL for the revision will be used to turn the revision number into a link.
+C<revision_url> attribute has been set, then the appropriate URL for the
+revision will be used to turn the revision number into a link.
 
 =cut
 
@@ -254,7 +254,7 @@ sub output_metadata {
     print $out "<dl>\n<dt>Revision</dt> <dd>";
 
     my $rev = $self->revision;
-    if (my $url = $self->svnweb_url || $self->viewcvs_url) {
+    if (my $url = $self->revision_url) {
         $url = encode_entities($url, '<>&"');
         # Make the revision number a URL.
         printf $out qq{<a href="$url">$rev</a>}, $rev;
@@ -315,8 +315,8 @@ sub output_log_message {
 
     }
 
-    # Make SVNWeb/ViewCVS links.
-    if (my $url = $self->svnweb_url || $self->viewcvs_url) {
+    # Make Revision links.
+    if (my $url = $self->revision_url) {
         $url = encode_entities($url, '<>&"');
         $msg =~ s|\b(rev(?:ision)?\s*#?\s*(\d+))\b|sprintf qq{<a href="$url">$1</a>}, $2|ige;
     }
