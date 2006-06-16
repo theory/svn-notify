@@ -1,6 +1,8 @@
 Revision history for Perl extension SVN::Notify
 
 2.61
+      - Removed unused patch file from the distribution. It was temporary, and
+        never supposed to be there, anyway.
 
 2.60  2006-06-16T22:42:48
       - HTML output now creates a link from a directory name to its place in
