@@ -1425,7 +1425,13 @@ sub diff_handle {
         '-|'   => $self->{svnlook},
         'diff' => $self->{repos_path},
         '-r'   => $self->{revision},
-                  $self->{diff_switches} || (),
+        ( $self->{diff_switches}
+            ? grep { defined && $_ ne '' }
+                # Allow quoting of arguments, but strip out the quotes.
+                split /(?:'([^']+)'|"([^"]+)")?\s+(?:'([^']+)'|"([^"]+)")?/,
+                $self->{diff_switches}
+            : ()
+        ),
     );
 }
 
