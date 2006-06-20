@@ -5,6 +5,9 @@ Revision history for Perl extension SVN::Notify
         never supposed to be there, anyway.
       - Added an "Errors-To" header to the outgoing email, using the same
         email address as is used for the "From" header.
+      - Added the --set-sender option to specify the envelope sender to the
+        same value as is used for the From header when sending via 'sendmail';
+        
 
 2.60  2006-06-16T22:42:48
       - HTML output now creates a link from a directory name to its place in

@@ -220,6 +220,17 @@ variable if F<sendmail> isn't in your path or to avoid loading
 L<File::Spec|File::Spec>. The same caveats as applied to the location of the
 F<svnlook> executable apply here.
 
+=item set_sender
+
+  svnnotify --set-sender
+  svnnotify -S
+
+Uses the C<-f> option to C<sendmail> to set the envelope sender address of the
+email to the same address as is used for the "From" header. If you're also
+using the C<from> option, be sure to make it B<only> an email address. Don't
+include any other junk in it, like a sender's name. Ignored when using
+C<smtp>.
+
 =item smtp
 
   svnnotify --smtp smtp.example.com
@@ -667,6 +678,7 @@ sub get_options {
         'user-domain|D=s'     => \$opts->{user_domain},
         'svnlook|l=s'         => \$opts->{svnlook},
         'sendmail|s=s'        => \$opts->{sendmail},
+        'set-sender|S'        => \$opts->{set_sender},
         'smtp=s'              => \$opts->{smtp},
         'charset|c=s'         => \$opts->{charset},
         'io-layer|o=s'        => \$opts->{io_layer},
@@ -1026,7 +1038,10 @@ sub execute {
 
     my $out = $self->{smtp}
         ? SVN::Notify::SMTP->get_handle($self)
-        : $self->_pipe('|-', $self->{sendmail}, '-oi', '-t');
+        : $self->_pipe(
+            '|-', $self->{sendmail}, '-oi', '-t',
+            ($self->{set_sender} ? ('-f', $self->{from}) : ())
+        );
 
     # Output the message.
     $self->output($out);
@@ -1482,6 +1497,7 @@ __PACKAGE__->_accessors(qw(
     user_domain
     svnlook
     sendmail
+    set_sender
     smtp
     charset
     io_layer
@@ -1595,6 +1611,13 @@ Gets or sets the value of the C<svnlook> attribute.
   $notifier = $notifier->sendmail($sendmail);
 
 Gets or sets the value of the C<sendmail> attribute.
+
+=head3 set_sender
+
+  my $set_sender = $notifier->set_sender;
+  $notifier = $notifier->set_sender($set_sender);
+
+Gets or sets the value of the C<set_sender> attribute.
 
 =head3 smtp
 

@@ -17,6 +17,7 @@ my %testopts = (
 );
 
 my %params = (
+    set_sender      => undef,
     smtp            => undef,
     smtp_user       => undef,
     smtp_pass       => undef,
