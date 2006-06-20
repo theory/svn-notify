@@ -1117,6 +1117,7 @@ sub output_headers {
     print $out
       "MIME-Version: 1.0\n",
       "From: $self->{from}\n",
+      "Errors-To: $self->{from}\n",
       "To: $self->{to}\n",
       "Subject: $self->{subject}\n";
     print $out "Reply-To: $self->{reply_to}\n" if $self->{reply_to};

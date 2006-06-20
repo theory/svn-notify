@@ -3,7 +3,7 @@
 # $Id$
 
 use strict;
-use Test::More tests => 196;
+use Test::More tests => 197;
 use File::Spec::Functions;
 
 use_ok('SVN::Notify');
@@ -81,6 +81,7 @@ my $email = get_output();
 like( $email, qr/Subject: \[111\] Did this, that, and the other\.\n/,
       "Check subject" );
 like( $email, qr/From: theory\n/, 'Check From');
+like( $email, qr/Errors-To: theory\n/, 'Check Errors-To');
 like( $email, qr/To: test\@example\.com\n/, 'Check To');
 like( $email, qr{Content-Type: text/plain; charset=UTF-8\n},
       'Check Content-Type' );
