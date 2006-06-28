@@ -1,5 +1,7 @@
 Revision history for Perl extension SVN::Notify
 
+2.62
+
 2.61  2006-06-28T23:07:40
       - Removed unused patch file from the distribution. It was temporary, and
         never supposed to be there, anyway.
