@@ -136,12 +136,11 @@ F<post-commit> for details. Required.
 =item to
 
   svnnotify --to commiters@example.com
-  svnnotify -t commiters@example.com
+  svnnotify -t commiters@example.com --to managers@example.com
 
-The address or addresses to which to send the notification email. To specify
-multiple addresses, simply put them all into a comma-delimited list suitable
-for an SMTP "From" header. This parameter is required unless C<to_regex_map>
-is specified.
+The address or addresses to which to send the notification email. Can be used
+multiple times to specify multiple addresses. This parameter is required
+unless C<to_regex_map> is specified.
 
 =item to_regex_map
 
@@ -223,7 +222,7 @@ F<svnlook> executable apply here.
 =item set_sender
 
   svnnotify --set-sender
-  svnnotify -S
+  svnnotify -E
 
 Uses the C<-f> option to C<sendmail> to set the envelope sender address of the
 email to the same address as is used for the "From" header. If you're also
@@ -586,6 +585,9 @@ sub new {
         $params{revision_url} .= '/revision/?rev=%s&view=rev'
     }
 
+    # Make sure that the recipients are an arrayref.
+    $params{to} = [ $params{to} ] unless ref $params{to};
+
     # Make it so!
     $class->_dbpnt( "Instantiating $class object") if $params{verbose};
     return bless \%params, $class;
@@ -672,13 +674,13 @@ sub get_options {
     Getopt::Long::GetOptions(
         'repos-path|p=s'      => \$opts->{repos_path},
         'revision|r=s'        => \$opts->{revision},
-        'to|t=s'              => \$opts->{to},
+        'to|t=s@'             => \$opts->{to},
         'to-regex-map|x=s%'   => \$opts->{to_regex_map},
         'from|f=s'            => \$opts->{from},
         'user-domain|D=s'     => \$opts->{user_domain},
         'svnlook|l=s'         => \$opts->{svnlook},
         'sendmail|s=s'        => \$opts->{sendmail},
-        'set-sender|S'        => \$opts->{set_sender},
+        'set-sender|E'        => \$opts->{set_sender},
         'smtp=s'              => \$opts->{smtp},
         'charset|c=s'         => \$opts->{charset},
         'io-layer|o=s'        => \$opts->{io_layer},
@@ -805,7 +807,7 @@ affected directories).
 sub prepare {
     my $self = shift;
     $self->prepare_recipients;
-    return $self unless $self->{to};
+    return $self unless $self->{to} && @{ $self->{to} };
     $self->prepare_contents;
     $self->prepare_files;
     $self->prepare_subject;
@@ -833,7 +835,7 @@ sub prepare_recipients {
     my $self = shift;
     $self->_dbpnt( "Preparing recipients list") if $self->{verbose};
     return $self unless $self->{to_regex_map} || $self->{subject_cx};
-    my @to = $self->{to} ? ($self->{to}) : ();
+    my @to = $self->{to} ? @{ $self->{to} } : ();
     my $regexen = $self->{to_regex_map};
     if ($regexen) {
         $regexen = {%$regexen};
@@ -875,9 +877,10 @@ sub prepare_recipients {
     $self->_dbpnt( qq{Context is "$cx"})
         if $self->{subject_cx} && $self->{verbose} > 1;
     close $fh or warn "Child process exited: $?\n";
-    $self->{to} = join ', ', @to;
+    $self->{to} = \@to;
     $self->{cx} = $cx;
-    $self->_dbpnt( qq{Recipients: "$self->{to}"}) if $self->{verbose} > 1;
+    $self->_dbpnt( 'Recipients: "', join(', ', @to), '"')
+        if $self->{verbose} > 1;
     return $self;
 }
 
@@ -1034,7 +1037,7 @@ any other actions in response to Subversion activity.
 sub execute {
     my $self = shift;
     $self->_dbpnt( "Sending message") if $self->{verbose};
-    return $self unless $self->{to};
+    return $self unless $self->{to} && @{ $self->{to} };
 
     my $out = $self->{smtp}
         ? SVN::Notify::SMTP->get_handle($self)
@@ -1133,7 +1136,7 @@ sub output_headers {
       "MIME-Version: 1.0\n",
       "From: $self->{from}\n",
       "Errors-To: $self->{from}\n",
-      "To: $self->{to}\n",
+      "To: ", join ( ', ', @{ $self->{to} } ), "\n",
       "Subject: $self->{subject}\n";
     print $out "Reply-To: $self->{reply_to}\n" if $self->{reply_to};
     print $out "X-Mailer: SVN::Notify ", $self->VERSION,
@@ -1888,7 +1891,7 @@ sub get_handle {
     binmode tied(*{ $smtp->tied_fh }), ":$notifier->{io_layer}"
         if SVN::Notify::PERL58;
     $smtp->mail($notifier->{from});
-    $smtp->to($notifier->{to});
+    $smtp->to(@{ $notifier->{to} });
     $smtp->data;
     tie local(*SMTP), $class, $smtp;
     return *SMTP;

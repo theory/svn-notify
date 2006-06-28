@@ -59,7 +59,7 @@ while (my ($k, $v) = each %testopts) {
     $k =~ s/-/_/g;
     $params{$k} = $v;
 }
-
+$params{to} = [ $params{to} ];
 
 # Make sure that the default options work.
 local @ARGV = %testopts;

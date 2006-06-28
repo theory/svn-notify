@@ -6,8 +6,11 @@ Revision history for Perl extension SVN::Notify
       - Added an "Errors-To" header to the outgoing email, using the same
         email address as is used for the "From" header.
       - Added the --set-sender option to specify the envelope sender to the
-        same value as is used for the From header when sending via 'sendmail';
-        
+        same value as is used for the From: header when sending via sendmail.
+      - The --to option may now be specified multiple times (or passed as an
+        array reference to the constructor) to specify multiple recipients.
+        This change allows multiple recipients to be used when sending
+        notifications via SMTP. Reported by John Colton.
 
 2.60  2006-06-16T22:42:48
       - HTML output now creates a link from a directory name to its place in

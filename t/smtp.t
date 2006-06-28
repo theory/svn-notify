@@ -19,7 +19,7 @@ my %args = (
     smtp       => 'smtp.example.com',
     repos_path => 'tmp',
     revision   => '111',
-    to         => 'test@example.com',
+    to         => ['test@example.com', 'try@example.com'],
 );
 
 ok my $notifier = SVN::Notify->new(%args), 'Create new SMTP notifier';
@@ -34,7 +34,7 @@ do {
 is_deeply $smtp->{new}, ['smtp.example.com'],
     'The SMTP object should have been instantiated with the SMTP address';
 is $smtp->{mail}, 'theory', 'Mail should be initiated by user "theory"';
-is $smtp->{to}, 'test@example.com', 'Mail should be from the right address';
+is_deeply $smtp->{to}, $args{to}, 'Mail should be from the right addresses';
 ok $smtp->{data}, 'data() should have been called';
 ok $smtp->{dataend}, 'dataend() should have been called';
 ok $smtp->{quit}, 'quit() should have been called';
@@ -42,7 +42,8 @@ ok $smtp->{quit}, 'quit() should have been called';
 like $smtp->{datasend}, qr/Subject: \[111\] Did this, that, and the other\.\n/,
       "Check subject";
 like $smtp->{datasend}, qr/From: theory\n/, 'Check From';
-like $smtp->{datasend}, qr/To: test\@example\.com\n/, 'Check To';
+like $smtp->{datasend}, qr/To:\s+test\@example\.com,\s+try\@example\.com\n/,
+    'Check To';
 like $smtp->{datasend}, qr{Content-Type: text/plain; charset=UTF-8\n},
       'Check Content-Type';
 like $smtp->{datasend}, qr{Content-Transfer-Encoding: 8bit\n},
@@ -93,7 +94,7 @@ do {
 is_deeply $smtp->{new}, ['smtp.example.com', Debug => 1],
     'The SMTP object should be instantiated with SMTP address and Debug on';
 is $smtp->{mail}, 'theory', 'Mail should be initiated by user "theory"';
-is $smtp->{to}, 'test@example.com', 'Mail should be from the right address';
+is_deeply $smtp->{to}, $args{to}, 'Mail should be from the right addresses';
 ok $smtp->{data}, 'data() should have been called';
 ok $smtp->{dataend}, 'dataend() should have been called';
 ok $smtp->{quit}, 'quit() should have been called';
@@ -110,7 +111,7 @@ sub new {
 }
 
 sub mail     { $smtp->{mail} = $_[1] }
-sub to       { $smtp->{to} = $_[1] }
+sub to       { shift; $smtp->{to} = \@_ }
 sub data     { $smtp->{data} = 1 }
 sub datasend { shift; $smtp->{datasend} .= join '', @_ }
 sub dataend  { $smtp->{dataend} = 1; }
