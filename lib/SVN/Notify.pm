@@ -554,6 +554,9 @@ sub new {
         }
     }
 
+    # Make sure that the tos are an arrayref.
+    $params{to} = [ $params{to} || () ] unless ref $params{to};
+
     # Check for required parameters.
     $class->_dbpnt( "Checking required parameters to new()")
       if $params{verbose};
@@ -562,7 +565,7 @@ sub new {
     die qq{Missing required "revision" parameter}
       unless $params{revision};
     die qq{Missing required "to" or "to_regex_map" parameter}
-      unless $params{to} || $params{to_regex_map};
+      unless @{ $params{to} } || $params{to_regex_map};
 
     # Set up default values.
     $params{svnlook}        ||= $ENV{SVNLOOK}  || $class->find_exe('svnlook');
@@ -585,8 +588,6 @@ sub new {
         $params{revision_url} .= '/revision/?rev=%s&view=rev'
     }
 
-    # Make sure that the recipients are an arrayref.
-    $params{to} = [ $params{to} ] unless ref $params{to};
 
     # Make it so!
     $class->_dbpnt( "Instantiating $class object") if $params{verbose};
@@ -807,7 +808,7 @@ affected directories).
 sub prepare {
     my $self = shift;
     $self->prepare_recipients;
-    return $self unless $self->{to} && @{ $self->{to} };
+    return $self unless @{ $self->{to} };
     $self->prepare_contents;
     $self->prepare_files;
     $self->prepare_subject;
@@ -835,7 +836,7 @@ sub prepare_recipients {
     my $self = shift;
     $self->_dbpnt( "Preparing recipients list") if $self->{verbose};
     return $self unless $self->{to_regex_map} || $self->{subject_cx};
-    my @to = $self->{to} ? @{ $self->{to} } : ();
+    my $tos = $self->{to};
     my $regexen = $self->{to_regex_map};
     if ($regexen) {
         $regexen = {%$regexen};
@@ -862,7 +863,7 @@ sub prepare_recipients {
             # If the directory matches the regex, save the email.
             if (/$rx/) {
                 $self->_dbpnt( qq{"$_" matched $rx}) if $self->{verbose} > 2;
-                push @to, $email;
+                push @$tos, $email;
                 delete $regexen->{$email};
             }
         }
@@ -877,9 +878,8 @@ sub prepare_recipients {
     $self->_dbpnt( qq{Context is "$cx"})
         if $self->{subject_cx} && $self->{verbose} > 1;
     close $fh or warn "Child process exited: $?\n";
-    $self->{to} = \@to;
     $self->{cx} = $cx;
-    $self->_dbpnt( 'Recipients: "', join(', ', @to), '"')
+    $self->_dbpnt( 'Recipients: "', join(', ', @$tos), '"')
         if $self->{verbose} > 1;
     return $self;
 }
@@ -1037,7 +1037,7 @@ any other actions in response to Subversion activity.
 sub execute {
     my $self = shift;
     $self->_dbpnt( "Sending message") if $self->{verbose};
-    return $self unless $self->{to} && @{ $self->{to} };
+    return $self unless @{ $self->{to} };
 
     my $out = $self->{smtp}
         ? SVN::Notify::SMTP->get_handle($self)
