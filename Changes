@@ -1,6 +1,6 @@
 Revision history for Perl extension SVN::Notify
 
-2.62
+2.62  2006-06-30T18:03:21
       - Changed to() accessor to return the first value in the array in scalar
         context, and all of the items as a list in list context. This makes
         its behavior more consistent with versions of SVN::Notify priort to
