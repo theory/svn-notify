@@ -1494,7 +1494,6 @@ sub _dump_diff {
 __PACKAGE__->_accessors(qw(
     repos_path
     revision
-    to
     to_regex_map
     from
     user_domain
@@ -1556,6 +1555,16 @@ sub _accessors {
 sub svnweb_url  { shift->revision_url(@_) }
 sub viewcvs_url { shift->revision_url(@_) }
 
+for my $attr (qw(to strip_cx_regex)) {
+    no strict 'refs';
+    *{__PACKAGE__ . "::$attr"} = sub {
+        my $self = shift;
+        return wantarray ? @{ $self->{$attr} } : $self->{$attr}[0] unless @_;
+        $self->{$attr}= \@_;
+        return $self;
+    };
+}
+
 =head2 Accessors
 
 =head3 repos_path
@@ -1576,8 +1585,14 @@ Gets or sets the value of the C<revision> attribute.
 
   my $to = $notifier->to;
   $notifier = $notifier->to($to);
+  my @tos = $notifier->to;
+  $notifier = $notifier->to(@tos);
 
-Gets or sets the value of the C<to> attribute.
+Gets or sets the list of values stored in the C<to> attribute. In a scalar
+context, it returns only the first value in the list, for backards
+compatibility with older versions of SVN::Notify. In list context, it of
+course returns the entire list. Pass in one or more values to set all of the
+values for the C<to> attribute.
 
 =head3 to_regex_map
 
@@ -1691,6 +1706,18 @@ Gets or sets the value of the C<subject_prefix> attribute.
   $notifier = $notifier->subject_cx($subject_cx);
 
 Gets or sets the value of the C<subject_cx> attribute.
+
+=head3 strip_cx_regex
+
+  my $strip_cx_regex = $notifier->strip_cx_regex;
+  $notifier = $notifier->strip_cx_regex($strip_cx_regex);
+  my @strip_cx_regexs = $notifier->strip_cx_regex;
+  $notifier = $notifier->strip_cx_regex(@strip_cx_regexs);
+
+Gets or sets the list of values stored in the C<strip_cx_regex> attribute. In
+a scalar context, it returns only the first value in the list; in list
+context, it of course returns the entire list. Pass in one or more values to
+set all of the values for the C<strip_cx_regex> attribute.
 
 =head3 max_sub_length
 

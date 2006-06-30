@@ -1,6 +1,13 @@
 Revision history for Perl extension SVN::Notify
 
 2.62
+      - Changed to() accessor to return the first value in the array in scalar
+        context, and all of the items as a list in list context. This makes
+        its behavior more consistent with versions of SVN::Notify priort to
+        2.61.
+      - Added strip_cx_regex() accessor. It also returns the first value in
+        scalar context, and the full list in list context, for consistency
+        with to().
 
 2.61  2006-06-28T23:07:40
       - Removed unused patch file from the distribution. It was temporary, and
