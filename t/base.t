@@ -3,7 +3,7 @@
 # $Id$
 
 use strict;
-use Test::More tests => 203;
+use Test::More tests => 204;
 use File::Spec::Functions;
 
 use_ok('SVN::Notify');
@@ -427,6 +427,8 @@ ok( $notifier = SVN::Notify->new(
 ),
     "Construct new subject checking notifier" );
 isa_ok($notifier, 'SVN::Notify');
+is_deeply( [ $notifier->strip_cx_regex ], ['^trunk/'],
+           'Check the strip_cx_regex accessor' );
 ok( $notifier->prepare, "Prepare subject checking" );
 ok( $notifier->execute, "Notify subject checking" );
 is( $notifier->subject, '[111] Class-Meta',
