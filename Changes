@@ -1,6 +1,8 @@
 Revision history for Perl extension SVN::Notify
 
 2.63  
+      - The tests in t/options.t no longer fail when HTML::Entities is not
+        installed. Thanks to Ricardo Signes for the spot! Ticket #20267.
 
 2.62  2006-06-30T18:03:21
       - Changed to() accessor to return the first value in the array in scalar

@@ -80,3 +80,8 @@ $params{css_url} = undef;
 @ARGV = (%testopts, '--bugzilla-url' => 'url', '--handler' => 'HTML');
 ok $opts = SVN::Notify->get_options, "Get SVN::Notify + HTML options";
 is_deeply($opts, \%params, "Check new results");
+
+BEGIN {
+    package HTML::Entities;
+    $INC{'HTML/Entities.pm'} = __FILE__;
+}
