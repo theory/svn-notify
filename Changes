@@ -5,6 +5,8 @@ Revision history for Perl extension SVN::Notify
         installed. Thanks to Ricardo Signes for the spot! Ticket #20267.
       - The email subject is now encoded in the MIME-Q encoding, in compliance
         with RFC 2047. Patch from Éric Cholet.
+      - Now properly setting the binmode on file handles in Win32 when
+        running under Perl 5.8.
 
 2.62  2006-06-30T18:03:21
       - Changed to() accessor to return the first value in the array in scalar

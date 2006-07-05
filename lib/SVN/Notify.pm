@@ -1861,8 +1861,10 @@ sub _pipe {
             ? q{"}  . join(q{" "}, @_) . q{"|}
             : q{|"} . join(q{" "}, @_) . q{"};
         open PIPE, $cmd or die "Cannot fork: $!\n";
+        binmode PIPE, ":$self->{io_layer}" if PERL58;
         return *PIPE;
     }
+
     my $pid = open PIPE, $mode;
     die "Cannot fork: $!\n" unless defined $pid;
 
