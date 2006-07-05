@@ -1018,6 +1018,13 @@ sub prepare_subject {
       && length $self->{subject} > $self->{max_sub_length};
 
     $self->_dbpnt( qq{Subject is "$self->{subject}"}) if $self->{verbose};
+
+    # Q-Encoding (RFC 2047)
+    if (PERL58) {
+        require Encode;
+        Encode::from_to($self->{subject}, $self->{charset}, 'MIME-Q');
+    }
+
     return $self;
 }
 
