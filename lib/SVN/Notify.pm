@@ -269,7 +269,13 @@ list. Defaults to "PLAIN".
 
 The character set typically used on the repository for log messages, file
 names, and file contents. Used to specify the character set in the email
-Content-Type headers. Defaults to "UTF-8".
+Content-Type headers. Defaults to "UTF-8". Note that you still might end up
+with garbage characters in your notification email if you use a non-UTF-8
+locale. For example, "für" might come out as "f?\195?\188r". The solution is
+to set the C<$LANG> environment variable for your locale so that F<sendmail>
+knows what to do with your message:
+
+  LANG=de_DE.ISO8859-1 svnnotify --charset ISO8859-1 ...
 
 =item io_layer
 
@@ -282,7 +288,7 @@ repository uses different character encodings, C<charset> should be set to
 whatever is the most common character encoding, and C<io_layer> is best set to
 C<raw>. In that case, some characters might not look right in the commit
 messaage (because an email can manage only one character encoding at a time),
-but then C<svnnotify> won't get stuck inssuing a slew of warnings.
+but then C<svnnotify> won't get stuck issuing a slew of warnings.
 
 =item language
 
