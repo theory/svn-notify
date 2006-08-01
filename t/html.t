@@ -134,7 +134,7 @@ like( $email, qr|<link rel="stylesheet" type="text/css" href="foo.css" />|,
 ##############################################################################
 # Include HTML diff and language.
 ##############################################################################
-ok( $notifier = SVN::Notify::HTML->new(%args, with_diff => 1, language => 'en'),
+ok( $notifier = SVN::Notify::HTML->new(%args, with_diff => 1, language => 'en_US'),
     "Construct new HTML diff notifier" );
 isa_ok($notifier, 'SVN::Notify::HTML');
 isa_ok($notifier, 'SVN::Notify');
@@ -154,11 +154,11 @@ is( scalar @{[ $email =~ m{Content-Type: text/(plain|html); charset=UTF-8\n} ]},
     'Check for one HTML Content-Type header' );
 is( scalar @{[$email =~ m{Content-Transfer-Encoding: 8bit\n}g]}, 1,
       'Check for one HTML Content-Transfer-Encoding header');
-is( scalar @{[$email =~ m{Content-Language: en\n}g]}, 1,
+is( scalar @{[$email =~ m{Content-Language: en_US\n}g]}, 1,
       'Check for one HTML Content-Language header');
 
 # Check for the html header.
-like( $email, qr|<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">|,
+like( $email, qr|<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en_US">|,
       "Check for HTML tag" );
 # Make sure that the diff is included and escaped.
 like( $email, qr/<div id="patch">/, "Check for patch div" );
