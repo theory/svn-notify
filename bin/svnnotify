@@ -77,10 +77,13 @@ Fake-out Pod::Usage
   -c --charset CHARSET         The character set of the log message and the
                                repository files.
   -o --io-layer                Perl IO layer to use for input and output.
+  -g --language LANGUAGE       Value for the Content-Language header and $LANG
+                               environment variable.
   -d --with-diff               Include the diff in the message.
   -a --attach-diff             Attach the diff to the message.
   -w --diff-switches SWITCHES  Switches to pass to C<svnlook diff>.
   -R --reply-to ADDRESS        Address for use in the Reply-To header.
+     --add-header NAME=VALUE   Add an extra header to the email.
   -P --subject-prefix PREFIX   String to prepend to the subject.
   -C --subject-cx              Include the context of the commit in the
                                subject.

@@ -7,9 +7,12 @@ Revision history for Perl extension SVN::Notify
         with RFC 2047. Patch from Éric Cholet.
       - Now properly setting the binmode on file handles in Win32 when
         running under Perl 5.8.
-      - Added a note in the documentation for the --charset option suggesting
-        that the LANG environment variable be set to get sendmail to recognize
-        non-Unicode characters. Fix discovered by Éric Cholet. Ticket #16050.
+      - Added the --add-header option to add headers to the outgoing email.
+        Useful for things like auto-approval for MLMs. Patch (with tests!)
+        from Ricardo Signes.
+      - Documented the --language option in the svnnotify script.
+      - Now setting the $LANG environment variable with the contents of the
+        language and charset options if language is set. Ticket #16050.
 
 2.62  2006-06-30T18:03:21
       - Changed to() accessor to return the first value in the array in scalar

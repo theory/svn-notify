@@ -3,7 +3,7 @@
 # $Id$
 
 use strict;
-use Test::More tests => 204;
+use Test::More tests => 211;
 use File::Spec::Functions;
 
 use_ok('SVN::Notify');
@@ -124,11 +124,11 @@ unlike( $email, qr{Modified: trunk/Params-CallbackRequest/Changes},
 ok( $notifier = SVN::Notify->new(
     %args,
     with_diff => 1,
-    language  => 'en',
+    language  => 'en_US',
     io_layer  => 'raw',
 ), 'Construct new diff notifier' );
 ok $notifier->with_diff, 'with_diff() should return true';
-is $notifier->language, 'en', 'language should be "en"';
+is $notifier->language, 'en_US', 'language should be "en_US"';
 is $notifier->io_layer, 'raw', 'IO layer should be "raw"';
 isa_ok($notifier, 'SVN::Notify');
 ok( $notifier->prepare, "Single method call prepare" );
@@ -141,7 +141,7 @@ like( $email, qr/Subject: \[111\] Did this, that, and the other\.\n/,
       "Check diff subject" );
 like( $email, qr/From: theory\n/, 'Check diff From');
 like( $email, qr/To: test\@example\.com\n/, 'Check diff To');
-like( $email, qr/Content-Language: en\n/, 'Check diff Content-Language');
+like( $email, qr/Content-Language: en_US\n/, 'Check diff Content-Language');
 
 # Make sure there are no attachment headers
 is( scalar @{[ $email =~ m{Content-Type: text/plain; charset=UTF-8\n} ]}, 1,
@@ -162,7 +162,7 @@ unlike( $email, qr{Content-Disposition: attachment; filename=},
 ##############################################################################
 # Attach diff with language.
 ##############################################################################
-ok( $notifier = SVN::Notify->new(%args, attach_diff => 1, language => 'en'),
+ok( $notifier = SVN::Notify->new(%args, attach_diff => 1, language => 'en_US'),
     "Construct new attach diff notifier" );
 isa_ok($notifier, 'SVN::Notify');
 ok( $notifier->prepare, "Single method call prepare" );
@@ -179,7 +179,7 @@ like( $email, qr/To: test\@example\.com\n/, 'Check attach diff To');
 # Make sure we have two sets of headers for attachments.
 is( scalar @{[ $email =~ m{Content-Type: text/plain; charset=UTF-8\n}g ]}, 2,
     'Check for two Content-Type headers' );
-is( scalar @{[ $email =~ m{Content-Language: en\n}g ]}, 2,
+is( scalar @{[ $email =~ m{Content-Language: en_US\n}g ]}, 2,
     'Check for two Content-Language headers' );
 is( scalar @{[$email =~ m{Content-Transfer-Encoding: 8bit\n}g]}, 2,
       'Check for two Content-Transfer-Encoding headers');
@@ -541,6 +541,26 @@ ok $notifier->execute, 'Notify "multiple to" checking';
 $email = get_output();
 like $email, qr{To:\s+test\@example\.com,\s+try\@example\.com\n},
     'Check for both address in the To header';
+
+##############################################################################
+# Try add_headers.
+##############################################################################
+my $headers = {
+    Approve    => 'secrit',
+    'X-Flavor' => [qw(vegemite marmite)],
+};
+ok $notifier = SVN::Notify->new(
+    %args,
+    add_headers => $headers,
+), 'Construct new "add headers" notifier';
+isa_ok $notifier, 'SVN::Notify';
+is_deeply $notifier->add_headers, $headers, 'Should be hashref of headers';
+ok $notifier->prepare, 'Prepare "add headers" checking';
+ok $notifier->execute, 'Notify "add headers" checking';
+$email = get_output();
+like $email, qr/Approve:\s+secrit\n/, 'Check for single header';
+like $email, qr{X-Flavor:\s+vegemite\nX-Flavor:\s+marmite\n},
+    'Check for multiple additional headers';
 
 ##############################################################################
 # Test file_exe
