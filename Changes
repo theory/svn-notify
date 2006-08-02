@@ -1,6 +1,6 @@
 Revision history for Perl extension SVN::Notify
 
-2.63  
+2.63  2006-08-02T18:11:36
       - The tests in t/options.t no longer fail when HTML::Entities is not
         installed. Thanks to Ricardo Signes for the spot! Ticket #20267.
       - The email subject is now encoded in the MIME-Q encoding, in compliance
@@ -11,8 +11,9 @@ Revision history for Perl extension SVN::Notify
         Useful for things like auto-approval for MLMs. Patch (with tests!)
         from Ricardo Signes.
       - Documented the --language option in the svnnotify script.
-      - Now setting the $LANG environment variable with the contents of the
-        language and charset options if language is set. Ticket #16050.
+      - Before executing 'sendmail', SVN::Notify now sets the $LANG
+        environment variable with the contents of the language and charset
+        options if language is set. Ticket #16050.
 
 2.62  2006-06-30T18:03:21
       - Changed to() accessor to return the first value in the array in scalar
