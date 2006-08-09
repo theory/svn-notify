@@ -1,6 +1,8 @@
 Revision history for Perl extension SVN::Notify
 
 2.64
+      - Added notes about Net::SMPT and Net::SMTP_auth to the README file.
+        Reported by Nacho Barrientos Arias.
 
 2.63  2006-08-02T18:11:36
       - The tests in t/options.t no longer fail when HTML::Entities is not

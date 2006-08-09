@@ -41,6 +41,16 @@ SVN::Notify has the following dependencies:
         This module is required for sending HTML-formatted notifications
         with SVN::Notify::HTML.
 
+    * Net::SMTP
+        This module is required for sending notification messages via SMTP
+        rather than by sendmail (e.g., under Windows). That is, it is requird
+        when using the --smtp option.
+
+    * Net::SMTP_auth
+        This module is required for sending notifications messages via an
+        authenticating SMTP server, i.e., when using the --smtp-authtype
+        option.
+
 COPYRIGHT AND LICENCE
 
 Copyright (c) 2004-2006 Kineticode, Inc. All Rights Reserved.
