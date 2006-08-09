@@ -33,7 +33,7 @@ SVN::Notify has the following dependencies:
         This module is included with Perl.
 
     * Pod::Usage
-        For calling "svnnotify" with the "--help" or "--man" options, or when
+        For calling 'svnnotify' with the --help or --man options, or when
         it fails to process the command-line options, usage output will be
         triggered by Pod::Usage, has been included with Perl since 5.6.0.
 
