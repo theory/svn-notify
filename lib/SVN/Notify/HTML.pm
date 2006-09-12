@@ -330,7 +330,7 @@ sub output_log_message {
     # Make RT links.
     if (my $url = $self->rt_url) {
         $url = encode_entities($url, '<>&"');
-        $msg =~ s|\b((?:rt-)?ticket:?\s*#?\s*(\d+))\b|sprintf qq{<a href="$url">$1</a>}, $2|ige;
+        $msg =~ s{\b((?:rt|(?:rt-)?ticket:?)\s*#?\s*(\d+))\b}{sprintf qq{<a href="$url">$1</a>}, $2}ige;
     }
 
     # Make JIRA links.

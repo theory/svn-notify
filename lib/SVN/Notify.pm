@@ -478,9 +478,9 @@ Deprecated. Use C<revision_url> instead.
   svnnotify -T 'http://rt.perl.org/NoAuth/Bugs.html?id=%s'
 
 The URL of a Request Tracker (RT) server. If passed in, any strings in the log
-message of the form "Ticket # 12" or "ticket 6" or even "Ticket#1066" will be
-turned into links to the RT server. The URL must have the "%s" format where
-the RT ticket ID should be put into the URL.
+message of the form "Ticket # 12", "ticket 6", "RT # 52", "rt 52", or even
+"Ticket#1066" will be turned into links to the RT server. The URL must have
+the "%s" format where the RT ticket ID should be put into the URL.
 
 =item bugzilla_url
 
@@ -1304,7 +1304,7 @@ sub output_log_message {
 
     # Make RT links.
     if (my $url = $self->rt_url) {
-        if (my @matches = $msg =~ /\b(?:(?:rt-)?ticket:?\s*#?\s*(\d+))\b/ig) {
+        if (my @matches = $msg =~ /\b(?:(?:rt|(?:rt-)?ticket:?)\s*#?\s*(\d+))\b/ig) {
             print $out "\nRT Links:\n--------\n";
             printf $out "    $url\n", $_ for @matches;
         }

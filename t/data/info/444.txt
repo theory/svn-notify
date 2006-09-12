@@ -11,7 +11,8 @@ Again, the period should not be a part of the link.
 We might have a few RT links, too. For example, If I mention Ticket # 6,
 it will be a link. Likewise, if I decide to, I can  go ahead with Ticket
 12, where I have no # and the string is divided over two lines. But
-sticket 69 won't match. Jesse also wants RT-Ticket: #23 to work.
+sticket 69 won't match. Jesse also wants RT-Ticket: #23 to work and Ask
+wants RT #45 to work.
 
 Of course, we have our mainstay, ViewCVS, which will refer to SVN numbers
 such as Revision 6000. And just like the others, we can make it rev

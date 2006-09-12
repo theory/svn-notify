@@ -7,7 +7,7 @@ use Test::More;
 use File::Spec::Functions;
 
 if (eval { require HTML::Entities }) {
-    plan tests => 172;
+    plan tests => 173;
 } else {
     plan skip_all => "SVN::Notify::HTML::ColorDiff requires HTML::Entities";
 }
@@ -445,7 +445,10 @@ unlike($email,
      "Check for no Ticket 69 URL");
 like($email,
      qr{<a href="http://rt\.cpan\.org/NoAuth/Bugs\.html\?id=23">RT-Ticket: #23</a>},
-     "Check for Jesse RT URL");
+     "Check for Jesse's RT URL");
+like($email,
+     qr{<a href="http://rt\.cpan\.org/NoAuth/Bugs\.html\?id=45">RT #45</a>},
+     "Check for Ask's RT URL");
 
 # Check for ViewCVS URLs.
 like( $email,

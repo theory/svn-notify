@@ -3,7 +3,7 @@
 # $Id$
 
 use strict;
-use Test::More tests => 211;
+use Test::More tests => 213;
 use File::Spec::Functions;
 
 use_ok('SVN::Notify');
@@ -398,6 +398,12 @@ like($email, qr/RT Links:\n/, 'Check for ViewCVS Links label' );
 like($email,
      qr{    http://rt\.cpan\.org/NoAuth/Bugs\.html\?id=4321\n},
      "Check for RT URL");
+like($email,
+     qr{    http://rt\.cpan\.org/NoAuth/Bugs\.html\?id=123\n},
+     "Check for Jesse's RT URL");
+like($email,
+     qr{    http://rt\.cpan\.org/NoAuth/Bugs\.html\?id=445\n},
+     "Check for Ask's RT URL");
 like($email, qr/Bugzilla Links:\n/, 'Check for Bugzilla Links label' );
 like( $email,
       qr{   http://bugzilla\.mozilla\.org/show_bug\.cgi\?id=709\n},
