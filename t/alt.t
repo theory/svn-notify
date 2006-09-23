@@ -3,8 +3,14 @@
 # $Id: base.t 2771 2006-04-03 23:10:02Z theory $
 
 use strict;
-use Test::More tests => 77;
+use Test::More;
 use File::Spec::Functions;
+
+if (eval { require HTML::Entities }) {
+    plan tests => 77;
+} else {
+    plan skip_all => "SVN::Notify::Alternative requires HTML::Entities";
+}
 
 use_ok 'SVN::Notify::Alternative' or die;
 
