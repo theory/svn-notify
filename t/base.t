@@ -70,6 +70,9 @@ is($notifier->subject, '[111] Did this, that, and the other.',
    "Check subject accessor" );
 is($notifier->header, undef, 'Check header accessor');
 is($notifier->footer, undef, 'Check footer accessor');
+is($notifier->ticket_url, undef, 'Check ticket_url');
+is($notifier->ticket_regex, undef, 'Check ticket_regex');
+is($notifier->ticket_map, undef, 'Check ticket_map');
 
 # Send the notification.
 ok( $notifier->execute, "Notify" );
@@ -382,6 +385,15 @@ ok( $notifier = SVN::Notify->new(
 ),
     "Construct new URL notifier" );
 isa_ok($notifier, 'SVN::Notify');
+
+is_deeply( $notifier->ticket_map, {
+    rt       => 'http://rt.cpan.org/NoAuth/Bugs.html?id=%s',
+    bugzilla => 'http://bugzilla.mozilla.org/show_bug.cgi?id=%s',
+    jira     => 'http://jira.atlassian.com/secure/ViewIssue.jspa?key=%s',
+    gnats    => 'http://gnats.example.com/gnatsweb.pl?cmd=view&pr=%s',
+    '\[?\s*Custom\s*#\s*(\d+)\s*\]?' => 'http://ticket.example.com/id=%s',
+}, 'Check ticket_map accessor' );
+
 ok( $notifier->prepare, "Prepare URL" );
 ok( $notifier->execute, "Notify URL" );
 
@@ -391,10 +403,10 @@ $email = get_output();
 like( $email, qr|Revision:\s+222\n\s+http://viewsvn\.bricolage\.cc/\?rev=222\&view=rev\n|,
       'Check for main ViewCVS URL');
 like($email, qr/Revision Links:\n/, 'Check for ViewCVS Links label' );
+like($email, qr/Ticket Links:\n/, 'Check for Ticket Links label' );
 like($email,
      qr{    http://viewsvn\.bricolage\.cc/\?rev=606&view=rev\n},
      "Check for log mesage ViewCVS URL");
-like($email, qr/RT Links:\n/, 'Check for ViewCVS Links label' );
 like($email,
      qr{    http://rt\.cpan\.org/NoAuth/Bugs\.html\?id=4321\n},
      "Check for RT URL");
@@ -404,19 +416,15 @@ like($email,
 like($email,
      qr{    http://rt\.cpan\.org/NoAuth/Bugs\.html\?id=445\n},
      "Check for Ask's RT URL");
-like($email, qr/Bugzilla Links:\n/, 'Check for Bugzilla Links label' );
 like( $email,
       qr{   http://bugzilla\.mozilla\.org/show_bug\.cgi\?id=709\n},
       "Check for Bugzilla URL" );
-like($email, qr/JIRA Links:\n/, 'Check for JIRA Links label' );
 like( $email,
       qr{    http://jira\.atlassian\.com/secure/ViewIssue\.jspa\?key=TST-1608\n},
       "Check for Jira URL" );
-like($email, qr/GNATS Links:\n/, 'Check for GNATS Links label' );
 like($email,
      qr{    http://gnats\.example\.com/gnatsweb\.pl\?cmd=view&pr=12345\n},
      "Check for GNATS URL");
-like($email, qr/Ticket Links:\n/, 'Check for Ticket Links label' );
 like($email,
      qr{    http://ticket\.example\.com/id=4321\n},
      "Check for custom ticket URL");

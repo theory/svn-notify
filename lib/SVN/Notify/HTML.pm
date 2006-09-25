@@ -91,12 +91,13 @@ specified by C<css_url> need not completely style the HTML, but simply
 override the default settings. This approach nicely takes advantage of the
 "cascading" abilities of CSS.
 
-=item ticket_regex
+=item ticket_map
 
-  svnnotify --ticket-regex '(BUG-(\d+))'
+  svnnotify --ticket-map '(BUG-(\d+))=http://bugs.example.com/?show=%s'
 
 This attribute is inherited from L<SVN::Notify|SVN::Notify>, but its semantics
-are slightly different: it should return I<two> matches instead of one: the
+are slightly different: the regular expression passed as the regular
+expression used for the key should return I<two> matches instead of one: the
 text to linkify and the ticket ID itself. For example, '(BUG-(\d+))' will
 match "BUG-1234567", and "BUG-1234567" will be used for the link text, while
 "1234567" will be used to fill in the C<ticket_url> format string. The first
@@ -321,43 +322,13 @@ sub output_log_message {
         $msg =~ s|\b(rev(?:ision)?\s*#?\s*(\d+))\b|sprintf qq{<a href="$url">$1</a>}, $2|ige;
     }
 
-    # Make Bugzilla links.
-    if (my $url = $self->bugzilla_url) {
-        $url = encode_entities($url, '<>&"');
-        $msg =~ s|\b(bug\s*#?\s*(\d+))\b|sprintf qq{<a href="$url">$1</a>}, $2|ige;
-    }
-
-    # Make RT links.
-    if (my $url = $self->rt_url) {
-        $url = encode_entities($url, '<>&"');
-        $msg =~ s{\b((?:rt|(?:rt-)?ticket:?)\s*#?\s*(\d+))\b}{sprintf qq{<a href="$url">$1</a>}, $2}ige;
-    }
-
-    # Make JIRA links.
-    if (my $url = $self->jira_url) {
-        $url = encode_entities($url, '<>&"');
-        $msg =~ s|\b([A-Z]+-\d+)\b|sprintf qq{<a href="$url">$1</a>}, $1|ge;
-    }
-
-    # Make GNATS links.
-    if (my $url = $self->gnats_url) {
-        $url = encode_entities($url, '<>&"');
-        $msg =~ s|\b(PR\s*(\d+))\b|sprintf qq{<a href="$url">$1</a>}, $2|ge;
-    }
-
-    # Make custom ticketing system links.
-    if (my $url = $self->ticket_url) {
-        my $regex = $self->ticket_regex
-            or die q{Missing "ticket_regex" parameter to accompany }
-            . q{"ticket_url" parameter};
-        $url = encode_entities($url, '<>&"');
-        $msg =~ s{$regex}{ sprintf qq{<a href="$url">$1</a>}, $2 || $1 }ige;
-    }
-
-    else {
-        die q{Missing "ticket_url" parameter to accompany }
-            . q{"ticket_regex" parameter}
-            if $self->ticket_regex;
+    # Make ticketing system links.
+    if (my $map = $self->ticket_map) {
+        while (my ($regex, $url) = each %$map) {
+            $regex = $SVN::Notify::_ticket_regexen{$regex} || $regex;
+            $url = encode_entities($url, '<>&"');
+            $msg =~ s{$regex}{ sprintf qq{<a href="$url">$1</a>}, $2 || $1 }ige;
+        }
     }
 
     # Print it out and return.

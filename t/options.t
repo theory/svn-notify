@@ -41,10 +41,7 @@ my %params = (
     handler         => undef,
     author_url      => undef,
     revision_url    => undef,
-    rt_url          => undef,
-    bugzilla_url    => undef,
-    gnats_url       => undef,
-    jira_url        => undef,
+    ticket_map      => undef,
     ticket_url      => undef,
     ticket_regex    => undef,
     verbose         => undef,
@@ -73,7 +70,7 @@ $params{strip_cx_regex} = ['^trunk'] if $Getopt::Long::VERSION >= 2.34;
 
 is_deeply($opts, \%params, "Check results");
 
-$params{bugzilla_url} = 'url';
+$params{ticket_url} = 'url';
 $params{handler} = 'HTML';
 $params{linkize} = undef;
 $params{css_url} = undef;

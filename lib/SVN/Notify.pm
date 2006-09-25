@@ -472,65 +472,91 @@ Deprecated. Use C<revision_url> instead.
 
 Deprecated. Use C<revision_url> instead.
 
+=item ticket_map
+
+  svnnotify --ticket-map '\[?#\s*(\d+)\s*\]?=http://example.com/ticket?id=%s'
+            --ticket-map 'rt=http://rt.cpan.org/NoAuth/Bugs.html?id=%s' \
+
+Specifies a mapping between a regular expression and a URL. The regular
+expression should return a single match to be interpolated into the URL, which
+should be a C<sprintf> format using "%s" to place the match (usually the
+ticket identifier) from the regex. The command-line option may be specified
+any number of times for different ticketing systems. To the API, it must be
+passed as a hash reference.
+
+The first example matches "[#1234]" or "#1234" or "[# 1234]". This regex
+should be as specific as possible, preferably wrapped in "\b" to match word
+boundaries. If you're using L<SVN::Notify::HTML|SVN::Notify::HTML>, be sure to
+read its documentation for a different regular expression requirement!
+
+Optionally, the key value can be a placeholder for a regular expession used
+internally by SVN::Notify to match strings typically used for well-known
+ticketing systems. Those keys are:
+
+=over
+
+=item rt
+
+Matches Request Tracker (RT) ticket references of the form "Ticket # 12",
+"ticket 6", "RT # 52", "rt 52", "RT-Ticket # 213" or even "Ticket#1066".
+
+=item bugzilla
+
+Matches Bugzilla bug references of the form "Bug # 12" or "bug 6" or even
+"Bug#1066".
+
+=item jira
+
+Matches JIRA refrences of the form "JRA-1234".
+
+=item gnats
+
+Matches GnatsWeb refrences of the form "PR 1234".
+
+=back
+
 =item rt_url
 
   svnnotify --rt-url 'http://rt.cpan.org/NoAuth/Bugs.html?id=%s'
   svnnotify -T 'http://rt.perl.org/NoAuth/Bugs.html?id=%s'
 
-The URL of a Request Tracker (RT) server. If passed in, any strings in the log
-message of the form "Ticket # 12", "ticket 6", "RT # 52", "rt 52", or even
-"Ticket#1066" will be turned into links to the RT server. The URL must have
-the "%s" format where the RT ticket ID should be put into the URL.
+A shortcut for C<--ticket-map 'rt=$url'> provided for backwards compatibility.
 
 =item bugzilla_url
 
   svnnotify --bugzilla-url 'http://bugzilla.mozilla.org/show_bug.cgi?id=%s'
   svnnotify -B 'http://bugs.bricolage.cc/show_bug.cgi?id=%s'
 
-The URL of a Bugzilla server. If passed in, any strings in the log message of
-the form "Bug # 12" or "bug 6" or even "Bug#1066" will be turned into links to
-the Bugzilla server. The URL must have the "%s" format where the Bugzilla Bug
-ID should be put into the URL.
+A shortcut for C<--ticket-map 'bugzilla=$url'> provided for backwards
+compatibility.
 
 =item jira_url
 
   svnnotify --jira-url 'http://jira.atlassian.com/secure/ViewIssue.jspa?key=%s'
   svnnotify -J 'http://nagoya.apache.org/jira/secure/ViewIssue.jspa?key=%s'
 
-The URL of a JIRA server. If passed in, any strings in the log message that
-appear to be JIRA keys (such as "JRA-1234") will be turned into links to the
-JIRA server. The URL must have the "%s" format where the Jira key should be
-put into the URL.
+A shortcut for C<--ticket-map 'jira=$url'> provided for backwards
+compatibility.
 
 =item gnats_url
 
   svnnotify --gnats-url 'http://gnatsweb.example.com/cgi-bin/gnatsweb.pl?cmd=view&pr=%s'
   svnnotify -G 'http://gnatsweb.example.com/cgi-bin/gnatsweb.pl?cmd=view&pr=%s'
 
-The URL of a GnatsWeb server. If passed in, any strings in the log message
-that appear to be GNATS PRs (such as "PR 1234") will be turned into links to
-the GnatsWeb server. The URL must have the "%s" format where the GNATS PR
-number should be put into the URL.
+A shortcut for C<--ticket-map 'gnats=$url'> provided for backwards
+compatibility.
 
 =item ticket_url
 
   svnnotify --ticket-url 'http://ticket.example.com/showticket.html?id=%s'
 
-The URL of a custom ticket system. If passed in, any strings in the log
-message that match C<ticket_regex> will be turned into links to the custom
-ticket system. The URL must have the "%s" format where the first match
-(usually the ticket identifier) in the regex should be put into the URL.
+Deprecated. Use C<ticket_map>, instead.
 
 =item ticket_regex
 
   svnnotify --ticket-regex '\[?#\s*(\d+)\s*\]?'
 
-The regex to match a ticket tag of a custom ticket system. This should return
-a single match to be interpolated into the C<ticket_url> option. The example
-shown matches "[#1234]" or "#1234" or "[# 1234]". This regex should be as
-specific as possible, preferably wrapped in "\b" to match word boundaries. If
-you're using L<SVN::Notify::HTML|SVN::Notify::HTML>, be sure to read its
-documentation for a different syntax for C<ticket_regex>!
+Deprecated. Use C<ticket_map>, instead.
 
 =item verbose
 
@@ -556,6 +582,14 @@ C<prepare_subject()>.
 =back
 
 =cut
+
+# XXX Sneakily used by SVN::Notify::HTML. Change to use class methods?
+our %_ticket_regexen = (
+    rt       => '\b((?:rt|(?:rt-)?ticket:?)\s*#?\s*(\d+))\b',
+    bugzilla => '\b(bug\s*#?\s*(\d+))\b',
+    jira     => '\b([A-Z]+-\d+)\b',
+    gnats    => '\b(PR\s*(\d+))\b',
+);
 
 sub new {
     my ($class, %params) = @_;
@@ -602,6 +636,18 @@ sub new {
         warn "--revision-url must have '%s' format\n";
         $params{revision_url} .= '/revision/?rev=%s&view=rev'
     }
+
+    # Set up the issue tracking links.
+    my $track = $params{ticket_map};
+    if ($params{ticket_regex}) {
+        $track->{ delete $params{ticket_regex} } = delete $params{ticket_url};
+    }
+
+    for my $system (qw(rt bugzilla jira gnats)) {
+        my $param = $system . '_url';
+        $track->{ $system } = delete $params{ $param } if $params{ $param };
+    }
+    $params{ticket_map} = $track if $track;
 
     # Make it so!
     $class->_dbpnt( "Instantiating $class object") if $params{verbose};
@@ -712,12 +758,8 @@ sub get_options {
         'max-diff-length|e=i' => \$opts->{max_diff_length},
         'handler|H=s'         => \$opts->{handler},
         'author-url|A=s'      => \$opts->{author_url},
-        'rt-url|T=s'          => \$opts->{rt_url},
-        'bugzilla-url|B=s'    => \$opts->{bugzilla_url},
-        'jira-url|J=s'        => \$opts->{jira_url},
-        'gnats-url|G=s'       => \$opts->{gnats_url},
-        'ticket-url=s'        => \$opts->{ticket_url},
         'ticket-regex=s'      => \$opts->{ticket_regex},
+        'ticket-map=s%'       => \$opts->{ticket_map},
         'verbose|V+'          => \$opts->{verbose},
         'help|h'              => \$opts->{help},
         'man|m'               => \$opts->{man},
@@ -731,6 +773,8 @@ sub get_options {
             shift; push @{ $opts->{add_headers}{+shift} }, shift
         },
         'revision-url|U|svnweb-url|S|viewcvs-url=s' => \$opts->{revision_url},
+        'rt-url|T|bugzilla-url|B|jira-url|J|gnats-url|G||ticket-url=s'
+            => \$opts->{ticket_url},
     ) or return;
 
     # Load a subclass if one has been specified.
@@ -1244,9 +1288,9 @@ sub start_body {
   $notifier->output_metadata($file_handle);
 
 This method outputs the metadata of the commit, including the revision number,
-author (user), and date of the revision. If the C<author_url>, C<viewcvs_url>,
-or C<revision_url> attributes have been set, then the appropriate URL(s) for
-the revision will also be output.
+author (user), and date of the revision. If the C<author_url> or
+C<revision_url> attributes have been set, then the appropriate URL(s) for the
+revision will also be output.
 
 =cut
 
@@ -1286,7 +1330,7 @@ sub output_log_message {
     my $msg = join "\n", @{$self->{message}};
     print $out "Log Message:\n-----------\n$msg\n";
 
-    # Make Revision links. Mutually exclusive with viewcvs.
+    # Make Revision links.
     if (my $url = $self->{revision_url}) {
         if (my @matches = $msg =~ /\b(?:rev(?:ision)?\s*#?\s*(\d+))\b/ig) {
             print $out "\nRevision Links:\n--------------\n";
@@ -1294,53 +1338,19 @@ sub output_log_message {
         }
     }
 
-    # Make Bugzilla links.
-    if (my $url = $self->bugzilla_url) {
-        if (my @matches = $msg =~ /\b(?:bug\s*#?\s*(\d+))\b/ig) {
-            print $out "\nBugzilla Links:\n--------------\n";
-            printf $out "    $url\n", $_ for @matches;
+    # Make ticketing system links.
+    if (my $map = $self->ticket_map) {
+        my $has_header = 0;
+        while (my ($regex, $url) = each %$map) {
+            $regex = $_ticket_regexen{ $regex } || $regex;
+            while ($msg =~ /$regex/ig) {
+                unless ($has_header) {
+                    print $out "\nTicket Links:\n:-----------\n";
+                    $has_header = 1;
+                }
+                printf $out "    $url\n",  $2 || $1;
+            }
         }
-    }
-
-    # Make RT links.
-    if (my $url = $self->rt_url) {
-        if (my @matches = $msg =~ /\b(?:(?:rt|(?:rt-)?ticket:?)\s*#?\s*(\d+))\b/ig) {
-            print $out "\nRT Links:\n--------\n";
-            printf $out "    $url\n", $_ for @matches;
-        }
-    }
-
-    # Make JIRA links.
-    if (my $url = $self->jira_url) {
-        if (my @matches = $msg =~ /\b([A-Z]+-\d+)\b/g) {
-            print $out "\nJIRA Links:\n----------\n";
-            printf $out "    $url\n", $_ for @matches;
-        }
-    }
-
-    # Make GNATS links.
-    if (my $url = $self->gnats_url) {
-        if (my @matches = $msg =~ /\b(?:PR\s*(\d+))\b/ig) {
-            print $out "\nGNATS Links:\n-----------\n";
-            printf $out "    $url\n", $_ for @matches;
-        }
-     }
-
-    # Make custom ticketing system links.
-    if (my $url = $self->ticket_url) {
-        my $regex = $self->ticket_regex
-            or die q{Missing "ticket_regex" parameter to accompany }
-            . q{"ticket_url" parameter};
-        if (my @matches = $msg =~ /$regex/ig) {
-            print $out "\nTicket Links:\n-----------\n";
-            printf $out "    $url\n", $_ for @matches;
-        }
-    }
-
-    else {
-        die q{Missing "ticket_url" parameter to accompany }
-            . q{"ticket_regex" parameter}
-            if $self->ticket_regex;
     }
 
     return $self;
@@ -1547,12 +1557,9 @@ __PACKAGE__->_accessors(qw(
     max_diff_length
     author_url
     revision_url
-    rt_url
-    bugzilla_url
-    jira_url
-    gnats_url
     ticket_url
     ticket_regex
+    ticket_map
     header
     footer
     verbose
@@ -1585,8 +1592,25 @@ sub _accessors {
 }
 
 # Aliases for deprecated attributes.
-sub svnweb_url  { shift->revision_url(@_) }
-sub viewcvs_url { shift->revision_url(@_) }
+sub svnweb_url   { shift->revision_url(@_) }
+sub viewcvs_url  { shift->revision_url(@_) }
+
+# Deprecated ticket URL systems.
+for my $tick (qw(rt bugzilla jira gnats)) {
+    no strict 'refs';
+    *{$tick . '_url'} = sub {
+        my $self = shift;
+        my $map = $self->{ticket_map} || {};
+        return $map->{$tick} unless @_;
+        if (my $url = shift) {
+            $map->{$tick} = $url;
+        } else {
+            delete $map->{$tick};
+        }
+        $self->{ticket_map} = $map;
+        return $self;
+    };
+}
 
 for my $attr (qw(to strip_cx_regex)) {
     no strict 'refs';

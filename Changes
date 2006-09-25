@@ -7,6 +7,19 @@ Revision history for Perl extension SVN::Notify
         matches "RT" in addtion to "Ticket". Suggested by Ask Bjørn Hansen.
       - Now skipping all tests in 't/alt.t' if HTML::Entities is not
         installed. Reported by Marshall Roch.
+      - Added a new option, '--ticket-map', to map regular expressions
+        that match ticket references to the URLs to create links for those
+        references. This allows users to specify any number of ticketing
+        systems for which to scan for references in the log message.
+      - Deprecated '--ticket-regex' and '--ticket-url' in favor of the new
+        '--ticket-map' option.
+      - Converted the support for explicit ticketing systems (RT, JIRA,
+        GnatsWeb, and Bugzilla) to internally use the 'ticket_map' attribute.
+        This change eliminates quite a bit of redundant code. Based on a patch
+        from Martijn van Beers (Ticket # 21633).
+      - Unified the internal ticket system regular expressions so that
+        SVN::Notify::HTML can reference and use exactly the same regexen that
+        SVN::Notify uses. Inspired by a patch from Martijn van Beers.
 
 2.63  2006-08-02T18:11:36
       - The tests in t/options.t no longer fail when HTML::Entities is not

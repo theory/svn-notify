@@ -100,8 +100,7 @@ Fake-out Pod::Usage
   -B --bugzilla-url URL        Include links to specified Bugzilla URL.
   -J --jira-url URL            Include links to specified JIRA URL.
   -G --gnats-url URL           Include links to specified Gnats URL.
-     --ticket-regex REGEX      Regex matching custom ticket identifiers.
-     --ticket-url URL          URL for linking to custom ticket identifers.
+     --ticket-map REGEX=URL    Regex and URL for custom ticket identifiers.
      --header HEADER           Text header to display before body.
      --footer FOOTER           Text footer to display at end of body.
   -V --verbose                 Incremental verbose mode.
