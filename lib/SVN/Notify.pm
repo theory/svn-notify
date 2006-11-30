@@ -281,9 +281,10 @@ The Perl IO layer to use for inputting and outputting data. See
 L<perlio|perlio> for details. Defaults to "encoding($charset)". If your
 repository uses different character encodings, C<charset> should be set to
 whatever is the most common character encoding, and C<io_layer> is best set to
-C<raw>. In that case, some characters might not look right in the commit
-messaage (because an email can manage only one character encoding at a time),
-but then C<svnnotify> won't get stuck issuing a slew of warnings.
+C<raw>, e.g., C<--io-layer raw --charset cp850>. In that case, some characters
+might not look right in the commit messaage (because an email can manage only
+one character encoding at a time), but then C<svnnotify> won't get stuck
+issuing a slew of warnings.
 
 =item language
 
