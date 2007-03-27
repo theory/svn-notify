@@ -10,8 +10,9 @@ $SVN::Notify::HTML::VERSION = '2.65';
 @SVN::Notify::HTML::ISA = qw(SVN::Notify);
 
 __PACKAGE__->register_attributes(
-    linkize  => 'linkize',
-    css_url  => 'css-url=s',
+    linkize   => 'linkize',
+    css_url   => 'css-url=s',
+    wrap_log  => 'wrap-log',
 );
 
 =head1 Name
@@ -135,6 +136,15 @@ correctly extracts the ticket number for use in the URL.
 To learn more about the power of Regular expressions, I highly recommend
 _Mastering Regular Expressions, Second Edition_, by Jeffrey Friedl.
 
+=item wrap_log
+
+  svnnotify --wrap-log
+
+A boolean attribute to specify whether or not to wrap the log message in the
+output HTML. By default, log messages are I<not> wrapped, on the assumption
+that they should appear exactly as typed. But if that's not the case, specify
+this option to wrap the log message.
+
 =back
 
 =cut
@@ -228,9 +238,9 @@ sub output_css {
       qq(#msg dl a:visited { color:#cc6; }\n),
       q(h3 { font-family: verdana,arial,helvetica,sans-serif; ),
           qq(font-size: 10pt; font-weight: bold; }\n),
-      q(#msg pre { overflow: auto; background: #ffc; ),
+      q(#msg pre, #msg p { overflow: auto; background: #ffc; ),
           qq(border: 1px #fc0 solid; padding: 6px; }\n),
-      qq(#msg ul, pre { overflow: auto; }\n),
+      qq(#msg ul { overflow: auto; }\n),
       q(#header, #footer { color: #fff; background: #636; ),
       qq(border: 1px #300 solid; padding: 6px; }\n),
       qq(#patch { width: 100%; }\n);
@@ -332,7 +342,8 @@ sub output_log_message {
     }
 
     # Print it out and return.
-    print $out "<h3>Log Message</h3>\n<pre>$msg</pre>\n\n";
+    my $tag = $self->wrap_log ? 'p' : 'pre';
+    print $out "<h3>Log Message</h3>\n<$tag>$msg</$tag>\n\n";
     return $self;
 }
 

@@ -5,6 +5,12 @@ Revision history for Perl extension SVN::Notify
         execution of --ticket-map parageters (Ticket # 21633).
       - Added note and link for HookStart for Windows users who run into
         asynchronous execution issues. Reported by Eric Lemes.
+      - Added the `--wrap-log` option to SVN::Notify::HTML. When passed a true
+        value, the log message will be put into a `p` tag instead of a `pre`
+        tag, thus allowing it to wrap to the width of the mailer window.
+        Needless to say, this means that any whitespace formatting in the log
+        message itself will be lost. Suggested by someone at Apple (Ticket
+        #24138).
 
 2.64  2006-09-28T18:39:47
       - Added notes about Net::SMPT and Net::SMTP_auth to the README file.

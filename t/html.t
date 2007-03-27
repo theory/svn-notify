@@ -7,7 +7,7 @@ use Test::More;
 use File::Spec::Functions;
 
 if (eval { require HTML::Entities }) {
-    plan tests => 202;
+    plan tests => 210;
 } else {
     plan skip_all => "SVN::Notify::HTML requires HTML::Entities";
 }
@@ -42,6 +42,7 @@ is ($notifier->linkize, 1, "Check linkize" );
 is ($notifier->bugzilla_url, undef, "Check bugzilla_url" );
 is ($notifier->jira_url, undef, "Check jira_url" );
 is ($notifier->rt_url, undef, "Check rt_url" );
+ok !$notifier->wrap_log, 'wrap_log should be false';
 
 # Send the mesasge and get the output.
 ok( $notifier->execute, "HTML notify" );
@@ -567,6 +568,24 @@ like $email, qr{<div id="header"><p>&laquo;Welcome!&raquo;</p></div>\n<dl>},
 like $email,
     qr{<div id="footer"><p>Copyright &reg; 2006</p></div>\s+</div>\s+</body>},
     'Check for the footer';
+
+##############################################################################
+# Try wrapping the log message.
+##############################################################################
+ok $notifier = SVN::Notify::HTML->new(
+    %args,
+    wrap_log => 1,
+), 'Constructe new HTML wrapped log notifier';
+isa_ok($notifier, 'SVN::Notify::HTML');
+isa_ok $notifier, 'SVN::Notify';
+ok $notifier->wrap_log, 'wrap_log should be true';
+ok $notifier->prepare, 'Prepare HTML header and footer checking';
+ok $notifier->execute, 'Notify HTML header and footer checking';
+
+# Check the output.
+$email = get_output();
+like( $email, qr{<p>Did this, that, and the other\. And then I did some more\. Some\nit was done on a second line\. “Go figure”\.</p>}, 'Check for HTML log in p tag message' );
+
 
 ##############################################################################
 # Functions.

@@ -71,9 +71,10 @@ $params{strip_cx_regex} = ['^trunk'] if $Getopt::Long::VERSION >= 2.34;
 is_deeply($opts, \%params, "Check results");
 
 $params{ticket_url} = 'url';
-$params{handler} = 'HTML';
-$params{linkize} = undef;
-$params{css_url} = undef;
+$params{handler}  = 'HTML';
+$params{linkize}  = undef;
+$params{css_url}  = undef;
+$params{wrap_log} = undef;
 
 # Use the --handler option to load the HTML subclass and make sure that
 # its options are properly parsed out of @ARGV.
