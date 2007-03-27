@@ -921,22 +921,24 @@ sub prepare_recipients {
         || $self->{to_email_map};
     # Prevent duplication.
     my $tos = $self->{to} = [ @{ $self->{to} } ];
+
     my $regexen = $self->{to_regex_map} && $self->{to_email_map}
-        ? { %{ $self->{to_regex_map} }, reverse %{ $self->{to_email_map } } }
-        : $self->{to_regex_map} ? { %{ $self->{to_regex_map} } }
-        : $self->{to_email_map} ? { reverse %{ $self->{to_email_map } } }
+        ? [ %{ $self->{to_regex_map} }, reverse %{ $self->{to_email_map } } ]
+        : $self->{to_regex_map} ? [ %{ $self->{to_regex_map} } ]
+        : $self->{to_email_map} ? [ reverse %{ $self->{to_email_map } } ]
         :                         undef;
+
     if ($regexen) {
         $self->_dbpnt( "Compiling regex_map regular expressions")
             if $self->{verbose} > 1;
-        for (values %$regexen) {
+        for (my $i = 1; $i < @$regexen; $i += 2) {
             $self->_dbpnt( qq{Compiling "$_"}) if $self->{verbose} > 2;
             # Remove initial slash and compile.
-            s|^\^[/\\]|^|;
-            $_ = qr/$_/;
+            $regexen->[$i] =~ s|^\^[/\\]|^|;
+            $regexen->[$i] = qr/$regexen->[$i]/;
         }
     } else {
-        $regexen = {};
+        $regexen = [];
     }
 
     my $cx;
@@ -944,14 +946,16 @@ sub prepare_recipients {
                           $self->{repos_path}, '-r', $self->{revision});
 
     # Read in a list of the directories changed.
+    my %seen;
     while (<$fh>) {
         s/[\n\r\/\\]+$//;
-        while (my ($email, $rx) = each %$regexen) {
+        for (my $i = 0; $i < @$regexen; $i += 2) {
+            my ($email, $rx) = @{$regexen}[$i, $i + 1];
             # If the directory matches the regex, save the email.
             if (/$rx/) {
                 $self->_dbpnt( qq{"$_" matched $rx}) if $self->{verbose} > 2;
-                push @$tos, $email;
-                delete $regexen->{$email};
+                push @$tos, $email unless $seen{$email}++;
+                splice @$regexen, $i, 2;
             }
         }
         # Grab the context if it's needed for the subject.
