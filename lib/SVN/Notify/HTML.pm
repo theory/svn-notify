@@ -442,20 +442,28 @@ sub output_diff {
     $self->_dbpnt( "Outputting HTML diff") if $self->verbose > 1;
 
     print $out qq{</div>\n<div id="patch"><pre>\n};
-    my %seen;
+    my ($length, %seen) = 0;
+    my $max = $self->max_diff_length;
+
     while (<$diff>) {
-        s/[\n\r]+$//;
-        if (/^(Modified|Added|Deleted|Copied|Property changes on): (.*)/
-            && !$seen{$2}++)
-        {
-            my $action = $1;
-            my $file = encode_entities($2, '<>&"');
-            (my $id = $file) =~ s/[^\w_]//g;
-            print $out qq{<a id="$id">$action: $file</a>\n};
+        if (!$max || ($length += length) < $max) {
+            s/[\n\r]+$//;
+            if (/^(Modified|Added|Deleted|Copied|Property changes on): (.*)/
+                    && !$seen{$2}++) {
+                my $action = $1;
+                my $file = encode_entities($2, '<>&"');
+                (my $id = $file) =~ s/[^\w_]//g;
+                print $out qq{<a id="$id">$action: $file</a>\n};
+            }
+            else {
+                print $out encode_entities($_, '<>&"'), "\n";
+            }
+        } else {
+            print $out
+                "\n\@\@ Diff output truncated at $max characters. \@\@\n";
+            last;
         }
-        else {
-            print $out encode_entities($_, '<>&"'), "\n";
-        }
+
     }
     print $out "</pre></div>\n";
 

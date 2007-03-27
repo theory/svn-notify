@@ -18,6 +18,8 @@ Revision history for Perl extension SVN::Notify
       - Added support for specifying the loation of the revision number via an
         "%d" temlate in the --subject-prefix option. Patch from Jerry
         Veldhuis (Ticket #24309).
+      - The --max-diff-length option now works properly in HTML output, as
+        well. Reported by Rob Moore (Ticket #25070)
 
 2.64  2006-09-28T18:39:47
       - Added notes about Net::SMPT and Net::SMTP_auth to the README file.
