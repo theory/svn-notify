@@ -61,7 +61,7 @@ everything executes properly.
 
 =head2 Windows Usage
 
-Go get SVN::Notify to work properly in a F<post-commit> script, you must set
+To get SVN::Notify to work properly in a F<post-commit> script, you must set
 the following environment variables, as they will likley not be present inside
 Apache:
 
@@ -76,7 +76,10 @@ Apache:
 =back
 
 See L<http://svn.haxx.se/users/archive-2006-05/0593.shtml> for more detailed
-information on getting SVN::NOtify running on Windows.
+information on getting SVN::Notify running on Windows. If you have issues with
+asynchronous execution, try using F<HookStart.exe>
+(L<http://www.koders.com/csharp/fidE2724F44EF2D47F1C0FE76C538006435FA20051D.aspx>)
+to run F<svnnotify>.
 
 =cut
 

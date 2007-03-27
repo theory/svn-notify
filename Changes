@@ -3,6 +3,8 @@ Revision history for Perl extension SVN::Notify
 2.65
       - Another patch from Martijn van Beers, this one generalizing the
         execution of --ticket-map parageters (Ticket # 21633).
+      - Added note and link for HookStart for Windows users who run into
+        asynchronous execution issues. Reported by Eric Lemes.
 
 2.64  2006-09-28T18:39:47
       - Added notes about Net::SMPT and Net::SMTP_auth to the README file.
