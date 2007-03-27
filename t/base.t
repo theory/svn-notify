@@ -3,7 +3,7 @@
 # $Id$
 
 use strict;
-use Test::More tests => 218;
+use Test::More tests => 226;
 use File::Spec::Functions;
 
 use_ok('SVN::Notify');
@@ -38,6 +38,8 @@ is($notifier->revision, $args{revision}, "Check revision accessor" );
 is_deeply([$notifier->to], $args{to}, "Check to accessor" );
 is($notifier->to_regex_map, $args{to_regex_map},
    "Check to_regex_map accessor" );
+is($notifier->to_email_map, $args{to_email_map},
+   "Check to_email_map accessor" );
 is($notifier->from, 'theory', "Check from accessor" );
 is($notifier->user_domain, $args{user_domain},
    "Check user_domain accessor" );
@@ -226,7 +228,27 @@ like( $email,
       'Check regex_map To');
 
 ##############################################################################
-# Try reply_to.
+# Try to_email_map.
+##############################################################################
+my $email_map = {
+    'AccessorBuilder' => 'one@example.com',
+    '^/trunk',        => 'two@example.com',
+    '/branches'       => 'hone@example.com',
+};
+ok( $notifier = SVN::Notify->new(%args, to_email_map => $email_map),
+    "Construct new email_map notifier" );
+isa_ok($notifier, 'SVN::Notify');
+is_deeply $notifier->to_email_map, $email_map, 'email_map should be set';
+ok( $notifier->prepare, "Prepare to_email_map" );
+ok( $notifier->execute, "Notify to_email_map" );
+is keys %$email_map, 3, 'The email map hash should be unchanged';
+
+# Check the output.
+$email = get_output();
+like( $email,
+      qr/To: (test|one|two)\@example\.com, (test|one|two)\@example\.com, (test|one|two)\@example\.com\n/,
+      'Check email_map To');
+
 ##############################################################################
 ok( $notifier = SVN::Notify->new(%args, reply_to => 'me@example.com'),
     "Construct new reply_to notifier" );

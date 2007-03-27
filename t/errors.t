@@ -17,5 +17,5 @@ like $err, qr/Missing required "revision" parameter/,
 
 eval { SVN::Notify->new(repos_path => 'foo', revision => 1) };
 ok $err = $@, 'Caught exception';
-like $err, qr/Missing required "to" or "to_regex_map" parameter/,
+like $err, qr/Missing required "to", "to_regex_map", or "to_email_map" parameter/,
   'Matches missing to or to_regex_map';

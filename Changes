@@ -20,6 +20,9 @@ Revision history for Perl extension SVN::Notify
         Veldhuis (Ticket #24309).
       - The --max-diff-length option now works properly in HTML output, as
         well. Reported by Rob Moore (Ticket #25070)
+      - Added the --to-email-map option as the inverse of --to-regex-map. That
+        is, it maps regular expressions to email addresses, rather than the
+        other way around.
 
 2.64  2006-09-28T18:39:47
       - Added notes about Net::SMPT and Net::SMTP_auth to the README file.

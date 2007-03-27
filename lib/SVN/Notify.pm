@@ -143,7 +143,7 @@ F<post-commit> for details. Required.
 
 The address or addresses to which to send the notification email. Can be used
 multiple times to specify multiple addresses. This parameter is required
-unless C<to_regex_map> is specified.
+unless either C<to_regex_map> or C<to_email_map> is specified.
 
 =item to_regex_map
 
@@ -157,13 +157,21 @@ only if the name of one or more of the directories affected by a commit
 matches the regular expression. This is a good way to have a notification
 email sent to a particular mail address (or comma-delimited list of addresses)
 only for certain parts of the subversion tree. This parameter is required
-unless C<to> is specified.
+unless C<to> or C<to_email_map> is specified.
 
 The command-line options, C<--to-regex_map> and C<-x>, can be specified any
 number of times, once for each entry in the hash to be passed to C<new()>. The
 value passed to the option must be in the form of the key and the value
 separated by an equal sign. Consult the L<Getopt::Long> documentation for more
 information.
+
+=item to_email_map
+
+  svnnotify --to-email-map L18N=translate@example.com \
+            -x legal@example.com=License
+
+The inverse of C<to_regex_map>: The regular expression is the hash key
+and the email address or addresses are the value.
 
 =item from
 
@@ -619,8 +627,9 @@ sub new {
       unless $params{repos_path};
     die qq{Missing required "revision" parameter}
       unless $params{revision};
-    die qq{Missing required "to" or "to_regex_map" parameter}
-      unless @{ $params{to} } || $params{to_regex_map};
+    die qq{Missing required "to", "to_regex_map", or "to_email_map" parameter}
+        unless @{ $params{to} } || $params{to_regex_map}
+        || $params{to_email_map};
 
     # Set up default values.
     $params{svnlook}        ||= $ENV{SVNLOOK}  || $class->find_exe('svnlook');
@@ -747,6 +756,7 @@ sub get_options {
         'revision|r=s'        => \$opts->{revision},
         'to|t=s@'             => \$opts->{to},
         'to-regex-map|x=s%'   => \$opts->{to_regex_map},
+        'to-email-map=s%'     => \$opts->{to_email_map},
         'from|f=s'            => \$opts->{from},
         'user-domain|D=s'     => \$opts->{user_domain},
         'svnlook|l=s'         => \$opts->{svnlook},
@@ -871,8 +881,8 @@ for:
 
 Only it returns after the call to C<prepare_recipients()> if there are no
 recipients (that is, as when recipients are specified solely by the
-C<to_regex_map> parameter and none of the regular expressions match any of the
-affected directories).
+C<to_regex_map> or C<to_email_map> parameter and none of the regular
+expressions match any of the affected directories).
 
 =cut
 
@@ -894,8 +904,9 @@ sub prepare {
 Collects and prepares a list of the notification recipients. The recipients
 are a combination of the value passed to the C<to> parameter as well as any
 email addresses specified as keys in the hash reference passed C<to_regex_map>
-parameter, where the regular expressions stored in the values match one or
-more of the names of the directories affected by the commit.
+parameter or values passed to the C<to_email_map> parameter, where the
+corresponding regular expressions stored in the hash matches one or more of
+the names of the directories affected by the commit.
 
 If the F<subject_cx> parameter to C<new()> has a true value,
 C<prepare_recipients()> also determines the directory name to use for the
@@ -906,13 +917,18 @@ context.
 sub prepare_recipients {
     my $self = shift;
     $self->_dbpnt( "Preparing recipients list") if $self->{verbose};
-    return $self unless $self->{to_regex_map} || $self->{subject_cx};
-    my $tos = $self->{to};
-    my $regexen = $self->{to_regex_map};
+    return $self unless $self->{to_regex_map} || $self->{subject_cx}
+        || $self->{to_email_map};
+    # Prevent duplication.
+    my $tos = $self->{to} = [ @{ $self->{to} } ];
+    my $regexen = $self->{to_regex_map} && $self->{to_email_map}
+        ? { %{ $self->{to_regex_map} }, reverse %{ $self->{to_email_map } } }
+        : $self->{to_regex_map} ? { %{ $self->{to_regex_map} } }
+        : $self->{to_email_map} ? { reverse %{ $self->{to_email_map } } }
+        :                         undef;
     if ($regexen) {
-        $regexen = {%$regexen};
         $self->_dbpnt( "Compiling regex_map regular expressions")
-          if $self->{verbose} > 1;
+            if $self->{verbose} > 1;
         for (values %$regexen) {
             $self->_dbpnt( qq{Compiling "$_"}) if $self->{verbose} > 2;
             # Remove initial slash and compile.
@@ -1577,6 +1593,7 @@ __PACKAGE__->_accessors(qw(
     repos_path
     revision
     to_regex_map
+    to_email_map
     from
     user_domain
     svnlook
@@ -1698,6 +1715,14 @@ values for the C<to> attribute.
 
 Gets or sets the value of the C<to_regex_map> attribute, which is a hash
 reference of email addresses mapped to regular expressions.
+
+=head3 to_email_map
+
+  my $to_email_map = $notifier->to_email_map;
+  $notifier = $notifier->to_email_map($to_email_map);
+
+Gets or sets the value of the C<to_email_map> attribute, which is a hash
+reference of regular expressions mapped to email addresses.
 
 =head3 from
 
