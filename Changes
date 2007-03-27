@@ -9,7 +9,7 @@ Revision history for Perl extension SVN::Notify
         value, the log message will be put into a `p` tag instead of a `pre`
         tag, thus allowing it to wrap to the width of the mailer window.
         Needless to say, this means that any whitespace formatting in the log
-        message itself will be lost. Suggested by someone at Apple (Ticket
+        message itself will be lost. Suggested by Ian Anderson (Ticket
         #24138).
 
 2.64  2006-09-28T18:39:47
