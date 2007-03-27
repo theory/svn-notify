@@ -1342,8 +1342,8 @@ sub output_log_message {
     # Make ticketing system links.
     if (my $map = $self->ticket_map) {
         my $has_header = 0;
-        while (my ($regex, $url) = each %$map) {
-            $regex = $_ticket_regexen{ $regex } || $regex;
+        $self->run_ticket_map( sub {
+            my ($regex, $url) = @_;
             while ($msg =~ /$regex/ig) {
                 unless ($has_header) {
                     print $out "\nTicket Links:\n:-----------\n";
@@ -1351,7 +1351,7 @@ sub output_log_message {
                 }
                 printf $out "    $url\n",  $2 || $1;
             }
-        }
+        } );
     }
 
     return $self;
@@ -1359,9 +1359,32 @@ sub output_log_message {
 
 ##############################################################################
 
+=head3 run_ticket_map
+
+  $notifier->run_ticket_map( \&callback, @params );
+
+Loops over the ticket systems you have defined, calling the C<$callback>
+function for each one, pasing to it the regex, url and @params specified as
+its parameters.
+
+=cut
+
+sub run_ticket_map {
+    my ($self, $callback, @params) = @_;
+
+    # Make ticketing system links.
+    my $map = $self->ticket_map or return;
+    my $has_header = 0;
+    while (my ($regex, $url) = each %$map) {
+        $regex = $_ticket_regexen{ $regex } || $regex;
+        $callback->( $regex, $url, @params );
+    }
+}
+##############################################################################
+
 =head3 output_file_lists
 
-  $notifier->output_log_message($file_handle);
+  $notifier->output_file_lists($file_handle);
 
 Outputs the lists of modified, added, and deleted files, as well as the list
 of files for which properties were changed. The labels used for each group are

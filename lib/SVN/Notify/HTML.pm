@@ -324,11 +324,11 @@ sub output_log_message {
 
     # Make ticketing system links.
     if (my $map = $self->ticket_map) {
-        while (my ($regex, $url) = each %$map) {
-            $regex = $SVN::Notify::_ticket_regexen{$regex} || $regex;
+        $self->run_ticket_map ( sub {
+            my ($regex, $url) = @_;
             $url = encode_entities($url, '<>&"');
             $msg =~ s{$regex}{ sprintf qq{<a href="$url">$1</a>}, $2 || $1 }ige;
-        }
+        });
     }
 
     # Print it out and return.
