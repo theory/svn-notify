@@ -168,7 +168,7 @@ information.
 =item to_email_map
 
   svnnotify --to-email-map L18N=translate@example.com \
-            -x legal@example.com=License
+            --to-email-map License=legal@example.com
 
 The inverse of C<to_regex_map>: The regular expression is the hash key
 and the email address or addresses are the value.
