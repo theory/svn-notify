@@ -16,7 +16,8 @@ Revision history for Perl extension SVN::Notify
       - Fixed some spelling errors, thanks to Matt Doar.
       - Added not that verbose output goes to STDOUT.
       - Added support for specifying the loation of the revision number via an
-        "%d" temlate in the --subject-prefix option.
+        "%d" temlate in the --subject-prefix option. Patch from Jerry
+        Veldhuis (Ticket #24309).
 
 2.64  2006-09-28T18:39:47
       - Added notes about Net::SMPT and Net::SMTP_auth to the README file.
