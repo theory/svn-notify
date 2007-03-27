@@ -3,7 +3,7 @@
 # $Id$
 
 use strict;
-use Test::More tests => 213;
+use Test::More tests => 218;
 use File::Spec::Functions;
 
 use_ok('SVN::Notify');
@@ -241,7 +241,7 @@ like( $email, qr/Reply-To: me\@example\.com\n/, 'Check Reply-To Header');
 ##############################################################################
 # Try subject_prefix.
 ##############################################################################
-ok( $notifier = SVN::Notify->new(%args, subject_prefix => '[Commits]'),
+ok( $notifier = SVN::Notify->new(%args, subject_prefix => '[Commits] '),
     "Construct new subject_prefix notifier" );
 isa_ok($notifier, 'SVN::Notify');
 ok( $notifier->prepare, "Prepare subject_prefix" );
@@ -251,6 +251,20 @@ ok( $notifier->execute, "Notify subject_prefix" );
 $email = get_output();
 like( $email, qr/Subject: \[Commits\] \[111\] Did this, that, and the other\.\n/,
       "Check subject header for prefix" );
+
+##############################################################################
+# Try subject_prefix with %n.
+##############################################################################
+ok( $notifier = SVN::Notify->new(%args, subject_prefix => '[Commit r%d] '),
+    "Construct new subject_prefix with %d notifier" );
+isa_ok($notifier, 'SVN::Notify');
+ok( $notifier->prepare, "Prepare subject_prefix" );
+ok( $notifier->execute, "Notify subject_prefix" );
+
+# Check the output.
+$email = get_output();
+like( $email, qr/Subject: \[Commit r111\] Did this, that, and the other\.\n/,
+      "Check subject header for prefix with %d" );
 
 ##############################################################################
 # Try subject_cx.

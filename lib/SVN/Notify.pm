@@ -354,10 +354,12 @@ beginning of the email body.
 =item subject_prefix
 
   svnnotify --subject-prefix [Devlist]
-  svnnotify -P (Our-Developers)
+  svnnotify -P [%d (Our-Developers)]
 
 An optional string to prepend to the beginning of the subject line of the
-notification email.
+notification email. If it contains '%d', it will be used to place the revision
+number; otherwise it will simply be prepended to the subject, which will
+contain the revision number in brackets.
 
 =item subject_cx
 
@@ -1059,9 +1061,16 @@ sub prepare_subject {
     $self->_dbpnt( "Preparing subject") if $self->{verbose};
 
     # Start with the optional message and revision number..
-    $self->{subject} .=
-      (defined $self->{subject_prefix} ?  "$self->{subject_prefix} " : '')
-      . "[$self->{revision}] ";
+    if ( defined $self->{subject_prefix} ) {
+        if ( index($self->{subject_prefix}, '%d') > 0 ) {
+            $self->{subject} .= sprintf
+                $self->{subject_prefix}, $self->{revision};
+        } else {
+            $self->{subject} .= $self->{subject_prefix} . "[$self->{revision}] ";
+        }
+    } else {
+        $self->{subject} .= "[$self->{revision}] ";
+    }
 
     # Add the context if there is one.
     if ($self->{cx}) {

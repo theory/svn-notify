@@ -5,7 +5,7 @@ Revision history for Perl extension SVN::Notify
         execution of --ticket-map parageters (Ticket # 21633).
       - Added note and link for HookStart for Windows users who run into
         asynchronous execution issues. Reported by Eric Lemes.
-      - Added the `--wrap-log` option to SVN::Notify::HTML. When passed a true
+      - Added the --wrap-log option to SVN::Notify::HTML. When passed a true
         value, the log message will be put into a `p` tag instead of a `pre`
         tag, thus allowing it to wrap to the width of the mailer window.
         Needless to say, this means that any whitespace formatting in the log
@@ -15,12 +15,15 @@ Revision history for Perl extension SVN::Notify
         URLs. Reported by Matt Doar.
       - Fixed some spelling errors, thanks to Matt Doar.
       - Added not that verbose output goes to STDOUT.
+      - Added support for specifying the loation of the revision number via an
+        "%d" temlate in the --subject-prefix option.
 
 2.64  2006-09-28T18:39:47
       - Added notes about Net::SMPT and Net::SMTP_auth to the README file.
         Reported by Nacho Barrientos Arias.
-      - The regular expresson for RT ticket numbers now also case-insnsitively
-        matches "RT" in addtion to "Ticket". Suggested by Ask Bjørn Hansen.
+      - The regular expresson for RT ticket numbers now also
+        case-insensitively matches "RT" in addtion to "Ticket". Suggested by
+        Ask Bjørn Hansen.
       - Now skipping all tests in 't/alt.t' if HTML::Entities is not
         installed. Reported by Marshall Roch.
       - Added a new option, '--ticket-map', to map regular expressions
