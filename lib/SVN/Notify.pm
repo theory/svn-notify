@@ -511,11 +511,11 @@ Matches Bugzilla bug references of the form "Bug # 12" or "bug 6" or even
 
 =item jira
 
-Matches JIRA refrences of the form "JRA-1234".
+Matches JIRA references of the form "JRA-1234".
 
 =item gnats
 
-Matches GnatsWeb refrences of the form "PR 1234".
+Matches GnatsWeb references of the form "PR 1234".
 
 =back
 
@@ -571,7 +571,7 @@ default is 0, meaning that SVN::Notify will be silent. A value of 1 causes
 SVN::Notify to output some information about what it's doing, while 2 and 3
 each cause greater verbosity. To set the verbosity on the command line, simply
 pass the C<--verbose> or C<-V> option once for each level of verbosity, up to
-three times.
+three times. Output from SVN::Notify is sent to C<STDOUT>.
 
 =item boundary
 
@@ -649,7 +649,11 @@ sub new {
 
     for my $system (qw(rt bugzilla jira gnats)) {
         my $param = $system . '_url';
-        $track->{ $system } = delete $params{ $param } if $params{ $param };
+        if ($params{ $param }) {
+            $track->{ $system } = delete $params{ $param };
+            warn "--$system-url must have '%s' format\n"
+                unless $track->{ $system } =~ /%s/;
+        }
     }
     $params{ticket_map} = $track if $track;
 

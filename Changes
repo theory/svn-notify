@@ -11,6 +11,10 @@ Revision history for Perl extension SVN::Notify
         Needless to say, this means that any whitespace formatting in the log
         message itself will be lost. Suggested by Ian Anderson (Ticket
         #24138).
+      - Restored checking for "%s" in the JIRA, RT, Butzilla, and GNATS
+        URLs. Reported by Matt Doar.
+      - Fixed some spelling errors, thanks to Matt Doar.
+      - Added not that verbose output goes to STDOUT.
 
 2.64  2006-09-28T18:39:47
       - Added notes about Net::SMPT and Net::SMTP_auth to the README file.

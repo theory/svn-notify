@@ -61,7 +61,7 @@ Fake-out Pod::Usage
   -t --to ADDRESS              The notification destination email address.
                                Required unless --to-regex-map.
   -x --to-regex-map TO=REGEX   A mapping between a destination email address
-                               and a regular expresion to match against the
+                               and a regular expression to match against the
                                directories affected by the commit. Required
                                unless --to.
   -f --from ADDRESS            Email address to use in the From header.
