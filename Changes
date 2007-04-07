@@ -1,6 +1,10 @@
 Revision history for Perl extension SVN::Notify
 
 2.66
+      - Added some examples complements of Matt Doar.
+      - Fixed the specification of recipients passed to the SMTP server so
+        that comma-separated email addresses are properly split apart.
+        Reported by Michael Plump.
 
 2.65  2007-03-27T07:01:09
       - Another patch from Martijn van Beers, this one generalizing the
