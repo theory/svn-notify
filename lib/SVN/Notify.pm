@@ -967,7 +967,6 @@ sub prepare_recipients {
             if (/$rx/) {
                 $self->_dbpnt( qq{"$_" matched $rx}) if $self->{verbose} > 2;
                 push @$tos, $email unless $seen{$email}++;
-                splice @$regexen, $i, 2;
             }
         }
         # Grab the context if it's needed for the subject.

@@ -5,6 +5,8 @@ Revision history for Perl extension SVN::Notify
       - Fixed the specification of recipients passed to the SMTP server so
         that comma-separated email addresses are properly split apart.
         Reported by Michael Plump.
+      - Fixed a bug with --to-regex-map where certain entries in it could
+        be skipped altogether. Reported by John Peacock.
 
 2.65  2007-03-27T07:01:09
       - Another patch from Martijn van Beers, this one generalizing the
