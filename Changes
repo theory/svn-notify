@@ -1,5 +1,7 @@
 Revision history for Perl extension SVN::Notify
 
+2.67
+
 2.66  2007-06-17T05:08:29
       - Added some examples complements of Matt Doar.
       - Fixed the specification of recipients passed to the SMTP server so
