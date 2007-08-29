@@ -974,7 +974,7 @@ sub prepare_recipients {
             # XXX Do we need to set utf8 here?
             my $l = length;
             $cx ||= $_;
-            $cx =~ s{[/\\]?[^/\\]+$}{} until !$cx || /^$cx/;
+            $cx =~ s{[/\\]?[^/\\]+$}{} until !$cx || m{^\Q$cx\E(?:$|/|\\)};
         }
     }
     $self->_dbpnt( qq{Context is "$cx"})

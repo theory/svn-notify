@@ -1,6 +1,10 @@
 Revision history for Perl extension SVN::Notify
 
 2.67
+      - Fixed bug where a directory with a valid regular expression character
+        could be incorrectly truncated. Patch from Wayne Davison.
+      - Fixed a bug where a directory name could be truncated too much if
+        there are directory names with common roots. Patch from Wayne Davison.
 
 2.66  2007-06-17T05:08:29
       - Added some examples complements of Matt Doar.
