@@ -1,6 +1,6 @@
 #!perl -w
 
-# $Id: colordiff.t 726 2004-10-09 19:28:09Z theory $
+# $Id$
 
 use strict;
 use Test::More;
