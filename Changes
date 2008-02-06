@@ -1,5 +1,7 @@
 Revision history for Perl extension SVN::Notify
 
+2.68
+
 2.67 2008-02-06T20:15:13
       - Fixed bug where a directory with a valid regular expression character
         could be incorrectly truncated. Patch from Wayne Davison.
