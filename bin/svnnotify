@@ -11,7 +11,7 @@ my $opts = SVN::Notify->get_options
 
 # Handle version, help, man.
 if (delete $opts->{version}) {
-    print "svnnotify ", SVN::Notify->VERSION, $/;
+    print 'svnnotify ', SVN::Notify->VERSION, $/;
     exit;
 }
 require Pod::Usage && Pod::Usage::pod2usage(1) if delete $opts->{help};
