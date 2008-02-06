@@ -110,91 +110,100 @@ sub output_diff {
     my $in_div;
     my $in_span = '';
     print $out qq{</div>\n<div id="patch">\n<h3>Diff</h3>\n};
-    my %seen;
+    my ($length, %seen) = 0;
+    my $max = $self->max_diff_length;
+
     while (my $line = <$diff>) {
         $line =~ s/[\n\r]+$//;
         next unless $line;
-        if ($line =~ /^(Modified|Added|Deleted|Copied): (.*)/) {
-            my $class = $types{my $action = $1};
-            ++$seen{$2};
-            my $file = encode_entities($2, '<>&"');
-            (my $id = $file) =~ s/[^\w_]//g;
+        if (!$max || ($length += length($line)) < $max) {
+            if ($line =~ /^(Modified|Added|Deleted|Copied): (.*)/) {
+                my $class = $types{my $action = $1};
+                ++$seen{$2};
+                my $file = encode_entities($2, '<>&"');
+                (my $id = $file) =~ s/[^\w_]//g;
 
-            print $out "</$in_span>" if $in_span;
-            print $out "</span></pre></div>\n" if $in_div;
-
-            # Dump line, but check it's content.
-            if (<$diff> !~ /^=/) {
-                # Looks like they used --no-diff-added or --no-diff-deleted.
-                ($in_span, $in_div) = '';
-                print $out qq{<a id="$id"></a>\n<div class="$class">},
-                    qq{<h4>$action: $file</h4></div>\n};
-                next;
-            }
-
-            # Get the revision numbers.
-            my $before = <$diff>;
-            $before =~ s/[\n\r]+$//;
-
-            if ($before =~ /^\(Binary files differ\)/) {
-                # Just output the whole file div.
-                print $out qq{<a id="$id"></a>\n<div class="binary"><h4>},
-                  qq{$action: $file</h4>\n<pre class="diff"><span>\n},
-                  qq{<span class="cx">$before\n</span></span></pre></div>\n};
-                ($in_span, $in_div) = '';
-                next;
-            }
-
-            my ($rev1) = $before =~ /\(rev (\d+)\)$/;
-            my $after = <$diff>;
-            $after =~ s/[\n\r]+$//;
-            my ($rev2) = $after =~ /\(rev (\d+)\)$/;
-
-            # Output the headers.
-            print $out qq{<a id="$id"></a>\n<div class="$class"><h4>$action: $file},
-              " ($rev1 => $rev2)</h4>\n";
-            print $out qq{<pre class="diff"><span>\n<span class="info">};
-            $in_div = 1;
-            print $out encode_entities($_, '<>&"'), "\n" for ($before, $after);
-            print $out "</span>";
-            $in_span = '';
-        } elsif ($line =~ /^Property changes on: (.*)/ && !$seen{$1}) {
-            # It's just property changes.
-            my $file = encode_entities($1, '<>&"');
-            (my $id = $file) =~ s/[^\w_]//g;
-            # Dump line.
-            <$diff>;
-
-            # Output the headers.
-            print $out "</$in_span>" if $in_span;
-            print $out "</span></pre></div>\n" if $in_div;
-            print $out qq{<a id="$id"></a>\n<div class="propset">},
-              qq{<h4>Property changes: $file</h4>\n<pre class="diff"><span>\n};
-            $in_div = 1;
-            $in_span = '';
-        } elsif ($line =~ /^\@\@/) {
-            print $out "</$in_span>" if $in_span;
-            print $out qq{<span class="lines">}, encode_entities($line, '<>&"'),
-              "\n</span>";
-            $in_span = '';
-        } elsif ($line =~ /^([-+])/) {
-            my $type = $1 eq '+' ? 'ins' : 'del';
-            if ($in_span eq $type) {
-                print $out encode_entities($line, '<>&"'), "\n";
-            } else {
                 print $out "</$in_span>" if $in_span;
-                print $out qq{<$type>}, encode_entities($line, '<>&"'), "\n";
-                $in_span = $type;
+                print $out "</span></pre></div>\n" if $in_div;
+
+                # Dump line, but check it's content.
+                if (<$diff> !~ /^=/) {
+                    # Looks like they used --no-diff-added or --no-diff-deleted.
+                    ($in_span, $in_div) = '';
+                    print $out qq{<a id="$id"></a>\n<div class="$class">},
+                        qq{<h4>$action: $file</h4></div>\n};
+                    next;
+                }
+
+                # Get the revision numbers.
+                my $before = <$diff>;
+                $before =~ s/[\n\r]+$//;
+
+                if ($before =~ /^\(Binary files differ\)/) {
+                    # Just output the whole file div.
+                    print $out qq{<a id="$id"></a>\n<div class="binary"><h4>},
+                      qq{$action: $file</h4>\n<pre class="diff"><span>\n},
+                      qq{<span class="cx">$before\n</span></span></pre></div>\n};
+                    ($in_span, $in_div) = '';
+                    next;
+                }
+
+                my ($rev1) = $before =~ /\(rev (\d+)\)$/;
+                my $after = <$diff>;
+                $after =~ s/[\n\r]+$//;
+                my ($rev2) = $after =~ /\(rev (\d+)\)$/;
+
+                # Output the headers.
+                print $out qq{<a id="$id"></a>\n<div class="$class"><h4>$action: $file},
+                  " ($rev1 => $rev2)</h4>\n";
+                print $out qq{<pre class="diff"><span>\n<span class="info">};
+                $in_div = 1;
+                print $out encode_entities($_, '<>&"'), "\n" for ($before, $after);
+                print $out "</span>";
+                $in_span = '';
+            } elsif ($line =~ /^Property changes on: (.*)/ && !$seen{$1}) {
+                # It's just property changes.
+                my $file = encode_entities($1, '<>&"');
+                (my $id = $file) =~ s/[^\w_]//g;
+                # Dump line.
+                <$diff>;
+
+                # Output the headers.
+                print $out "</$in_span>" if $in_span;
+                print $out "</span></pre></div>\n" if $in_div;
+                print $out qq{<a id="$id"></a>\n<div class="propset">},
+                  qq{<h4>Property changes: $file</h4>\n<pre class="diff"><span>\n};
+                $in_div = 1;
+                $in_span = '';
+            } elsif ($line =~ /^\@\@/) {
+                print $out "</$in_span>" if $in_span;
+                print $out qq{<span class="lines">}, encode_entities($line, '<>&"'),
+                  "\n</span>";
+                $in_span = '';
+            } elsif ($line =~ /^([-+])/) {
+                my $type = $1 eq '+' ? 'ins' : 'del';
+                if ($in_span eq $type) {
+                    print $out encode_entities($line, '<>&"'), "\n";
+                } else {
+                    print $out "</$in_span>" if $in_span;
+                    print $out qq{<$type>}, encode_entities($line, '<>&"'), "\n";
+                    $in_span = $type;
+                }
+            } else {
+                if ($in_span eq 'cx') {
+                    print $out encode_entities($line, '<>&"'), "\n";
+                } else {
+                    print $out "</$in_span>" if $in_span;
+                    print $out qq{<span class="cx">},
+                        encode_entities($line, '<>&"'), "\n";
+                    $in_span = 'span';
+                }
             }
         } else {
-            if ($in_span eq 'cx') {
-                print $out encode_entities($line, '<>&"'), "\n";
-            } else {
-                print $out "</$in_span>" if $in_span;
-                print $out qq{<span class="cx">},
-                    encode_entities($line, '<>&"'), "\n";
-                $in_span = 'span';
-            }
+            print $out "</$in_span>" if $in_span;
+            print $out qq{<span class="lines">\@\@ Diff output truncated at $max characters. \@\@\n</span>};
+            $in_span = '';
+            last;
         }
     }
     print $out "</$in_span>" if $in_span;

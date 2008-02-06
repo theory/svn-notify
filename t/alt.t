@@ -262,6 +262,10 @@ unlike $email, qr{ BEGIN }, 'Check for missing extra line';
 like $email, qr{Diff output truncated at 1024 characters.},
     'Check for truncation message';
 
+##############################################################################
+# Functions.
+##############################################################################
+
 sub get_output {
     my $outfile = catfile qw(t data output.txt);
     open CAP, "<$outfile" or die "Cannot open '$outfile': $!\n";

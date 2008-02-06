@@ -6,6 +6,8 @@ Revision history for Perl extension SVN::Notify
       - Fixed a bug where a directory name could be truncated too much if
         there are directory names with common roots. Patch from Wayne Davison.
       - Added the "configure_requires" parameter to Build.PL.
+      - Fixed SVN::Notify::HTML::ColorDiff so that it respects
+        --max-diff-length.
 
 2.66  2007-06-17T05:08:29
       - Added some examples complements of Matt Doar.

@@ -7,7 +7,7 @@ use Test::More;
 use File::Spec::Functions;
 
 if (eval { require HTML::Entities }) {
-    plan tests => 173;
+    plan tests => 183;
 } else {
     plan skip_all => "SVN::Notify::HTML::ColorDiff requires HTML::Entities";
 }
@@ -493,6 +493,30 @@ unlike( $email,
 like( $email,
       qr{<a href="http://ticket\.example\.com/id=54321">Custom # 54321</a>},
       "Check for custom ticket URL" );
+
+##############################################################################
+# Try max_diff_length
+#############################################################################
+ok $notifier = SVN::Notify::HTML::ColorDiff->new(
+    %args,
+    max_diff_length => 512,
+    with_diff       => 1,
+), 'Construct new max_diff_length notifier';
+
+isa_ok $notifier, 'SVN::Notify';
+isa_ok $notifier, 'SVN::Notify::HTML';
+is $notifier->max_diff_length, 512, 'max_diff_hlength should be set';
+ok $notifier->with_diff, 'with_diff should be set';
+ok $notifier->prepare, 'Prepare max_diff_length checking';
+ok $notifier->execute, 'Notify max_diff_length checking';
+
+# Check the output.
+$email = get_output();
+like $email, qr{Use Apache::RequestRec for mod_perl 2},
+    'Check for the last diff line';
+unlike $email, qr{ BEGIN }, 'Check for missing extra line';
+like $email, qr{Diff output truncated at 512 characters.},
+    'Check for truncation message';
 
 ##############################################################################
 # Functions.
