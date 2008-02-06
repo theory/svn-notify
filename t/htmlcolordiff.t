@@ -523,6 +523,7 @@ like $email, qr{Diff output truncated at 512 characters.},
 ##############################################################################
 ok $notifier = SVN::Notify::HTML::ColorDiff->new(
     %args,
+    revision => 222,
     wrap_log => 1,
 ), 'Constructe new HTML wrapped log notifier';
 isa_ok($notifier, 'SVN::Notify::HTML::ColorDiff');
@@ -534,7 +535,12 @@ ok $notifier->execute, 'Notify HTML header and footer checking';
 
 # Check the output.
 $email = get_output();
-like( $email, qr{<p>Did this, that, and the other\. And then I did some more\. Some\nit was done on a second line\. “Go figure”\.</p>}, 'Check for HTML log in p tag message' );
+$email = get_output();
+like( $email,
+      qr{<p>Hey, we could add one for a Subversion Revision # 606, too!</p>
+
+<p>And finally, we have RT-Ticket: 123 for Jesse and RT # 445 for Ask\.</p>}
+);
 
 ##############################################################################
 # Functions.

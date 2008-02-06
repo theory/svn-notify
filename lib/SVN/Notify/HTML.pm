@@ -342,8 +342,10 @@ sub output_log_message {
     }
 
     # Print it out and return.
-    my $tag = $self->wrap_log ? 'p' : 'pre';
-    print $out "<h3>Log Message</h3>\n<$tag>$msg</$tag>\n\n";
+    print $out "<h3>Log Message</h3>\n",
+        $self->wrap_log
+        ? ('<p>', join( "</p>\n\n<p>", split /\n\s*\n/, $msg ), "</p>\n\n")
+        : "<pre>$msg</pre>\n\n";
     return $self;
 }
 
