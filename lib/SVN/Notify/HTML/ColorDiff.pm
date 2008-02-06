@@ -116,7 +116,12 @@ sub output_diff {
     while (my $line = <$diff>) {
         $line =~ s/[\n\r]+$//;
         next unless $line;
-        if (!$max || ($length += length($line)) < $max) {
+        if ( $max && ( $length += length $line ) >= $max ) {
+            print $out "</$in_span>" if $in_span;
+            print $out qq{<span class="lines">\@\@ Diff output truncated at $max characters. \@\@\n</span>};
+            $in_span = '';
+            last;
+        } else {
             if ($line =~ /^(Modified|Added|Deleted|Copied): (.*)/) {
                 my $class = $types{my $action = $1};
                 ++$seen{$2};
@@ -199,11 +204,6 @@ sub output_diff {
                     $in_span = 'span';
                 }
             }
-        } else {
-            print $out "</$in_span>" if $in_span;
-            print $out qq{<span class="lines">\@\@ Diff output truncated at $max characters. \@\@\n</span>};
-            $in_span = '';
-            last;
         }
     }
     print $out "</$in_span>" if $in_span;
