@@ -7,7 +7,7 @@ use Test::More;
 use File::Spec::Functions;
 
 if (eval { require HTML::Entities }) {
-    plan tests => 77;
+    plan tests => 85;
 } else {
     plan skip_all => "SVN::Notify::Alternative requires HTML::Entities";
 }
@@ -239,6 +239,28 @@ my $attach_count = ( $email
 ;
 
 is $attach_count, 1, 'The attachment should be attached only once';
+
+##############################################################################
+# Try max_diff_length
+#############################################################################
+ok $notifier = SVN::Notify->new(
+    %args,
+    with_diff       => 1,
+    max_diff_length => 1024,
+), 'Construct new colordiff alt notifier';
+
+isa_ok $notifier, 'SVN::Notify::Alternative';
+isa_ok $notifier, 'SVN::Notify';
+ok $notifier->prepare, 'Prepare alt notifier';
+ok $notifier->execute, 'Execute the alt notifier';
+
+# Check the output.
+$email = get_output();
+like $email, qr{Use Apache::RequestRec for mod_perl 2},
+    'Check for the last diff line';
+unlike $email, qr{ BEGIN }, 'Check for missing extra line';
+like $email, qr{Diff output truncated at 1024 characters.},
+    'Check for truncation message';
 
 sub get_output {
     my $outfile = catfile qw(t data output.txt);
