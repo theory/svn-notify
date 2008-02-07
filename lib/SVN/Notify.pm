@@ -2195,9 +2195,14 @@ Tutorial for installing Apache, Subversion, and SVN::Notify on Windows.
 
 =back
 
-=head1 Bugs
+=head1 Support
 
-Please send bug reports to <bug-svn-notify@rt.cpan.org>.
+This module is stored in an open repository at the following address:
+
+  L<https://svn.kineticode.com/SVN-Notify/trunk/>
+
+Patches against SVN are welcome. Please send bug reports to
+<bug-svn-notify@rt.cpan.org>.
 
 =head1 Author
 

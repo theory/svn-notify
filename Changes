@@ -15,6 +15,7 @@ Revision history for Perl extension SVN::Notify
           variable for the execution of `svnlook` as well as `sendmail`.
         + Added the `print_lines` method to SVN::Notify to encapsulate
           encoding lines of text and sending them to a file handle.
+      - Added a link to SVN::Notify's Subversion repository.
 
 2.67 2008-02-06T20:15:13
       - Fixed bug where a directory with a valid regular expression character
