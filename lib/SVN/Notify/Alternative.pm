@@ -191,7 +191,7 @@ David Wheeler <david@kineticode.com>
 
 Copyright (c) 2005-2008 Jukka Zitting and Kineticode, Inc. All Rights Reserved.
 
-This module is free software; you can redistribute it and/or modify it under the
-same terms as Perl itself.
+This module is free software; you can redistribute it and/or modify it under
+the same terms as Perl itself.
 
 =cut

@@ -275,7 +275,7 @@ David Wheeler <david@kineticode.com>
 
 Copyright (c) 2004-2008 Kineticode, Inc. All Rights Reserved.
 
-This module is free software; you can redistribute it and/or modify it under the
-same terms as Perl itself.
+This module is free software; you can redistribute it and/or modify it under
+the same terms as Perl itself.
 
 =cut
