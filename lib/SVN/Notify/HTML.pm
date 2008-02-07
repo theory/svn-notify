@@ -262,7 +262,7 @@ revision will be used to turn the revision number into a link.
 
 sub output_metadata {
     my ($self, $out) = @_;
-    print $out "<dl>\n<dt>Revision</dt> <dd>";
+    $self->print_lines($out, "<dl>\n<dt>Revision</dt> <dd>");
 
     my $rev = $self->revision;
     if (my $url = $self->revision_url) {
@@ -285,9 +285,13 @@ sub output_metadata {
         print $out $user;
     }
 
-    print $out "</dd>\n",
-      "<dt>Date</dt> <dd>", encode_entities($self->date, '<>&"'), "</dd>\n",
-      "</dl>\n\n";
+    $self->print_lines(
+        $out,
+        "</dd>\n",
+        "<dt>Date</dt> <dd>",
+        encode_entities($self->date, '<>&"'), "</dd>\n",
+        "</dl>\n\n"
+    );
 
     return $self;
 }
@@ -342,10 +346,13 @@ sub output_log_message {
     }
 
     # Print it out and return.
-    print $out "<h3>Log Message</h3>\n",
+    $self->print_lines(
+        $out,
+        "<h3>Log Message</h3>\n",
         $self->wrap_log
         ? ('<p>', join( "</p>\n\n<p>", split /\n\s*\n/, $msg ), "</p>\n\n")
-        : "<pre>$msg</pre>\n\n";
+        : "<pre>$msg</pre>\n\n"
+    );
     return $self;
 }
 
@@ -458,7 +465,7 @@ sub output_diff {
                 print $out qq{<a id="$id">$action: $file</a>\n};
             }
             else {
-                print $out encode_entities($_, '<>&"'), "\n";
+                $self->print_lines($out, encode_entities($_, '<>&"'), "\n");
             }
         } else {
             print $out

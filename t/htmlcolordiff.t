@@ -549,5 +549,6 @@ like( $email,
 sub get_output {
     my $outfile = catfile qw(t data output.txt);
     open CAP, "<$outfile" or die "Cannot open '$outfile': $!\n";
+    binmode CAP, 'utf8' if SVN::Notify::PERL58();
     return join '', <CAP>;
 }

@@ -5,6 +5,7 @@ package SVN::Notify;
 use strict;
 use constant WIN32  => $^O eq 'MSWin32';
 use constant PERL58 => $] > 5.007;
+require Encode if PERL58;
 $SVN::Notify::VERSION = '2.68';
 
 =begin comment
@@ -294,19 +295,27 @@ names, and file contents. Used to specify the character set in the email
 Content-Type headers and, when the C<language> paremeter is specified, the
 C<$LANG> environment variable when launching C<sendmail>. Defaults to "UTF-8".
 
-=item io_layer
+=item svn_charset
 
-  svnnotify --io-layer raw
-  svnnotify -o bytes
+  svnnotify --svn-charset euc-jp
 
-The Perl IO layer to use for inputting and outputting data. See
-L<perlio|perlio> for details. Defaults to "encoding($charset)". If your
-repository uses different character encodings, C<charset> should be set to
-whatever is the most common character encoding, and C<io_layer> is best set to
-C<raw>, e.g., C<--io-layer raw --charset cp850>. In that case, some characters
-might not look right in the commit messaage (because an email can manage only
-one character encoding at a time), but then C<svnnotify> won't get stuck
-issuing a slew of warnings.
+The character set used in files and log messages managed in Subversion. It's
+useful to set this option if you store files in Subversion using one character
+set but want to send notification messages in a different character set.
+Therefore C<charset> would be used for the notification message, and
+C<svn_charset> would be used to read in data from Subversion. Defaults to
+value stored in C<charset>.
+
+=item diff_charset
+
+  svnnotify --diff-charset iso-2022-jp
+
+The character set used by files in Subversion, and thus present in the the
+diff. It's useful to set this option if you store files in Subversion using
+one character write log messages in a different character set. Therefore
+C<svn_charset> would be used to read the log message and C<diff_charset>
+would be used to read the diff from Subversion. Defaults to value stored in
+C<svn_charset>.
 
 =item language
 
@@ -316,9 +325,10 @@ issuing a slew of warnings.
 The language typically used on the repository for log messages, file names,
 and file contents. Used to specify the email Content-Language header and to
 set the C<$LANG> environment variable to C<< $notify->language . '.' .
-$notify->charset >> before executing C<sendmail>. Undefined by default,
-meaning that no Content-Language header is output and the C<$LANG> environment
-variable will not be set.
+$notify->charset >> before executing C<svnlook> and C<sendmail> (but not for
+sending data to Net::SMTP). Undefined by default, meaning that no
+Content-Language header is output and the C<$LANG> environment variable will
+not be set.
 
 =item with_diff
 
@@ -648,10 +658,15 @@ sub new {
     $params{with_diff}      ||= $params{attach_diff};
     $params{verbose}        ||= 0;
     $params{charset}        ||= 'UTF-8';
-    $params{io_layer}       ||= "encoding($params{charset})";
+    $params{svn_charset}    ||= $params{charset};
+    $params{diff_charset}   ||= $params{svn_charset};
     $params{smtp_authtype}  ||= 'PLAIN';
     $params{sendmail}       ||= $ENV{SENDMAIL} || $class->find_exe('sendmail')
         unless $params{smtp};
+
+    # Set up the environment language.
+    $params{env_lang} = "$params{language}.$params{charset}"
+        if $params{language};
 
     die qq{Cannot find sendmail and no "smtp" parameter specified}
         unless $params{sendmail} || $params{smtp};
@@ -776,7 +791,8 @@ sub get_options {
         'set-sender|E'        => \$opts->{set_sender},
         'smtp=s'              => \$opts->{smtp},
         'charset|c=s'         => \$opts->{charset},
-        'io-layer|o=s'        => \$opts->{io_layer},
+        'diff-charset=s'      => \$opts->{diff_charset},
+        'svn-charset=s'       => \$opts->{svn_charset},
         'language|g=s'        => \$opts->{language},
         'with-diff|d'         => \$opts->{with_diff},
         'attach-diff|a'       => \$opts->{attach_diff},
@@ -953,12 +969,17 @@ sub prepare_recipients {
         $regexen = [];
     }
 
-    my $cx;
-    my $fh = $self->_pipe('-|', $self->{svnlook}, 'dirs-changed',
-                          $self->{repos_path}, '-r', $self->{revision});
+    local $ENV{LANG} = "$self->{env_lang}" if $self->{env_lang};
+    my $fh = $self->_pipe(
+        $self->{svn_charset},
+        '-|', $self->{svnlook},
+        'dirs-changed',
+        $self->{repos_path},
+        '-r', $self->{revision},
+    );
 
     # Read in a list of the directories changed.
-    my %seen;
+    my ($cx, %seen);
     while (<$fh>) {
         s/[\n\r\/\\]+$//;
         for (my $i = 0; $i < @$regexen; $i += 2) {
@@ -1001,6 +1022,7 @@ be used in the email) and the log message.
 sub prepare_contents {
     my $self = shift;
     $self->_dbpnt( "Preparing contents") if $self->{verbose};
+    local $ENV{LANG} = "$self->{env_lang}" if $self->{env_lang};
     my $lines = $self->_read_pipe($self->{svnlook}, 'info', $self->{repos_path},
                                   '-r', $self->{revision});
     $self->{user} = shift @$lines;
@@ -1010,8 +1032,8 @@ sub prepare_contents {
 
     # Set up the from address.
     unless ($self->{from}) {
-        $self->{from} = $self->{user}
-          . ($self->{user_domain} ? "\@$self->{user_domain}" : '');
+        $self->{from} = $self->_encode( $self->{user} )
+            . ( $self->{user_domain} ? "\@$self->{user_domain}" : '' );
     }
     if ($self->{verbose} > 1) {
         $self->_dbpnt( "From: $self->{from}");
@@ -1042,8 +1064,14 @@ sub prepare_files {
     my $self = shift;
     $self->_dbpnt( "Preparing file lists") if $self->{verbose};
     my %files;
-    my $fh = $self->_pipe('-|', $self->{svnlook}, 'changed',
-                          $self->{repos_path}, '-r', $self->{revision});
+    local $ENV{LANG} = "$self->{env_lang}" if $self->{env_lang};
+    my $fh = $self->_pipe(
+        $self->{svn_charset},
+        '-|', $self->{svnlook},
+        'changed',
+        $self->{repos_path},
+        '-r', $self->{revision},
+    );
 
     # Read in a list of changed files.
     my $cx = $_ = <$fh>;
@@ -1129,10 +1157,7 @@ sub prepare_subject {
     $self->_dbpnt( qq{Subject is "$self->{subject}"}) if $self->{verbose};
 
     # Q-Encoding (RFC 2047)
-    if (PERL58) {
-        require Encode;
-        Encode::from_to($self->{subject}, $self->{charset}, 'MIME-Q');
-    }
+    $self->{subject} = $self->_encode( $self->{subject}, 'MIME-Q' ) if PERL58;
 
     return $self;
 }
@@ -1156,10 +1181,11 @@ sub execute {
     return $self unless @{ $self->{to} };
 
     my $out = $self->{smtp} ? SVN::Notify::SMTP->get_handle($self) : do {
-        local $ENV{LANG} = "$self->{language}.$self->{charset}"
-            if $self->{language};
+        local $ENV{LANG} = $self->{env_lang} if $self->{env_lang};
         $self->_pipe(
-            '|-', $self->{sendmail}, '-oi', '-t',
+            $self->{charset},
+            '|-', $self->{sendmail},
+            '-oi', '-t',
             ($self->{set_sender} ? ('-f', $self->{from}) : ())
         );
     };
@@ -1344,19 +1370,21 @@ revision will also be output.
 
 sub output_metadata {
     my ($self, $out) = @_;
-    print $out "Revision: $self->{revision}\n";
+    $self->print_lines($out, "Revision: $self->{revision}\n");
     if (my $url = $self->{revision_url}) {
         printf $out "          $url\n", $self->{revision};
     }
 
     # Output the Author any any relevant URL.
-    print $out "Author:   $self->{user}\n";
+    $self->print_lines($out, "Author:   $self->{user}\n");
     if (my $url = $self->{author_url}) {
-        printf $out "          $url\n", $self->{user};
+        $self->print_lines(
+            $out,
+            sprintf "          $url\n", $self->{user}
+        );
     }
 
-    print $out "Date:     $self->{date}\n";
-
+    $self->print_lines($out , "Date:     $self->{date}\n");
 
     print $out "\n";
     return $self;
@@ -1376,7 +1404,7 @@ sub output_log_message {
     my ($self, $out) = @_;
     $self->_dbpnt( "Outputting log message") if $self->{verbose} > 1;
     my $msg = join "\n", @{$self->{message}};
-    print $out "Log Message:\n-----------\n$msg\n";
+    $self->print_lines($out, "Log Message:\n-----------\n$msg\n");
 
     # Make Revision links.
     if (my $url = $self->{revision_url}) {
@@ -1538,6 +1566,21 @@ sub end_message {
     return $self;
 }
 
+=head3 print_lines
+
+  $notifier->print_lines( $fh, @lines );
+
+Prints C<@lines> to the file handle. On Perl 5.8.0 and later, each line is
+first converted to its proper encoding as determined by the C<charset>
+attribute. This method is intended mainly for use by subclasses.
+
+=cut
+
+sub print_lines {
+    my ($self, $out) = (shift, shift);
+    print $out map { $self->_encode( $_ ) } @_;
+}
+
 ##############################################################################
 
 =head3 diff_handle
@@ -1553,7 +1596,14 @@ C<output_attached_diff()>.
 
 sub diff_handle {
     my $self = shift;
+    # To avoid svnlook output except for diff contents, such as "Modified"
+    # etc., to be output in the localized string encoded with another charset
+    # from diff contents. HTML and HTML::ColorDiff also expect the terms
+    # printed in English.
+    local $ENV{LANG} = "C";
+
     return $self->_pipe(
+        $self->{diff_charset},
         '-|'   => $self->{svnlook},
         'diff' => $self->{repos_path},
         '-r'   => $self->{revision},
@@ -1582,7 +1632,7 @@ sub _dump_diff {
         while (<$diff>) {
             s/[\n\r]+$//;
             if (($length += length) < $max) {
-                print $out "$_\n";
+                $self->print_lines($out, "$_\n");
             }
             else {
                 print $out
@@ -1595,7 +1645,7 @@ sub _dump_diff {
     else {
         while (<$diff>) {
             s/[\n\r]+$//;
-            print $out "$_\n";
+            $self->print_lines($out, "$_\n");
         }
     }
     close $diff or warn "Child process exited: $?\n";
@@ -1617,7 +1667,9 @@ __PACKAGE__->_accessors(qw(
     add_headers
     smtp
     charset
-    io_layer
+    diff_charset
+    svn_charset
+    env_lang
     language
     with_diff
     attach_diff
@@ -1788,12 +1840,29 @@ Gets or sets the value of the C<smtp> attribute.
 
 Gets or sets the value of the C<charset> attribute.
 
-=head3 io_layer
+=head3 diff_charset
 
-  my $io_layer = $notifier->io_layer;
-  $notifier = $notifier->io_layer($io_layer);
+  my $diff_charset = $notifier->diff_charset;
+  $notifier = $notifier->diff_charset($diff_charset);
 
-Gets or sets the value of the C<io_layer> attribute.
+Gets or sets the value of the C<diff_charset> attribute.
+
+=head3 env_lang
+
+  my $env_lang = $notifier->env_lang;
+  $notifier = $notifier->env_lang($env_lang);
+
+Gets or sets the value of the C<env_lang> attribute, which is set to C<<
+$notify->language . '.' . $notify->charset >> when C<language> is set, and
+otherwise is C<undef>. This attribute is used to set the C<$LANG> enviornment
+variable before executing C<svnlook> or C<sendmail>.
+
+=head3 svn_charset
+
+  my $svn_charset = $notifier->svn_charset;
+  $notifier = $notifier->svn_charset($svn_charset);
+
+Gets or sets the value of the C<svn_charset> attribute.
 
 =head3 language
 
@@ -1998,7 +2067,7 @@ Gets or set the value of the C<footer> attribute.
 ##############################################################################
 
 sub _pipe {
-    my ($self, $mode) = (shift, shift);
+    my ($self, $encode, $mode) = (shift, shift, shift);
     $self->_dbpnt( q{Piping execution of "} . join(q{" "}, @_) . q{"})
       if $self->{verbose};
     # Safer version of backtick (see perlipc(1)).
@@ -2008,7 +2077,7 @@ sub _pipe {
             ? q{"}  . join(q{" "}, @_) . q{"|}
             : q{|"} . join(q{" "}, @_) . q{"};
         open PIPE, $cmd or die "Cannot fork: $!\n";
-        binmode PIPE, ":$self->{io_layer}" if PERL58;
+        binmode PIPE, "encoding($encode)" if PERL58 && $encode;
         return *PIPE;
     }
 
@@ -2017,7 +2086,7 @@ sub _pipe {
 
     if ($pid) {
         # Parent process. Set the encoing layer and return the file handle.
-        binmode PIPE, ":$self->{io_layer}" if PERL58;
+        binmode PIPE, "encoding($encode)" if PERL58 && $encode;
         return *PIPE;
     } else {
         # Child process. Execute the commands.
@@ -2035,10 +2104,22 @@ sub _pipe {
 
 sub _read_pipe {
     my $self = shift;
-    my $fh = $self->_pipe('-|', @_);
+    my $fh = $self->_pipe( $self->{svn_charset}, '-|', @_ );
     local $/; my @lines = split /(?:\r\n|\r|\n)/, <$fh>;
     close $fh or warn "Child process exited: $?\n";
     return \@lines;
+}
+
+##############################################################################
+# This method is just a wrapper of Encode::encode API, with the checks for
+# Perl version and UTF8-ness flag.
+##############################################################################
+
+sub _encode {
+    my ($self, $str, $encoding) = @_;
+    return Encode::encode($encoding || $self->{charset}, $str)
+        if PERL58 && Encode::is_utf8($str);
+    return $str;
 }
 
 ##############################################################################
@@ -2071,8 +2152,6 @@ sub get_handle {
     $smtp->auth( @{ $notifier }{qw(smtp_authtype smtp_user smtp_pass)} )
         if $notifier->{smtp_user};
 
-    binmode tied(*{ $smtp->tied_fh }), ":$notifier->{io_layer}"
-        if SVN::Notify::PERL58;
     $smtp->mail($notifier->{from});
     $smtp->to(map { split /\s*,\s*/ } @{ $notifier->{to} });
     $smtp->data;

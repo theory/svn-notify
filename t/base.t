@@ -3,7 +3,7 @@
 # $Id$
 
 use strict;
-use Test::More tests => 226;
+use Test::More tests => 224;
 use File::Spec::Functions;
 
 use_ok('SVN::Notify');
@@ -31,7 +31,6 @@ ok( $notifier->prepare_recipients, 'prepare recipients' );
 ok( $notifier->prepare_contents, 'prepare contents' );
 ok( $notifier->prepare_files, 'prepare files');
 ok( $notifier->prepare_subject, 'prepare subject');
-
 # Make sure the attributes work.
 is($notifier->repos_path, $args{repos_path}, "Check repos_path accessor" );
 is($notifier->revision, $args{revision}, "Check revision accessor" );
@@ -46,7 +45,6 @@ is($notifier->user_domain, $args{user_domain},
 is($notifier->svnlook, $args{svnlook}, "Check svnlook accessor" );
 is($notifier->sendmail, $args{sendmail}, "Check sendmail accessor" );
 is($notifier->charset, 'UTF-8', "Check charset accessor" );
-is($notifier->io_layer, 'encoding(UTF-8)', 'Check IO layer');
 is($notifier->language, undef, "Check language accessor" );
 is($notifier->with_diff, $args{with_diff}, "Check with_diff accessor" );
 is($notifier->attach_diff, $args{attach_diff}, "Check attach_diff accessor" );
@@ -107,7 +105,6 @@ like( $email, qr/Date:     2004-04-20 01:33:35 -0700 \(Tue, 20 Apr 2004\)\n/,
 
 # Check that the log message is there.
 like( $email, qr/Did this, that, and the other\. And then I did some more\. Some\nit was done on a second line\. “Go figure”\./, 'Check for log message' );
-
 # Make sure that Class/Meta.pm is listed twice, once for modification and once
 # for its attribute being set.
 is( scalar @{[$email =~ m{(trunk/Class-Meta/lib/Class/Meta\.pm)}g]}, 2,
@@ -130,11 +127,9 @@ ok( $notifier = SVN::Notify->new(
     %args,
     with_diff => 1,
     language  => 'en_US',
-    io_layer  => 'raw',
 ), 'Construct new diff notifier' );
 ok $notifier->with_diff, 'with_diff() should return true';
 is $notifier->language, 'en_US', 'language should be "en_US"';
-is $notifier->io_layer, 'raw', 'IO layer should be "raw"';
 isa_ok($notifier, 'SVN::Notify');
 ok( $notifier->prepare, "Single method call prepare" );
 ok( $notifier->execute, "Diff notify" );
@@ -634,6 +629,7 @@ unlink "$look.exe" if SVN::Notify::WIN32();
 sub get_output {
     my $outfile = catfile qw(t data output.txt);
     open CAP, "<$outfile" or die "Cannot open '$outfile': $!\n";
+    binmode CAP, 'utf8' if SVN::Notify::PERL58();
     return join '', <CAP>;
 }
 

@@ -182,25 +182,44 @@ sub output_diff {
                 $in_span = '';
             } elsif ($line =~ /^\@\@/) {
                 print $out "</$in_span>" if $in_span;
-                print $out qq{<span class="lines">}, encode_entities($line, '<>&"'),
-                  "\n</span>";
+                $self->print_lines(
+                    $out,
+                    qq{<span class="lines">},
+                    encode_entities($line, '<>&"'),
+                    "\n</span>",
+                );
                 $in_span = '';
             } elsif ($line =~ /^([-+])/) {
                 my $type = $1 eq '+' ? 'ins' : 'del';
                 if ($in_span eq $type) {
-                    print $out encode_entities($line, '<>&"'), "\n";
+                    $self->print_lines(
+                        $out,
+                        encode_entities($line, '<>&"'), "\n",
+                    );
                 } else {
                     print $out "</$in_span>" if $in_span;
-                    print $out qq{<$type>}, encode_entities($line, '<>&"'), "\n";
+                    $self->print_lines(
+                        $out,
+                        qq{<$type>},
+                        encode_entities($line, '<>&"'),
+                        "\n",
+                    );
                     $in_span = $type;
                 }
             } else {
                 if ($in_span eq 'cx') {
-                    print $out encode_entities($line, '<>&"'), "\n";
+                    $self->print_lines(
+                        $out,
+                        encode_entities($line, '<>&"'), "\n",
+                    );
                 } else {
                     print $out "</$in_span>" if $in_span;
-                    print $out qq{<span class="cx">},
-                        encode_entities($line, '<>&"'), "\n";
+                    $self->print_lines(
+                        $out,
+                        qq{<span class="cx">},
+                        encode_entities($line, '<>&"'),
+                        "\n",
+                    );
                     $in_span = 'span';
                 }
             }

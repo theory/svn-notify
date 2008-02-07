@@ -1,6 +1,20 @@
 Revision history for Perl extension SVN::Notify
 
 2.68
+      - Rewrote character encoding handling, based on a patch submitted by
+        Toshikazu Kinkoh. Hopefully these changes will help solve the various
+        encoding problems that continue to crop up:
+        + Removed --io-layer, which never actually worked.
+        + Added --svn-charset, which identifies the encoding in which data
+          is stored in SVN. It outputs the value of --charset.
+        + Added --diff-charset, which identifies the encoding in which files
+          are stored in SVN. This is useful for the case when log messages
+          are written in one encoding and files stored in another. Defaults
+          to --svn-charset.
+        + The --language option is now used to set the C<$LANG> environment
+          variable for the execution of `svnlook` as well as `sendmail`.
+        + Added the `print_lines` method to SVN::Notify to encapsulate
+          encoding lines of text and sending them to a file handle.
 
 2.67 2008-02-06T20:15:13
       - Fixed bug where a directory with a valid regular expression character
