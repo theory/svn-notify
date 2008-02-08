@@ -95,6 +95,7 @@ Fake-out Pod::Usage
   -i --max-sub-length LENGTH   Maximum size of the subject line.
   -e --max-diff-length LENGTH  Maximum size of the diff output.
   -H --handler HANDLER         The notification handler, such as "HTML".
+  -F --filter FILTER           An output filter, such as "Markdown".
   -A --author-url URL          Include link to specified author URL.
   -U --revision-url URL        Include links to specified Revision URL.
   -T --rt-url URL              Include links to specified Request Tracker URL.

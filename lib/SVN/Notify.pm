@@ -476,6 +476,19 @@ F<svnnotify>. Be sure to read the documentation for your subclass of choice,
 as there may be additional parameters and existing parameters may behave
 differently.
 
+=item filter
+
+  svnnotify --filter Markdown
+  svnnotify -F Textile
+
+Specify a module in the SVN::Notify::Filter namespace to be loaded, in the
+expectation that said module will filter the output of SVN::Notify. For
+example, L<SVN::Notify::Filter::Markdown|SVN::Notify::Filter::Markdown> loads
+a filter that converts log messages from Markdown format to HTML. This
+parameter can be specified more than once to load multiple filters. If the
+value contains "::", it is assumed to be a complete module name rather than in
+the SVN::Notify::Filter namespace.
+
 =item author_url
 
   svnnotify --author-url 'http://svn.example.com/changelog/~author=%s/repos'
@@ -639,6 +652,12 @@ sub new {
             eval "require $subclass" or die $@;
             return $subclass->new(%params);
         }
+    }
+
+    # Load any filters.
+    if (my $filter = delete $params{filter}) {
+        $filter = "SVN::Notify::Filter::$filter" if $filter !~ /::/;
+        require $filter or die $@;
     }
 
     # Make sure that the tos are an arrayref.
@@ -857,6 +876,7 @@ sub get_options {
         'max-sub-length|i=i'  => \$opts->{max_sub_length},
         'max-diff-length|e=i' => \$opts->{max_diff_length},
         'handler|H=s'         => \$opts->{handler},
+        'filter|F=s@'         => \$opts->{filter},
         'author-url|A=s'      => \$opts->{author_url},
         'ticket-regex=s'      => \$opts->{ticket_regex},
         'ticket-map=s%'       => \$opts->{ticket_map},
