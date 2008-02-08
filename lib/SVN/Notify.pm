@@ -92,6 +92,8 @@ my %map = (
     _ => 'Property Changed',
 );
 
+my %filters;
+
 ##############################################################################
 
 =head1 Class Interface
@@ -694,6 +696,7 @@ sub new {
         }
     }
     $params{ticket_map} = $track if $track;
+    $params{filters} = {};
 
     # Make it so!
     $class->_dbpnt( "Instantiating $class object") if $params{verbose};
@@ -749,6 +752,55 @@ sub register_attributes {
         }
     }
     $class->_accessors(@attrs);
+}
+
+##############################################################################
+
+=head3 add_filters
+
+  SVN::Notify::Subclass->add_filters(
+      headers     => sub { ... },
+      log_message => sub { ... },
+      diff        => sub { ... },
+  );
+
+Adds one or more content filters to SVN::Notify. Content filters are
+subroutine references that take a single value representing some content to be
+output by one of the C<output_*> methods, process it in some way, and return.
+This makes it easy to change the output of SVN::Notify without the hassle of
+subclassing or sending patches to the maintainer. For example,
+SVN::Notify::HTML uses this filter to escape HTML:
+
+  use HTML::Entities;
+  __PACKAGE__->add_filters(
+      log_message => sub {
+          my $msgref = shift
+          $$msgref = encode_entities( $$msg_ref, '<>&"' );
+      }
+  );
+
+The outputs that can be filtered and their corresponding arguments to the
+filter subroutine references are:
+
+  headers       Array reference of individual headers.
+  metadata      Array reference of lines of metadata.
+  log_message   Array reference of lines of log message.
+  diff          A file handle reference to the diff.
+  file_lists    A hash reference of array references. Keys correspond to the
+                types of changes to the files while the valus are arrays of
+                file names. The keys are as follows:
+                  U => Modified Paths
+                  A => Added Paths
+                  D => Removed Paths
+                  _ => Property Changed
+
+=cut
+
+sub add_filters {
+    my $pkg = shift;
+    my $subs = $filters{+shift} ||= [];
+    push @$subs, @_;
+    return $pkg;
 }
 
 ##############################################################################
@@ -1276,22 +1328,27 @@ only once for a single email message.
 sub output_headers {
     my ($self, $out) = @_;
     $self->_dbpnt( "Outputting headers") if $self->{verbose} > 2;
-    print $out
-      "MIME-Version: 1.0\n",
-      "From: $self->{from}\n",
-      "Errors-To: $self->{from}\n",
-      "To: ", join ( ', ', @{ $self->{to} } ), "\n",
-      "Subject: $self->{subject}\n";
-    print $out "Reply-To: $self->{reply_to}\n" if $self->{reply_to};
-    print $out "X-Mailer: SVN::Notify ", $self->VERSION,
-               ": http://search.cpan.org/dist/SVN-Notify/\n";
+    my @headers = (
+        "MIME-Version: 1.0",
+        "X-Mailer: SVN::Notify " . $self->VERSION
+            . ': http://search.cpan.org/dist/SVN-Notify/',
+        "From: $self->{from}",
+        "Errors-To: $self->{from}",
+        "To: " . join ( ', ', @{ $self->{to} } ),
+        "Subject: $self->{subject}"
+    );
+
+    push @headers, "Reply-To: $self->{reply_to}" if $self->{reply_to};
 
     if (my $heads = $self->{add_headers}) {
         while (my ($k, $v) = each %{ $heads }) {
-            print $out "$k: $_\n" for ref $v ? @{ $v } : $v;
+            push @headers, "$k: $_" for ref $v ? @{ $v } : $v;
         }
     }
 
+    $self->run_filters( headers => \@headers );
+
+    print $out map { $_, $/ } @headers;
     return $self;
 }
 
@@ -1370,23 +1427,21 @@ revision will also be output.
 
 sub output_metadata {
     my ($self, $out) = @_;
-    $self->print_lines($out, "Revision: $self->{revision}\n");
+    my @lines = ("Revision: $self->{revision}");
     if (my $url = $self->{revision_url}) {
-        printf $out "          $url\n", $self->{revision};
+        push @lines, sprintf "          $url", $self->{revision};
     }
 
     # Output the Author any any relevant URL.
-    $self->print_lines($out, "Author:   $self->{user}\n");
+    push @lines, "Author:   $self->{user}";
     if (my $url = $self->{author_url}) {
-        $self->print_lines(
-            $out,
-            sprintf "          $url\n", $self->{user}
-        );
+        push @lines, sprintf "          $url", $self->{user};
     }
 
-    $self->print_lines($out , "Date:     $self->{date}\n");
+    push @lines, "Date:     $self->{date}";
 
-    print $out "\n";
+    $self->run_filters( metadata => \@lines );
+    $self->print_lines( $out, map { $_, $/ } @lines );
     return $self;
 }
 
@@ -1403,6 +1458,7 @@ Outputs the commit log message, as well as the label "Log Message".
 sub output_log_message {
     my ($self, $out) = @_;
     $self->_dbpnt( "Outputting log message") if $self->{verbose} > 1;
+    $self->run_filters( log_message => $self->{message} );
     my $msg = join "\n", @{$self->{message}};
     $self->print_lines($out, "Log Message:\n-----------\n$msg\n");
 
@@ -1434,29 +1490,6 @@ sub output_log_message {
 
 ##############################################################################
 
-=head3 run_ticket_map
-
-  $notifier->run_ticket_map( \&callback, @params );
-
-Loops over the ticket systems you have defined, calling the C<$callback>
-function for each one, pasing to it the regex, url and @params specified as
-its parameters.
-
-=cut
-
-sub run_ticket_map {
-    my ($self, $callback, @params) = @_;
-
-    # Make ticketing system links.
-    my $map = $self->ticket_map or return;
-    my $has_header = 0;
-    while (my ($regex, $url) = each %$map) {
-        $regex = $_ticket_regexen{ $regex } || $regex;
-        $callback->( $regex, $url, @params );
-    }
-}
-##############################################################################
-
 =head3 output_file_lists
 
   $notifier->output_file_lists($file_handle);
@@ -1471,6 +1504,7 @@ sub output_file_lists {
     my ($self, $out) = @_;
     my $files = $self->{files} or return $self;
     $self->_dbpnt( "Outputting file lists") if $self->{verbose} > 1;
+    $self->run_filters( file_lists => $files );
     my $map = $self->file_label_map;
     # Create the lines that will go underneath the above in the message.
     my %dash = ( map { $_ => '-' x length($map->{$_}) } keys %$map );
@@ -1566,6 +1600,47 @@ sub end_message {
     return $self;
 }
 
+##############################################################################
+
+=head3 run_ticket_map
+
+  $notifier->run_ticket_map( \&callback, @params );
+
+Loops over the ticket systems you have defined, calling the C<$callback>
+function for each one, pasing to it the regex, url and @params specified as
+its parameters.
+
+=cut
+
+sub run_ticket_map {
+    my ($self, $callback, @params) = @_;
+
+    # Make ticketing system links.
+    my $map = $self->ticket_map or return;
+    my $has_header = 0;
+    while (my ($regex, $url) = each %$map) {
+        $regex = $_ticket_regexen{ $regex } || $regex;
+        $callback->( $regex, $url, @params );
+    }
+}
+
+##############################################################################
+
+=head3 run_filters
+
+  $notifier->run_filters( $output_type => $data );
+
+=cut
+
+sub run_filters {
+    my $self = shift;
+    my $filters = $filters{+shift} or return $self;
+    $_->(@_) for @$filters;
+    return $self;
+}
+
+##############################################################################
+
 =head3 print_lines
 
   $notifier->print_lines( $fh, @lines );
@@ -1626,6 +1701,7 @@ sub diff_handle {
 
 sub _dump_diff {
     my ($self, $out, $diff) = @_;
+    $diff = $self->run_filters( diff => $diff ) if $filters{diff};
 
     if (my $max = $self->{max_diff_length}) {
         my $length = 0;
