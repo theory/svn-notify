@@ -41,6 +41,7 @@ my %params = (
     max_sub_length  => undef,
     max_diff_length => undef,
     handler         => undef,
+    filter          => undef,
     author_url      => undef,
     revision_url    => undef,
     ticket_map      => undef,

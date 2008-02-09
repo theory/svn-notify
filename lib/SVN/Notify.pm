@@ -787,16 +787,7 @@ Adds one or more content filters to SVN::Notify. Content filters are
 subroutine references that take a single value representing some content to be
 output by one of the C<output_*> methods, process it in some way, and return.
 This makes it easy to change the output of SVN::Notify without the hassle of
-subclassing or sending patches to the maintainer. For example,
-SVN::Notify::HTML uses this filter to escape HTML:
-
-  use HTML::Entities;
-  __PACKAGE__->add_filters(
-      log_message => sub {
-          my $msgref = shift
-          $$msgref = encode_entities( $$msg_ref, '<>&"' );
-      }
-  );
+subclassing or sending patches to the maintainer.
 
 The outputs that can be filtered and their corresponding arguments to the
 filter subroutine references are:
@@ -812,6 +803,70 @@ filter subroutine references are:
                   A => Added Paths
                   D => Removed Paths
                   _ => Property Changed
+
+It is expected that all filters will modify the content to be output in-place,
+with the exception of C<diff> filters, which should return a file handle for
+the diff.
+
+Some examples:
+
+=over
+
+=item * Add an extra header (like C<--add-header>):
+
+  SVN::Notify->add_filters(
+      headers => sub {
+          my $headers = shift;
+          push @$headers, 'Precedence: bulk';
+      }
+  );
+
+=item * Uppercase metadata labels:
+
+  SVN::Notify->add_filters(
+      metadata => sub {
+          my $lines = shift;
+          s/([^:]:)/uc $1/eg for @$lines;
+      }
+  );
+
+=item * Escape HTML in a log message:
+
+  use HTML::Entities;
+  SVN::Notify->add_filters(
+      log_message => sub {
+          my $lines = shift;
+          $_ = encode_entities( $_, '<>&"' ) for @$lines;
+      }
+  );
+
+=item * Remove leading "trunk/" from file names:
+
+  SVN::Notify->add_filters(
+      file_lists => sub {
+          my $lists = shift;
+          for my $list ( values %lists ) {
+              s{^trunk/}{} for @$list;
+          }
+      }
+  );
+
+=item * Remove leading "trunk/" from file names in a diff:
+
+  use IO::ScalarArray;
+  SVN::Notify->add_filters(
+      diff => sub {
+          my $fh = shift;
+          my @lines;
+          while (<$fh>) {
+              s/^((?:Modified|Added|Deleted|Copied|Property changes on): )trunk/$1/;
+              push @lines, $_;
+          }
+          return IO::ScalarArray->new( \@lines );
+      }
+  );
+
+=back
 
 =cut
 
