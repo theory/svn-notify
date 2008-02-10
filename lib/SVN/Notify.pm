@@ -818,6 +818,7 @@ Some examples:
       headers => sub {
           my $headers = shift;
           push @$headers, 'Precedence: bulk';
+          return $headers;
       }
   );
 
@@ -827,6 +828,7 @@ Some examples:
       metadata => sub {
           my $lines = shift;
           s/([^:]:)/uc $1/eg for @$lines;
+          return $lines;
       }
   );
 
@@ -837,6 +839,7 @@ Some examples:
       log_message => sub {
           my $lines = shift;
           $_ = encode_entities( $_, '<>&"' ) for @$lines;
+          return $lines;
       }
   );
 
@@ -848,6 +851,7 @@ Some examples:
           for my $list ( values %lists ) {
               s{^trunk/}{} for @$list;
           }
+          return $lists;
       }
   );
 
@@ -1404,26 +1408,24 @@ sub output_headers {
     my ($self, $out) = @_;
     $self->_dbpnt( "Outputting headers") if $self->{verbose} > 2;
     my @headers = (
-        "MIME-Version: 1.0",
+        "MIME-Version: 1.0\n",
         "X-Mailer: SVN::Notify " . $self->VERSION
-            . ': http://search.cpan.org/dist/SVN-Notify/',
-        "From: $self->{from}",
-        "Errors-To: $self->{from}",
-        "To: " . join ( ', ', @{ $self->{to} } ),
-        "Subject: $self->{subject}"
+            . ": http://search.cpan.org/dist/SVN-Notify/\n",
+        "From: $self->{from}\n",
+        "Errors-To: $self->{from}\n",
+        "To: " . join ( ', ', @{ $self->{to} } ) . "\n",
+        "Subject: $self->{subject}\n"
     );
 
-    push @headers, "Reply-To: $self->{reply_to}" if $self->{reply_to};
+    push @headers, "Reply-To: $self->{reply_to}\n" if $self->{reply_to};
 
     if (my $heads = $self->{add_headers}) {
         while (my ($k, $v) = each %{ $heads }) {
-            push @headers, "$k: $_" for ref $v ? @{ $v } : $v;
+            push @headers, "$k: $_\n" for ref $v ? @{ $v } : $v;
         }
     }
 
-    $self->run_filters( headers => \@headers );
-
-    print $out map { $_, $/ } @headers;
+    print $out @{ $self->run_filters( headers => \@headers ) };
     return $self;
 }
 
@@ -1502,21 +1504,20 @@ revision will also be output.
 
 sub output_metadata {
     my ($self, $out) = @_;
-    my @lines = ("Revision: $self->{revision}");
+    my @lines = ("Revision: $self->{revision}\n");
     if (my $url = $self->{revision_url}) {
-        push @lines, sprintf "          $url", $self->{revision};
+        push @lines, sprintf "          $url\n", $self->{revision};
     }
 
     # Output the Author any any relevant URL.
-    push @lines, "Author:   $self->{user}";
+    push @lines, "Author:   $self->{user}\n";
     if (my $url = $self->{author_url}) {
-        push @lines, sprintf "          $url", $self->{user};
+        push @lines, sprintf "          $url\n", $self->{user};
     }
 
-    push @lines, "Date:     $self->{date}";
+    push @lines, "Date:     $self->{date}\n";
 
-    $self->run_filters( metadata => \@lines );
-    $self->print_lines( $out, map { $_, $/ } @lines );
+    $self->print_lines( $out, @{ $self->run_filters( metadata => \@lines ) } );
     return $self;
 }
 
@@ -1533,8 +1534,10 @@ Outputs the commit log message, as well as the label "Log Message".
 sub output_log_message {
     my ($self, $out) = @_;
     $self->_dbpnt( "Outputting log message") if $self->{verbose} > 1;
-    $self->run_filters( log_message => $self->{message} );
-    my $msg = join "\n", @{$self->{message}};
+    my $msg = join "\n", @{
+        $self->run_filters( log_message => $self->{message} )
+    };
+
     $self->print_lines($out, "Log Message:\n-----------\n$msg\n");
 
     # Make Revision links.
@@ -1577,9 +1580,9 @@ pulled in from the C<file_label_map()> class method.
 
 sub output_file_lists {
     my ($self, $out) = @_;
-    my $files = $self->{files} or return $self;
+    my $files = $self->run_filters( file_lists => $self->{files} )
+        or return $self;
     $self->_dbpnt( "Outputting file lists") if $self->{verbose} > 1;
-    $self->run_filters( file_lists => $files );
     my $map = $self->file_label_map;
     # Create the lines that will go underneath the above in the message.
     my %dash = ( map { $_ => '-' x length($map->{$_}) } keys %$map );
@@ -1703,15 +1706,15 @@ sub run_ticket_map {
 
 =head3 run_filters
 
-  $notifier->run_filters( $output_type => $data );
+  $data =  $notifier->run_filters( $output_type => $data );
 
 =cut
 
 sub run_filters {
-    my $self = shift;
-    my $filters = $filters{+shift} or return $self;
-    $_->(@_) for @$filters;
-    return $self;
+    my ($self, $type, $data) = @_;
+    my $filters = $filters{$type} or return $data;
+    $data = $_->($data) for @$filters;
+    return $data;
 }
 
 ##############################################################################
