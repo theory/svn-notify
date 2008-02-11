@@ -2241,20 +2241,20 @@ __END__
 
 =head2 Writing Output Filters
 
-Output filters are simply subroutines defined in a package. The name of the
-subroutine determines what content it filters. They take two arguments: the
-SVN::Notify object that's creating the notification message, and the content
-to be filtered. They should return the filtered content in the same manner as
-it was passed. This makes it easy to change the output of SVN::Notify without
-the hassle of subclassing or sending patches to the maintainer.
+Output filters are simply subroutines defined in a package. The name of each
+subroutine determines what content it filters. The filters take two arguments:
+the SVN::Notify object that's creating the notification message, and the
+content to be filtered. They should return the filtered content in the same
+manner as it was passed. This makes it easy to change the output of
+SVN::Notify without the hassle of subclassing or sending patches to the
+maintainer.
 
 The names of the filter subroutines and the types of their second arguments
 and return values are as follows:
 
-
   Sub Name    | Second Argument
   ------------+---------------------------------------------------------------
-  headers     | Array reference of individual headers.
+  headers     | Array reference of individual headers lines.
   metadata    | Array reference of lines of metadata.
   log_message | Array reference of lines of log message.
   diff        | A file handle reference to the diff.
@@ -2266,29 +2266,40 @@ and return values are as follows:
               |   D => Removed Paths
               |   _ => Property Changed
 
+The module name can be anything you like; just pass it via the C<filter>
+parameter, e.g., C<< filter => [ 'My::Filter' ] >> (or C<--filter My::Filter>
+on the command-line). If, however, it's in the C<SVN::Notify::Filter>
+namespace, you can just pass the last bit as the filter name, for example C<<
+filter => [ 'NoSpam' ] >> (or C<--filter NoSpam> on the command-line) for
+C<SVN::Notify::Filter::NoSpam>.
+
 Some examples:
 
 =over
 
-=item * Add an extra header (like C<--add-header>):
+=item * Add an extra header
 
-  package SVN::Notify::Filter::Headers;
+This emulates C<add_header>:
+
+  package SVN::Notify::Filter::NoSpam;
   sub headers {
       my ($notifier, $headers) = @_;
-      push @$headers, 'Precedence: bulk';
+      push @$headers, 'X-NotSpam: true';
       return $headers;
   }
 
-=item * Uppercase metadata labels:
+=item * Uppercase metadata labels
+
+Change the format to read "REVISION: 111" instead of "Revision: 111":
 
   package SVN::Notify::Filter::UpLabels;
   sub metadata {
       my ($notifier, $lines) = @_;
-      s/([^:]:)/uc $1/eg for @$lines;
+      s/([^:]+:)/uc $1/eg for @$lines;
       return $lines;
   }
 
-=item * Escape HTML in a log message:
+=item * Escape HTML in a log message
 
   package SVN::Notify::Filter::EscapeHTML;
   use HTML::Entities;
@@ -2299,31 +2310,76 @@ Some examples:
       return $lines;
   }
 
-=item * Remove leading "trunk/" from file names:
+=item * Remove leading "trunk/" from file names
 
-  package SVN::Notify::Filter::EscapeHTML;
+  package SVN::Notify::Filter::StripTrunk;
   sub file_lists {
       my ($notifier, $lists) = @_;
-      my $lists = shift;
-      for my $list ( values %lists ) {
+      for my $list ( values %$lists ) {
           s{^trunk/}{} for @$list;
       }
       return $lists;
   }
 
-=item * Remove leading "trunk/" from file names in a diff:
+=item * Remove leading "trunk/" from file names in a diff
 
-  package SVN::Notify::Filter::EscapeHTML;
+This one is a little more complicated because you need to return a file
+handle. SVN::Notify tries to be as efficient with resources as it can, so it
+reads each line from the diff file handle one-at-a-time, processing and
+outputing each in turn so as to avoid loading the entire diff into memory. To
+retain this pattern, the best approach is to tie the file handle to a class
+that does the filtering one line at a time. The requisite C<tie> class needs
+only three methods: C<TIEHANDLE> C<READLINE>, and C<CLOSE>. In this example,
+I've defined them in a different namespace than the filter subroutine, so as
+to simplify SVN::Notify's loading of filters and to keep thing neatly
+packaged:
+
+  package My::IO::TrunkStripper;
+  sub TIEHANDLE {
+      my ($class, $fh) = @_;
+      bless { fh => $fh }, $class;
+  }
+
+  sub READLINE {
+      my $fh = shift->{fh};
+      my $line = <$fh> or return;
+      $line =~ s{^((?:-{3}|[+]{3})\s+)trunk/}{$1};
+      return $line;
+  }
+
+  sub CLOSE {
+      close shift->{fh};
+  }
+
+  package SVN::Notify::Filter::StripTrunkDiff;
+  use Symbol ();
+
+  sub diff {
+      my ($notifier, $fh) = @_;
+      my $filter = Symbol::gensym;
+      tie *{ $filter }, 'My::IO::TrunkStripper', $fh;
+      return $filter;
+  }
+
+However, if you don't mind loading the entire diff into memory, you can
+simplify things by using a data structure and an exsiting IO module to do the
+same thing:
+
+  package SVN::Notify::Filter::StripTrunkDiff;
   use IO::ScalarArray;
+
   sub diff {
       my ($notifier, $fh) = @_;
       my @lines;
       while (<$fh>) {
-          s/^((?:Modified|Added|Deleted|Copied|Property changes on): )trunk/$1/;
+          s{^((?:-{3}|[+]{3})\s+)trunk/}{$1};
           push @lines, $_;
       }
-      return IO::ScalarArray->new( \@lines );
+      return IO::ScalarArray->new(\@lines);
   }
+
+But do beware of this approach if you're likely to commit changes that would
+generate very larges diffs!
 
 =back
 
