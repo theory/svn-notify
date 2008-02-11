@@ -1,11 +1,80 @@
 package SVN::Notify::Filter::Trac;
 
-use strict;
-#use Text::Trac;
+# $Id$
 
-sub filter_log_messge {
+use strict;
+use Text::Trac;
+
+=begin comment
+
+Fake out Test::Pod::Coverage.
+
+=head3 log_message
+
+=end comment
+
+=cut
+
+sub log_message {
     my $notify = shift;
-    [ Text::Trac->new->parse( join '', @{ +shift } )->html ]
+    my $trac = Text::Trac->new;
+    $trac->parse(  join '', @{ +shift } );
+    return [ $trac->html ];
 }
 
 1;
+
+=head1 Name
+
+SVN::Notify::Filter::Trac - Filter SVN::Notify output in Trac format
+
+=head1 Synopsis
+
+Use F<svnnotify> in F<post-commit>:
+
+  svnnotify --repos-path "$1" --revision "$2" --handler HTML --filter Trac
+
+Use the class in a custom script:
+
+  use SVN::Notify;
+
+  my $notifier = SVN::Notify->new(
+      repos_path => $path,
+      revision   => $rev,
+      handler    => 'HTML::ColorDiff',
+      filter     => [ 'Trac' ],
+  );
+  $notifier->prepare;
+  $notifier->execute;
+
+=head1 Description
+
+This module filters SVN::Notify log message output from Trac markup into HTML.
+Essentially, this means that if you write your commit log messages using Trac
+wiki markup and like to use L<SVN::Notify::HTML|SVN::Notify::HTML> or
+L<SVN::Notify::HTML::ColorDiff|SVN::Notify::HTML::ColorDiff> to format your
+commit notifications, you can use this filter to convert the Trac formatting
+in the log message to HTML.
+
+=head1 See Also
+
+=over
+
+=item L<SVN::Notify|SVN::Notify>
+
+=item L<svnnotify|svnnotify>
+
+=back
+
+=head1 Author
+
+David Wheeler <david@kineticode.com>
+
+=head1 Copyright and License
+
+Copyright (c) 2008 Kineticode, Inc. All Rights Reserved.
+
+This module is free software; you can redistribute it and/or modify it under
+the same terms as Perl itself.
+
+=cut

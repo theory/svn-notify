@@ -3,7 +3,7 @@
 # $Id $
 
 use strict;
-use Test::More tests => 39;
+use Test::More tests => 44;
 use File::Spec::Functions;
 
 use_ok('SVN::Notify');
@@ -114,7 +114,7 @@ like $email, qr{^[+]{3}\s+Params-CallbackRequest/Changes}m, 'leading trunk shoul
 
 SKIP: {
     eval 'require IO::ScalarArray';
-    skip 'IO::ScalarArray did not load', 5 if $@;
+    skip 'IO::ScalarArray did not load', 6 if $@;
 
     ok( $notifier = SVN::Notify->new(
         %args,
@@ -127,6 +127,25 @@ SKIP: {
     $email = get_output();
     like $email, qr{^-{3}\s+Params-CallbackRequest/Changes}m, 'leading trunk should be stripped';
     like $email, qr{^[+]{3}\s+Params-CallbackRequest/Changes}m, 'leading trunk should be stripped';
+}
+
+##############################################################################
+# The included Trac filter.
+##############################################################################
+
+SKIP: {
+    eval 'require Text::Trac';
+    skip 'Text::Trac did not load', 5 if $@;
+
+    ok( $notifier = SVN::Notify->new(
+        %args,
+        filter => [ 'Trac' ],
+    ), 'Construct Trac filter notifier' );
+    isa_ok($notifier, 'SVN::Notify');
+    ok $notifier->prepare, 'Prepare log_message filter checking';
+    ok $notifier->execute, 'Notify log_mesage filter checking';
+    $email = get_output();
+    like $email, qr{<p>\s*Did this, that, and the other[.] And then I did some more[.] Someit was done on a second line[.] “Go figure”[.]\s*</p>}ms;
 }
 
 ##############################################################################
