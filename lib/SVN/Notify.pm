@@ -6,7 +6,7 @@ use strict;
 use constant WIN32  => $^O eq 'MSWin32';
 use constant PERL58 => $] > 5.007;
 require Encode if PERL58;
-$SVN::Notify::VERSION = '2.68';
+$SVN::Notify::VERSION = '2.70';
 
 =begin comment
 

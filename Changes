@@ -1,6 +1,6 @@
 Revision history for Perl extension SVN::Notify
 
-2.68
+2.70
       - Rewrote character encoding handling, based on a patch submitted by
         Toshikazu Kinkoh. Hopefully these changes will help solve the various
         encoding problems that continue to crop up:
