@@ -3,9 +3,9 @@
 # $Id$
 
 use strict;
-use Test::More tests => 5;
+use Test::More tests => 9;
 
-BEGIN {use_ok 'SVN::Notify' };
+BEGIN { use_ok 'SVN::Notify' };
 
 my %testopts = (
     '--repos-path'     => 'foo',
@@ -84,6 +84,16 @@ $params{wrap_log} = undef;
 @ARGV = (%testopts, '--bugzilla-url' => 'url', '--handler' => 'HTML', '--add-header', 'foo=baz');
 ok $opts = SVN::Notify->get_options, "Get SVN::Notify + HTML options";
 is_deeply($opts, \%params, "Check new results");
+
+SKIP: {
+    eval 'require SVN::Notify::Filter::Trac';
+    skip 'Text::Trac did not load', 4 if $@;
+    local @ARGV = (%testopts, '--trac-url', 'http://trac.example.com/');
+    ok my $opts = SVN::Notify->get_options, "Get SVN::Notify options";
+    is $opts->{trac_url}, 'http://trac.example.com/', 'trac_url should be set';
+    ok my $notifier = SVN::Notify->new(%$opts), 'Construct SVN::Notify';
+    is $notifier->trac_url, 'http://trac.example.com/', 'trac_url attribute should be set';
+}
 
 BEGIN {
     package HTML::Entities;

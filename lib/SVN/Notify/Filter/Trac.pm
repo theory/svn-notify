@@ -4,6 +4,7 @@ package SVN::Notify::Filter::Trac;
 
 use strict;
 use Text::Trac;
+use SVN::Notify;
 
 =begin comment
 
@@ -15,10 +16,16 @@ Fake out Test::Pod::Coverage.
 
 =cut
 
+SVN::Notify->register_attributes(
+    trac_url => 'trac-url=s',
+);
+
 sub log_message {
     my $notify = shift;
-    my $trac = Text::Trac->new;
-    $trac->parse(  join '', @{ +shift } );
+    my $trac = Text::Trac->new(
+        trac_url => $notify->trac_url,
+    );
+    $trac->parse(  join $/, @{ +shift } );
     return [ $trac->html ];
 }
 
@@ -32,7 +39,8 @@ SVN::Notify::Filter::Trac - Filter SVN::Notify output in Trac format
 
 Use F<svnnotify> in F<post-commit>:
 
-  svnnotify --repos-path "$1" --revision "$2" --handler HTML --filter Trac
+  svnnotify --p "$1" --r "$2" --handler HTML --filter Trac \
+  --trac-url http://trac.example.com
 
 Use the class in a custom script:
 
@@ -43,6 +51,7 @@ Use the class in a custom script:
       revision   => $rev,
       handler    => 'HTML::ColorDiff',
       filter     => [ 'Trac' ],
+      trac_url   => 'http://trac.example.com/',
   );
   $notifier->prepare;
   $notifier->execute;
@@ -55,6 +64,10 @@ wiki markup and like to use L<SVN::Notify::HTML|SVN::Notify::HTML> or
 L<SVN::Notify::HTML::ColorDiff|SVN::Notify::HTML::ColorDiff> to format your
 commit notifications, you can use this filter to convert the Trac formatting
 in the log message to HTML.
+
+If you specify an extra argument, C<trac_url> (C<--trac-url> on the
+command-line), it will be used to generate Trac links for revision numbers and
+the like in your log messages.
 
 =head1 See Also
 

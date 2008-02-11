@@ -145,7 +145,7 @@ SKIP: {
     ok $notifier->prepare, 'Prepare log_message filter checking';
     ok $notifier->execute, 'Notify log_mesage filter checking';
     $email = get_output();
-    like $email, qr{<p>\s*Did this, that, and the other[.] And then I did some more[.] Someit was done on a second line[.] “Go figure”[.]\s*</p>}ms;
+    like $email, qr{<p>\s*Did this, that, and the other[.] And then I did some more[.] Some\nit was done on a second line[.] “Go figure”[.] <a class="changeset" href="/changeset/1234">r1234</a>\s*</p>}ms;
 }
 
 ##############################################################################

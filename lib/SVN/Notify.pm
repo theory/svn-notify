@@ -865,8 +865,9 @@ sub get_options {
     ) or return;
 
     # Load a subclass if one has been specified.
-    return $opts unless $opts->{handler};
-    eval "require " . __PACKAGE__ . "::$opts->{handler}" or die $@;
+    if ($opts->{handler}) {
+        eval "require " . __PACKAGE__ . "::$opts->{handler}" or die $@;
+    }
 
     # Load any options for the subclass.
     return $opts unless %OPTS;
@@ -2380,6 +2381,27 @@ same thing:
 
 But do beware of this approach if you're likely to commit changes that would
 generate very larges diffs!
+
+=item * Filter based on Parameter.
+
+You can also add attributes (and therefor command-line options) to SVN::Notify
+in your filter in order to alter its behavior. This is precisely what the
+included L<SVN::Notify::Filter::Trac|SVN::Notify::Filter::Trac> module does:
+
+  package SVN::Notify::Filter::Trac;
+
+  SVN::Notify->register_attributes(
+      trac_url => 'trac-url=s',
+  );
+
+  sub log_message {
+      my $notify = shift;
+      my $trac = Text::Trac->new(
+          trac_url => $notify->trac_url,
+      );
+      $trac->parse(  join $/, @{ +shift } );
+      return [ $trac->html ];
+  }
 
 =back
 
