@@ -2241,30 +2241,30 @@ __END__
 
 =head2 Writing Output Filters
 
-Adds one or more content filters to SVN::Notify. Content filters are
-subroutine references that take a single value representing some content to be
-output by one of the C<output_*> methods, process it in some way, and return.
-This makes it easy to change the output of SVN::Notify without the hassle of
-subclassing or sending patches to the maintainer.
+Output filters are simply subroutines defined in a package. The name of the
+subroutine determines what content it filters. They take two arguments: the
+SVN::Notify object that's creating the notification message, and the content
+to be filtered. They should return the filtered content in the same manner as
+it was passed. This makes it easy to change the output of SVN::Notify without
+the hassle of subclassing or sending patches to the maintainer.
 
-The outputs that can be filtered and their corresponding arguments to the
-filter subroutine references are:
+The names of the filter subroutines and the types of their second arguments
+and return values are as follows:
 
-  headers       Array reference of individual headers.
-  metadata      Array reference of lines of metadata.
-  log_message   Array reference of lines of log message.
-  diff          A file handle reference to the diff.
-  file_lists    A hash reference of array references. Keys correspond to the
-                types of changes to the files while the valus are arrays of
-                file names. The keys are as follows:
-                  U => Modified Paths
-                  A => Added Paths
-                  D => Removed Paths
-                  _ => Property Changed
 
-It is expected that all filters will modify the content to be output in-place,
-with the exception of C<diff> filters, which should return a file handle for
-the diff.
+  Sub Name    | Second Argument
+  ------------+---------------------------------------------------------------
+  headers     | Array reference of individual headers.
+  metadata    | Array reference of lines of metadata.
+  log_message | Array reference of lines of log message.
+  diff        | A file handle reference to the diff.
+  file_lists  | A hash reference of array references. Keys correspond to the
+              | types of changes to the files while the valus are arrays of
+              | file names. The keys are as follows:
+              |   U => Modified Paths
+              |   A => Added Paths
+              |   D => Removed Paths
+              |   _ => Property Changed
 
 Some examples:
 
@@ -2281,60 +2281,51 @@ Some examples:
 
 =item * Uppercase metadata labels:
 
-  SVN::Notify->add_filters(
-      metadata => sub {
-          my $lines = shift;
-          s/([^:]:)/uc $1/eg for @$lines;
-          return $lines;
-      }
-  );
+  package SVN::Notify::Filter::UpLabels;
+  sub metadata {
+      my ($notifier, $lines) = @_;
+      s/([^:]:)/uc $1/eg for @$lines;
+      return $lines;
+  }
 
 =item * Escape HTML in a log message:
 
+  package SVN::Notify::Filter::EscapeHTML;
   use HTML::Entities;
-  SVN::Notify->add_filters(
-      log_message => sub {
-          my $lines = shift;
-          $_ = encode_entities( $_, '<>&"' ) for @$lines;
-          return $lines;
-      }
-  );
+  sub log_message {
+      my ($notifier, $lines) = @_;
+      my $lines = shift;
+      $_ = encode_entities( $_, '<>&"' ) for @$lines;
+      return $lines;
+  }
 
 =item * Remove leading "trunk/" from file names:
 
-  SVN::Notify->add_filters(
-      file_lists => sub {
-          my $lists = shift;
-          for my $list ( values %lists ) {
-              s{^trunk/}{} for @$list;
-          }
-          return $lists;
+  package SVN::Notify::Filter::EscapeHTML;
+  sub file_lists {
+      my ($notifier, $lists) = @_;
+      my $lists = shift;
+      for my $list ( values %lists ) {
+          s{^trunk/}{} for @$list;
       }
-  );
+      return $lists;
+  }
 
 =item * Remove leading "trunk/" from file names in a diff:
 
+  package SVN::Notify::Filter::EscapeHTML;
   use IO::ScalarArray;
-  SVN::Notify->add_filters(
-      diff => sub {
-          my $fh = shift;
-          my @lines;
-          while (<$fh>) {
-              s/^((?:Modified|Added|Deleted|Copied|Property changes on): )trunk/$1/;
-              push @lines, $_;
-          }
-          return IO::ScalarArray->new( \@lines );
+  sub diff {
+      my ($notifier, $fh) = @_;
+      my @lines;
+      while (<$fh>) {
+          s/^((?:Modified|Added|Deleted|Copied|Property changes on): )trunk/$1/;
+          push @lines, $_;
       }
-  );
+      return IO::ScalarArray->new( \@lines );
+  }
 
 =back
-
-sub add_filters {
-    my $pkg = shift;
-    my $subs = $self->{filters}{+shift} ||= [];
-    push @$subs, @_;
-    return $pkg;
-}
 
 =head1 See Also
 
