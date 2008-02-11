@@ -478,15 +478,14 @@ differently.
 
 =item filter
 
-  svnnotify --filter Markdown
-  svnnotify -F Textile
+  svnnotify --filter Trac -F My::Filter
 
-Specify a module in the SVN::Notify::Filter namespace to be loaded, in the
-expectation that said module will filter the output of SVN::Notify. For
-example, L<SVN::Notify::Filter::Markdown|SVN::Notify::Filter::Markdown> loads
-a filter that converts log messages from Markdown format to HTML. This
-parameter can be specified more than once to load multiple filters. If the
-value contains "::", it is assumed to be a complete module name rather than in
+Specify one or or more module to be loaded in the expectation that they define
+output filters. For example,
+L<SVN::Notify::Filter::Trac|SVN::Notify::Filter::Trac> loads a filter that
+converts log messages from Trac's markup format to HTML. This parameter can be
+specified more than once to load multiple filters. If the value contains "::",
+it is assumed to be a complete module name. Otherwise, it is assumed to bein
 the SVN::Notify::Filter namespace.
 
 =item author_url
@@ -655,9 +654,27 @@ sub new {
     }
 
     # Load any filters.
-    if (my $filter = delete $params{filter}) {
-        $filter = "SVN::Notify::Filter::$filter" if $filter !~ /::/;
-        require $filter or die $@;
+    $params{filters} = {};
+    if (my $filts = delete $params{filter}) {
+        for my $pkg (@$filts) {
+            $pkg = "SVN::Notify::Filter::$pkg" if $pkg !~ /::/;
+            if ($filters{$pkg}) {
+                while (my ($k, $v) = each %{ $filters{$pkg} }) {
+                    $params{filters}->{$k} ||= [];
+                    push @{ $params{filters}->{$k} }, $v;
+                }
+            } else {
+                eval "require $pkg" or die $@;
+                $filters{$pkg} = {};
+                no strict 'refs';
+                while ( my ($k, $v) = each %{ "$pkg\::" } ) {
+                    my $code = *{$v}{CODE} or next;
+                    $filters{$pkg}->{$k} = $code;
+                    $params{filters}->{$k} ||= [];
+                    push @{ $params{filters}->{$k} }, $code;
+                }
+            }
+        }
     }
 
     # Make sure that the tos are an arrayref.
@@ -715,7 +732,6 @@ sub new {
         }
     }
     $params{ticket_map} = $track if $track;
-    $params{filters} = {};
 
     # Make it so!
     $class->_dbpnt( "Instantiating $class object") if $params{verbose};
@@ -771,114 +787,6 @@ sub register_attributes {
         }
     }
     $class->_accessors(@attrs);
-}
-
-##############################################################################
-
-=head3 add_filters
-
-  SVN::Notify::Subclass->add_filters(
-      headers     => sub { ... },
-      log_message => sub { ... },
-      diff        => sub { ... },
-  );
-
-Adds one or more content filters to SVN::Notify. Content filters are
-subroutine references that take a single value representing some content to be
-output by one of the C<output_*> methods, process it in some way, and return.
-This makes it easy to change the output of SVN::Notify without the hassle of
-subclassing or sending patches to the maintainer.
-
-The outputs that can be filtered and their corresponding arguments to the
-filter subroutine references are:
-
-  headers       Array reference of individual headers.
-  metadata      Array reference of lines of metadata.
-  log_message   Array reference of lines of log message.
-  diff          A file handle reference to the diff.
-  file_lists    A hash reference of array references. Keys correspond to the
-                types of changes to the files while the valus are arrays of
-                file names. The keys are as follows:
-                  U => Modified Paths
-                  A => Added Paths
-                  D => Removed Paths
-                  _ => Property Changed
-
-It is expected that all filters will modify the content to be output in-place,
-with the exception of C<diff> filters, which should return a file handle for
-the diff.
-
-Some examples:
-
-=over
-
-=item * Add an extra header (like C<--add-header>):
-
-  SVN::Notify->add_filters(
-      headers => sub {
-          my $headers = shift;
-          push @$headers, 'Precedence: bulk';
-          return $headers;
-      }
-  );
-
-=item * Uppercase metadata labels:
-
-  SVN::Notify->add_filters(
-      metadata => sub {
-          my $lines = shift;
-          s/([^:]:)/uc $1/eg for @$lines;
-          return $lines;
-      }
-  );
-
-=item * Escape HTML in a log message:
-
-  use HTML::Entities;
-  SVN::Notify->add_filters(
-      log_message => sub {
-          my $lines = shift;
-          $_ = encode_entities( $_, '<>&"' ) for @$lines;
-          return $lines;
-      }
-  );
-
-=item * Remove leading "trunk/" from file names:
-
-  SVN::Notify->add_filters(
-      file_lists => sub {
-          my $lists = shift;
-          for my $list ( values %lists ) {
-              s{^trunk/}{} for @$list;
-          }
-          return $lists;
-      }
-  );
-
-=item * Remove leading "trunk/" from file names in a diff:
-
-  use IO::ScalarArray;
-  SVN::Notify->add_filters(
-      diff => sub {
-          my $fh = shift;
-          my @lines;
-          while (<$fh>) {
-              s/^((?:Modified|Added|Deleted|Copied|Property changes on): )trunk/$1/;
-              push @lines, $_;
-          }
-          return IO::ScalarArray->new( \@lines );
-      }
-  );
-
-=back
-
-=cut
-
-sub add_filters {
-    my $pkg = shift;
-    my $subs = $filters{+shift} ||= [];
-    push @$subs, @_;
-    return $pkg;
 }
 
 ##############################################################################
@@ -1712,8 +1620,8 @@ sub run_ticket_map {
 
 sub run_filters {
     my ($self, $type, $data) = @_;
-    my $filters = $filters{$type} or return $data;
-    $data = $_->($data) for @$filters;
+    my $filters = $self->{filters}{$type} or return $data;
+    $data = $_->($self, $data) for @$filters;
     return $data;
 }
 
@@ -1779,7 +1687,7 @@ sub diff_handle {
 
 sub _dump_diff {
     my ($self, $out, $diff) = @_;
-    $diff = $self->run_filters( diff => $diff ) if $filters{diff};
+    $diff = $self->run_filters( diff => $diff );
 
     if (my $max = $self->{max_diff_length}) {
         my $length = 0;
@@ -2328,6 +2236,105 @@ sub CLOSE  {
 
 1;
 __END__
+
+##############################################################################
+
+=head2 Writing Output Filters
+
+Adds one or more content filters to SVN::Notify. Content filters are
+subroutine references that take a single value representing some content to be
+output by one of the C<output_*> methods, process it in some way, and return.
+This makes it easy to change the output of SVN::Notify without the hassle of
+subclassing or sending patches to the maintainer.
+
+The outputs that can be filtered and their corresponding arguments to the
+filter subroutine references are:
+
+  headers       Array reference of individual headers.
+  metadata      Array reference of lines of metadata.
+  log_message   Array reference of lines of log message.
+  diff          A file handle reference to the diff.
+  file_lists    A hash reference of array references. Keys correspond to the
+                types of changes to the files while the valus are arrays of
+                file names. The keys are as follows:
+                  U => Modified Paths
+                  A => Added Paths
+                  D => Removed Paths
+                  _ => Property Changed
+
+It is expected that all filters will modify the content to be output in-place,
+with the exception of C<diff> filters, which should return a file handle for
+the diff.
+
+Some examples:
+
+=over
+
+=item * Add an extra header (like C<--add-header>):
+
+  package SVN::Notify::Filter::Headers;
+  sub headers {
+      my ($notifier, $headers) = @_;
+      push @$headers, 'Precedence: bulk';
+      return $headers;
+  }
+
+=item * Uppercase metadata labels:
+
+  SVN::Notify->add_filters(
+      metadata => sub {
+          my $lines = shift;
+          s/([^:]:)/uc $1/eg for @$lines;
+          return $lines;
+      }
+  );
+
+=item * Escape HTML in a log message:
+
+  use HTML::Entities;
+  SVN::Notify->add_filters(
+      log_message => sub {
+          my $lines = shift;
+          $_ = encode_entities( $_, '<>&"' ) for @$lines;
+          return $lines;
+      }
+  );
+
+=item * Remove leading "trunk/" from file names:
+
+  SVN::Notify->add_filters(
+      file_lists => sub {
+          my $lists = shift;
+          for my $list ( values %lists ) {
+              s{^trunk/}{} for @$list;
+          }
+          return $lists;
+      }
+  );
+
+=item * Remove leading "trunk/" from file names in a diff:
+
+  use IO::ScalarArray;
+  SVN::Notify->add_filters(
+      diff => sub {
+          my $fh = shift;
+          my @lines;
+          while (<$fh>) {
+              s/^((?:Modified|Added|Deleted|Copied|Property changes on): )trunk/$1/;
+              push @lines, $_;
+          }
+          return IO::ScalarArray->new( \@lines );
+      }
+  );
+
+=back
+
+sub add_filters {
+    my $pkg = shift;
+    my $subs = $self->{filters}{+shift} ||= [];
+    push @$subs, @_;
+    return $pkg;
+}
 
 =head1 See Also
 

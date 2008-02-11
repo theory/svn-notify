@@ -3,6 +3,7 @@ Build.PL
 Changes
 lib/SVN/Notify.pm
 lib/SVN/Notify/Alternative.pm
+lib/SVN/Notify/Filter/Trac.pm
 lib/SVN/Notify/HTML.pm
 lib/SVN/Notify/HTML/ColorDiff.pm
 Makefile.PL
@@ -32,6 +33,7 @@ t/data/info/222.txt
 t/data/info/333.txt
 t/data/info/444.txt
 t/errors.t
+t/filter.t
 t/html.t
 t/htmlcolordiff.t
 t/options.t

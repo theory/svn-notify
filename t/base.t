@@ -3,7 +3,7 @@
 # $Id$
 
 use strict;
-use Test::More tests => 224;
+use Test::More tests => 233;
 use File::Spec::Functions;
 
 use_ok('SVN::Notify');
@@ -45,6 +45,8 @@ is($notifier->user_domain, $args{user_domain},
 is($notifier->svnlook, $args{svnlook}, "Check svnlook accessor" );
 is($notifier->sendmail, $args{sendmail}, "Check sendmail accessor" );
 is($notifier->charset, 'UTF-8', "Check charset accessor" );
+is($notifier->svn_charset, 'UTF-8', "Check svn_charset accessor" );
+is($notifier->diff_charset, 'UTF-8', "Check diff_charset accessor" );
 is($notifier->language, undef, "Check language accessor" );
 is($notifier->with_diff, $args{with_diff}, "Check with_diff accessor" );
 is($notifier->attach_diff, $args{attach_diff}, "Check attach_diff accessor" );
@@ -392,6 +394,9 @@ like( $email, qr|Author:\s+theory\n\s+http://svn\.example\.com/~theory/\n|,
 ok( $notifier = SVN::Notify->new(%args, charset => 'ISO-8859-1'),
     "Construct new charset notifier" );
 isa_ok($notifier, 'SVN::Notify');
+is( $notifier->charset, 'ISO-8859-1', 'Check charset');
+is( $notifier->svn_charset, 'ISO-8859-1', 'Check charset');
+is( $notifier->diff_charset, 'ISO-8859-1', 'Check charset');
 ok( $notifier->prepare, "Prepare charset" );
 ok( $notifier->execute, "Notify charset" );
 
@@ -399,6 +404,15 @@ ok( $notifier->execute, "Notify charset" );
 $email = get_output();
 like( $email, qr{Content-Type: text/plain; charset=ISO-8859-1\n},
       'Check Content-Type charset' );
+
+ok( $notifier = SVN::Notify->new(
+    %args,
+    svn_charset => 'ISO-8859-1',
+    diff_charset => 'US-ASCII',
+), 'Constrcut new multi-charset notifier' );
+is( $notifier->charset, 'UTF-8', 'Check charset');
+is( $notifier->svn_charset, 'ISO-8859-1', 'Check charset');
+is( $notifier->diff_charset, 'US-ASCII', 'Check charset');
 
 ##############################################################################
 # Try Bug tracking URLs.
