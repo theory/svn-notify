@@ -65,9 +65,9 @@ L<SVN::Notify::HTML::ColorDiff|SVN::Notify::HTML::ColorDiff> to format your
 commit notifications, you can use this filter to convert the Trac formatting
 in the log message to HTML.
 
-If you specify an extra argument, C<trac_url> (C<--trac-url> on the
-command-line), it will be used to generate Trac links for revision numbers and
-the like in your log messages.
+If you specify an extra argument, C<trac_url> (or the C<--trac-url> parameter
+to C<svnnotify>), it will be used to generate Trac links for revision numbers
+and the like in your log messages.
 
 =head1 See Also
 
