@@ -7,7 +7,7 @@ use Test::More;
 use File::Spec::Functions;
 
 if (eval { require HTML::Entities }) {
-    plan tests => 226;
+    plan tests => 220;
 } else {
     plan skip_all => "SVN::Notify::HTML requires HTML::Entities";
 }
@@ -614,28 +614,6 @@ like( $email,
 
 <p>And finally, we have RT-Ticket: 123 for Jesse and RT # 445 for Ask\.</p>}
 );
-
-##############################################################################
-# Try using the Trac filter.
-##############################################################################
-SKIP: {
-    eval 'require Text::Trac';
-    skip 'Text::Trac did not load', 6 if $@;
-
-    ok $notifier = SVN::Notify::HTML->new(
-        %args,
-        revision => 111,
-        filter => [ 'Trac' ],
-        trac_url => 'http://trac.example.com/'
-    ), 'Construct Trac filtered log notifier';
-    isa_ok($notifier, 'SVN::Notify::HTML');
-    isa_ok $notifier, 'SVN::Notify';
-    ok $notifier->prepare, 'Prepare HTML header and footer checking';
-    ok $notifier->execute, 'Notify HTML header and footer checking';
-    # Check the output.
-    $email = get_output();
-    like $email, qr{<p>\s*Did this, that, and the other[.] And then I did some more[.] Some\nit was done on a second line[.] “Go figure”[.] <a class="changeset" href="http://trac[.]example[.]com/changeset/1234">r1234</a>\s*</p>}ms;
-}
 
 ##############################################################################
 # Functions.

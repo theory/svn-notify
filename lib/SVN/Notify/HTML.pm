@@ -221,29 +221,36 @@ This method starts outputs the CSS for the HTML message. It is called by
 C<start_body()>, and which wraps the output of C<output_css()> in the
 appropriate C<< <style> >> tags.
 
+An output filter may be added to modify the output of CSS. The filter
+subrutine name should be C<css> and expect an array reference of lines of CSS.
+See L<Writing Output Filters|SVN::Notify/"Writing Output Filters"> for details
+on filters.
+
 =cut
 
 sub output_css {
     my ($self, $out) = @_;
-    print $out
-      q(#msg dl { border: 1px #006 solid; background: #369; ),
-        qq(padding: 6px; color: #fff; }\n),
-      qq(#msg dt { float: left; width: 6em; font-weight: bold; }\n),
-      qq(#msg dt:after { content:':';}\n),
-      q(#msg dl, #msg dt, #msg ul, #msg li, #header, #footer { font-family: ),
-          qq(verdana,arial,helvetica,sans-serif; font-size: 10pt;  }\n),
-      qq(#msg dl a { font-weight: bold}\n),
-      qq(#msg dl a:link    { color:#fc3; }\n),
-      qq(#msg dl a:active  { color:#ff0; }\n),
-      qq(#msg dl a:visited { color:#cc6; }\n),
-      q(h3 { font-family: verdana,arial,helvetica,sans-serif; ),
-          qq(font-size: 10pt; font-weight: bold; }\n),
-      q(#msg pre, #msg p { overflow: auto; background: #ffc; ),
-          qq(border: 1px #fc0 solid; padding: 6px; }\n),
-      qq(#msg ul { overflow: auto; }\n),
-      q(#header, #footer { color: #fff; background: #636; ),
-      qq(border: 1px #300 solid; padding: 6px; }\n),
-      qq(#patch { width: 100%; }\n);
+    my @css = (
+        q(#msg dl { border: 1px #006 solid; background: #369; ),
+            qq(padding: 6px; color: #fff; }\n),
+        qq(#msg dt { float: left; width: 6em; font-weight: bold; }\n),
+        qq(#msg dt:after { content:':';}\n),
+        q(#msg dl, #msg dt, #msg ul, #msg li, #header, #footer { font-family: ),
+            qq(verdana,arial,helvetica,sans-serif; font-size: 10pt;  }\n),
+        qq(#msg dl a { font-weight: bold}\n),
+        qq(#msg dl a:link    { color:#fc3; }\n),
+        qq(#msg dl a:active  { color:#ff0; }\n),
+        qq(#msg dl a:visited { color:#cc6; }\n),
+        q(h3 { font-family: verdana,arial,helvetica,sans-serif; ),
+            qq(font-size: 10pt; font-weight: bold; }\n),
+        q(#msg pre, #msg p { overflow: auto; background: #ffc; ),
+            qq(border: 1px #fc0 solid; padding: 6px; }\n),
+        qq(#msg ul { overflow: auto; }\n),
+        q(#header, #footer { color: #fff; background: #636; ),
+        qq(border: 1px #300 solid; padding: 6px; }\n),
+        qq(#patch { width: 100%; }\n)
+    );
+    print $out @{ $self->run_filters( css => \@css ) };
     return $self;
 }
 
@@ -258,10 +265,19 @@ including the revision number, author (user), and date of the revision. If the
 C<revision_url> attribute has been set, then the appropriate URL for the
 revision will be used to turn the revision number into a link.
 
+If there are any C<log_message> filters, this method will do no HTML
+formatting, but redispatch to
+L<SVN::Notify::output_metadata|SVN::Notify/"output_metadata">. See L<Writing
+Output Filters|SVN::Notify/"Writing Output Filters"> for details on filters.
+
 =cut
 
 sub output_metadata {
     my ($self, $out) = @_;
+    if ( $self->filters_for('metadata') ) {
+        return $self->SUPER::output_metadata($out);
+    }
+
     $self->print_lines($out, "<dl>\n<dt>Revision</dt> <dd>");
 
     my $rev = $self->revision;
@@ -288,7 +304,7 @@ sub output_metadata {
     $self->print_lines(
         $out,
         "</dd>\n",
-        "<dt>Date</dt> <dd>",
+        '<dt>Date</dt> <dd>',
         encode_entities($self->date, '<>&"'), "</dd>\n",
         "</dl>\n\n"
     );
@@ -308,7 +324,8 @@ any strings like "Bug 2" or "bug # 567" will be turned into links.
 
 If there are any C<log_message> filters, the filters will be assumed to escape
 the HTML, linkize, and link ticket URLs. Otherwise, this method will do those
-things.
+things. See L<Writing Output Filters|SVN::Notify/"Writing Output Filters">
+for details on filters.
 
 =cut
 
@@ -318,7 +335,8 @@ sub output_log_message {
 
     # Assemble the message.
     my $msg;
-    if ($self->{filters}{log_message}) {
+    my $filters = $self->filters_for('log_message');
+    if ( $filters ) {
         $msg = join(
             "\n",
             @{ $self->run_filters( log_message => [ @{ $self->message } ] ) }
@@ -360,9 +378,13 @@ sub output_log_message {
     $self->print_lines(
         $out,
         "<h3>Log Message</h3>\n",
-        $self->{filters}{log_message} ? ($msg, "\n\n")
-            : $self->wrap_log         ? ('<p>', join( "</p>\n\n<p>", split /\n\s*\n/, $msg ), "</p>\n\n")
-            :                            "<pre>$msg</pre>\n\n"
+        $filters              ? ($msg, "\n\n")
+            : $self->wrap_log ? (
+                '<p>',
+                join( "</p>\n\n<p>", split /\n\s*\n/, $msg ),
+                "</p>\n\n"
+            )
+            :                   "<pre>$msg</pre>\n\n"
     );
     return $self;
 }
@@ -378,11 +400,22 @@ files for which properties were changed as unordered lists. The labels used
 for each group are pulled in from the C<file_label_map()> class method and
 output in C<< <h3> >> tags.
 
+If there are any C<file_lists> filters, this method will do no HTML
+formatting, but redispatch to
+L<SVN::Notify::output_file_lists|SVN::Notify/"output_file_lists">. See
+L<Writing Output Filters|SVN::Notify/"Writing Output Filters"> for details on
+filters.
+
 =cut
 
 sub output_file_lists {
     my ($self, $out) = @_;
     my $files = $self->files or return $self;
+
+    if ( $self->filters_for('file_lists') ) {
+        return $self->SUPER::output_file_lists($out);
+    }
+
     my $map = $self->file_label_map;
     # Create the lines that will go underneath the above in the message.
     my %dash = ( map { $_ => '-' x length($map->{$_}) } keys %$map );
@@ -455,10 +488,19 @@ Each line of the diff file is escaped by C<HTML::Entities::encode_entities()>.
 The diff data will be read from C<$diff_file_handle> and printed to
 C<$out_file_handle>.
 
+If there are any C<diff> filters, this method will do no HTML formatting, but
+redispatch to L<SVN::Notify::output_diff|SVN::Notify/"output_diff">. See
+L<Writing Output Filters|SVN::Notify/"Writing Output Filters"> for details on
+filters.
+
 =cut
 
 sub output_diff {
     my ($self, $out, $diff) = @_;
+    if ( $self->filters_for('diff') ) {
+        return $self->SUPER::output_diff($out, $diff);
+    }
+
     $self->_dbpnt( "Outputting HTML diff") if $self->verbose > 1;
 
     print $out qq{</div>\n<div id="patch"><pre>\n};

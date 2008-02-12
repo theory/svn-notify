@@ -1615,7 +1615,10 @@ sub run_ticket_map {
 
 =head3 run_filters
 
-  $data =  $notifier->run_filters( $output_type => $data );
+  $data = $notifier->run_filters( $output_type => $data );
+
+Runs the filters for C<$output_type> on $data. Used internally by SVN::Notify
+and by subclasses.
 
 =cut
 
@@ -1624,6 +1627,19 @@ sub run_filters {
     my $filters = $self->{filters}{$type} or return $data;
     $data = $_->($self, $data) for @$filters;
     return $data;
+}
+
+=head3 filters_for
+
+  my $filters = $notifier->filters_for( $output_type );
+
+Returns an array reference of of the filters loaded for C<$output_type>.
+Returns C<undef> if there are no filters have been loaded for C<$output_type>.
+
+=cut
+
+sub filters_for {
+    shift->{filters}{+shift};
 }
 
 ##############################################################################
@@ -2242,8 +2258,12 @@ __END__
 
 =head2 Writing Output Filters
 
-Output filters are simply subroutines defined in a package. The name of each
-subroutine determines what content it filters. The filters take two arguments:
+Output filters are simply subroutines defined in a package. That modify content
+output by SVN::Notify. Filters are loaded by the C<filter> parameter to
+C<new()> or by the C<--filter> option to C<svnnotify>.
+
+Writing SVN::Notify filters is easy. The name of each subroutine in a filter
+modulfe determines what content it filters. The filters take two arguments:
 the SVN::Notify object that's creating the notification message, and the
 content to be filtered. They should return the filtered content in the same
 manner as it was passed. This makes it easy to change the output of
@@ -2258,7 +2278,6 @@ and return values are as follows:
   headers     | Array reference of individual headers lines.
   metadata    | Array reference of lines of metadata.
   log_message | Array reference of lines of log message.
-  diff        | A file handle reference to the diff.
   file_lists  | A hash reference of array references. Keys correspond to the
               | types of changes to the files while the valus are arrays of
               | file names. The keys are as follows:
@@ -2266,6 +2285,8 @@ and return values are as follows:
               |   A => Added Paths
               |   D => Removed Paths
               |   _ => Property Changed
+  diff        | A file handle reference to the diff.
+  css         | An array of lines of CSS. Used only by SVN::Notify::HTML.
 
 The module name can be anything you like; just pass it via the C<filter>
 parameter, e.g., C<< filter => [ 'My::Filter' ] >> (or C<--filter My::Filter>
