@@ -168,46 +168,86 @@ sub content_type { 'text/html' }
 
 =head2 Instance Methods
 
+=head3 start_html
+
+  $notifier->start_html($file_handle);
+
+This method starts the HTML of the notification message. It outputs the
+opening C<< <html> >>, C<< <head> >>, and C<< <body> >> tags. Note that if the
+C<language> attribute is set to a value, it will be specified in the
+C<< <html> >> tag.
+
+All of the HTML will be passed to any "start_html" output filters. See
+L<Writing Output Filters|SVN::Notify/"Writing Output Filters"> for details on
+filters.
+
+=cut
+
+sub start_html {
+    my ($self, $out) = @_;
+    my $lang = $self->language;
+    my $char = lc $self->charset;
+
+    my @html = (
+        qq{<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN"\n},
+        qq{"http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">\n},
+        qq{<html xmlns="http://www.w3.org/1999/xhtml"},
+        ($lang ? qq{ xml:lang="$lang"} : ()),
+        qq{>\n<head><meta http-equiv="content-type" content="text/html; },
+        qq{charset=$char" />\n},
+        ( $self->{css_url}
+              ? (
+                  '<link rel="stylesheet" type="text/css" href="',
+                  encode_entities($self->{css_url}),
+                  qq{" />\n}
+              ) : ()
+        ),
+        '<title>', encode_entities($self->subject, '<>&"'),
+        qq{</title>\n</head>\n<body>\n\n}
+    );
+
+    print $out @{ $self->run_filters( start_html => \@html ) };
+    return $self;
+}
+
+##############################################################################
+
 =head3 start_body
 
-  $notifier->start_body($file_handle);
-
-This method starts the body of the notification message. It outputs the
-opening C<< <html> >>, C<< <head> >>, C<< <style> >>, and C<< <body> >>
-tags. Note that if the C<language> attribute is set to a value, it will be
-specified in the C<< <html> >> tag.
+This method starts the body of the HTML notification message. It first calls
+C<start_html()>, and then outputs the C<< <style> >> tag, calling
+C<output_css()> between them. It then outputs an opening C<< <div> >> tag.
 
 If the C<header> attribute is set, C<start_body()> outputs it between
 C<< <div> >> tags with the ID "header". Furthermore, if the header happens to
 start with the character "E<lt>", C<start_body()> assumes that it contains
 valid HTML and therefore will not escape it.
 
+If a "start_body" output filter has been specified, it will be passed the
+lines with the C<< <div> >> tag and the header. To filter the CSS, use a "css"
+filter, and to filter the declaration of the HTML document and its C<< <head>
+>> section, use a "start_html" filter. See L<Writing Output
+Filters|SVN::Notify/"Writing Output Filters"> for details on filters.
+
 =cut
 
 sub start_body {
     my ($self, $out) = @_;
-    my $lang = $self->language;
-    my $char = lc $self->charset;
-
-    print $out qq{<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN"\n},
-      qq{"http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">\n},
-      qq{<html xmlns="http://www.w3.org/1999/xhtml"},
-      ($lang ? qq{ xml:lang="$lang"} : ()),
-      qq{>\n<head><meta http-equiv="content-type" content="text/html; },
-      qq{charset=$char" /><style type="text/css"><!--\n};
-    $self->output_css($out);
+    $self->start_html($out);
+    print $out qq{<style type="text/css"><!--\n};
+    $self->output_css( $out );
     print $out qq{--></style>\n};
-    print $out '<link rel="stylesheet" type="text/css" href="',
-           encode_entities($self->{css_url}),
-           qq{" />\n}
-       if $self->{css_url};
-    print $out '<title>', encode_entities($self->subject, '<>&"'),
-      qq{</title>\n</head>\n<body>\n\n<div id="msg">\n};
+
+    my @html = ( qq{<div id="msg">\n} );
     if (my $header = $self->header) {
-        print $out '<div id="header">',
+        push @html, (
+            '<div id="header">',
             ( $header =~ /^</  ? $header : encode_entities($header, '<>&"') ),
-            "</div>\n";
+            "</div>\n",
+        );
     }
+
+    print $out @{ $self->run_filters( start_body => \@html ) };
     return $self;
 }
 
@@ -221,10 +261,10 @@ This method starts outputs the CSS for the HTML message. It is called by
 C<start_body()>, and which wraps the output of C<output_css()> in the
 appropriate C<< <style> >> tags.
 
-An output filter may be added to modify the output of CSS. The filter
-subrutine name should be C<css> and expect an array reference of lines of CSS.
-See L<Writing Output Filters|SVN::Notify/"Writing Output Filters"> for details
-on filters.
+An output filter named "css" may be added to modify the output of CSS. The
+filter subrutine name should be C<css> and expect an array reference of lines
+of CSS. See L<Writing Output Filters|SVN::Notify/"Writing Output Filters"> for
+details on filters.
 
 =cut
 
@@ -248,8 +288,9 @@ sub output_css {
         qq(#msg ul { overflow: auto; }\n),
         q(#header, #footer { color: #fff; background: #636; ),
         qq(border: 1px #300 solid; padding: 6px; }\n),
-        qq(#patch { width: 100%; }\n)
+        qq(#patch { width: 100%; }\n),
     );
+
     print $out @{ $self->run_filters( css => \@css ) };
     return $self;
 }
@@ -461,18 +502,26 @@ C<< <div> >> tags with the ID "footer". Furthermore, if the footer happens to
 end with the character "E<lt>", C<end_body()> assumes that it contains valid
 HTML and therefore will not escape it.
 
+All of the HTML will be passed to any "end_body" output filters. See L<Writing
+Output Filters|SVN::Notify/"Writing Output Filters"> for details on filters.
+
 =cut
 
 sub end_body {
     my ($self, $out) = @_;
     $self->_dbpnt( "Ending body") if $self->verbose > 2;
+    my @html;
     if (my $footer = $self->footer) {
-        print $out '<div id="footer">',
+        push @html, (
+            '<div id="footer">',
             ( $footer =~ /^</  ? $footer : encode_entities($footer, '<>&"') ),
-            "</div>\n";
+            "</div>\n",
+        );
     }
-    print $out "\n</div>" unless $self->with_diff && !$self->attach_diff;
-    print $out "\n</body>\n</html>\n";
+    push @html, "\n</div>" unless $self->with_diff && !$self->attach_diff;
+    push @html, "\n</body>\n</html>\n";
+
+    print $out @{ $self->run_filters( end_body => \@html ) };
     return $self;
 }
 

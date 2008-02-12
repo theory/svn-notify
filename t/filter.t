@@ -3,7 +3,7 @@
 # $Id $
 
 use strict;
-use Test::More tests => 78;
+use Test::More tests => 84;
 use File::Spec::Functions;
 
 use_ok('SVN::Notify');
@@ -78,6 +78,21 @@ ok $notifier->prepare, 'Prepare log_message filter checking';
 ok $notifier->execute, 'Notify log_mesage filter checking';
 $email = get_output();
 like $email, qr/X-Foo: Bar\nContent-Type:/, 'New header should be included';
+
+##############################################################################
+# Start and End filters.
+##############################################################################
+
+ok( $notifier = SVN::Notify->new(
+    %args,
+    filter => [ 'StartEnd' ],
+), 'Construct new headers filter notifier' );
+isa_ok($notifier, 'SVN::Notify');
+ok $notifier->prepare, 'Prepare log_message filter checking';
+ok $notifier->execute, 'Notify log_mesage filter checking';
+$email = get_output();
+like $email, qr/In the beginning[.]{3}/, 'Start text should be present';
+like $email, qr/The end[.]/, 'End text should be present';
 
 ##############################################################################
 # File Lists filter.
@@ -329,4 +344,16 @@ BEGIN {
         return $lines;
     }
 
+    package SVN::Notify::Filter::StartEnd;
+    $INC{'SVN/Notify/Filter/StartEnd.pm'} = __FILE__;
+    sub start_body {
+        my ($notifier, $lines) = @_;
+        push @$lines, "In the beginning...\n";
+        return $lines;
+    }
+    sub end_body {
+        my ($notifier, $lines) = @_;
+        push @$lines, "The end.\n";
+        return $lines;
+    }
 }

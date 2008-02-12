@@ -20,6 +20,11 @@ Revision history for Perl extension SVN::Notify
         modify content befor it's output. As an example and likely common
         usage, see the new SVN::Notify::Filter::Trac module. There is also
         extensive documentation on writing filters in the SVN::Notify POD.
+      - Split up the output of the HTML <head> section and the <body> section
+        into two methods in SVN::Notify::HTML in order to simplify filtering.
+      - The CSS output by SVN::Notify::HTML is now output inside the <body>
+        tags, rather than inside the <head> tags, as the former works better
+        for Webmail clients.
 
 2.67 2008-02-06T20:15:13
       - Fixed bug where a directory with a valid regular expression character

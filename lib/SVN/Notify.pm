@@ -1394,7 +1394,9 @@ it outputs nothing, but see subclasses for other behaviors.
 
 sub start_body {
     my ($self, $out) = @_;
-    print $out "$self->{header}\n\n" if $self->{header};
+    my $start = [ $self->{header} ? ("$self->{header}\n") : () ];
+    $start = $self->run_filters( start_body => $start );
+    print $out @$start, "\n" if $start && @$start;
     return $self;
 }
 
@@ -1525,7 +1527,9 @@ C<output_attached_diff()>.
 sub end_body {
     my ($self, $out) = @_;
     $self->_dbpnt( "Ending body") if $self->{verbose} > 2;
-    print $out $self->{footer} ? "\n$self->{footer}\n" : "\n";
+    my $end = [ $self->{footer} ? ("$self->{footer}\n") : () ];
+    $end = $self->run_filters( end_body => $end );
+    print $out @$end, "\n" if $end && @$end;
     return $self;
 }
 
@@ -2287,6 +2291,9 @@ and return values are as follows:
               |   _ => Property Changed
   diff        | A file handle reference to the diff.
   css         | An array of lines of CSS. Used only by SVN::Notify::HTML.
+  start_html  | An array of lines starting an SVN::Notify::HTML document.
+  start_body  | Array reference of lines at the start of the message body.
+  end_body    | Array reference of lines at the end of the message body.
 
 The module name can be anything you like; just pass it via the C<filter>
 parameter, e.g., C<< filter => [ 'My::Filter' ] >> (or C<--filter My::Filter>
