@@ -3,7 +3,7 @@
 # $Id $
 
 use strict;
-use Test::More tests => 84;
+use Test::More tests => 96;
 use File::Spec::Functions;
 
 use_ok('SVN::Notify');
@@ -86,13 +86,45 @@ like $email, qr/X-Foo: Bar\nContent-Type:/, 'New header should be included';
 ok( $notifier = SVN::Notify->new(
     %args,
     filter => [ 'StartEnd' ],
-), 'Construct new headers filter notifier' );
+), 'Construct start and end filter notifier' );
 isa_ok($notifier, 'SVN::Notify');
 ok $notifier->prepare, 'Prepare log_message filter checking';
 ok $notifier->execute, 'Notify log_mesage filter checking';
 $email = get_output();
 like $email, qr/In the beginning[.]{3}/, 'Start text should be present';
 like $email, qr/The end[.]/, 'End text should be present';
+
+##############################################################################
+# Start and End filters with SVN::Notify::HTML.
+##############################################################################
+
+ok( $notifier = SVN::Notify::HTML->new(
+    %args,
+    filter => [ 'StartEnd' ],
+), 'Construct HTML start and end filter notifier' );
+isa_ok($notifier, 'SVN::Notify');
+ok $notifier->prepare, 'Prepare log_message filter checking';
+ok $notifier->execute, 'Notify log_mesage filter checking';
+$email = get_output();
+like $email, qr/<div id="msg">\nIn the beginning[.]{3}/m,
+    'Start text should be present';
+like $email, qr{</html>\nThe end[.]}m, 'End text should be present';
+
+##############################################################################
+# StartHTML.
+##############################################################################
+
+ok( $notifier = SVN::Notify::HTML->new(
+    %args,
+    filter => [ 'StartHTML' ],
+), 'Construct new headers filter notifier' );
+isa_ok($notifier, 'SVN::Notify::HTML');
+isa_ok($notifier, 'SVN::Notify');
+ok $notifier->prepare, 'Prepare log_message filter checking';
+ok $notifier->execute, 'Notify log_mesage filter checking';
+$email = get_output();
+like $email, qr{<meta name="keywords" value="foo" />},
+    'New header should be present';
 
 ##############################################################################
 # File Lists filter.
@@ -211,7 +243,7 @@ like $email, qr{Content-Type: text/html; charset=UTF-8}, 'Should be HTML';
 like $email, qr{^\s+Class-Meta/Changes}m, 'trunk/ should be stripped out';
 
 ##############################################################################
-# Try the iff filter with SVN::Notify::HTML.
+# Try the diff filter with SVN::Notify::HTML.
 ##############################################################################
 
 ok( $notifier = SVN::Notify::HTML->new(
@@ -226,6 +258,7 @@ $email = get_output();
 like $email, qr{^-{3}\s+Params-CallbackRequest/Changes}m, 'leading trunk should be stripped';
 like $email, qr{^[+]{3}\s+Params-CallbackRequest/Changes}m, 'leading trunk should be stripped';
 
+##############################################################################
 # Try a CSS filter.
 ##############################################################################
 
@@ -354,6 +387,14 @@ BEGIN {
     sub end_body {
         my ($notifier, $lines) = @_;
         push @$lines, "The end.\n";
+        return $lines;
+    }
+
+    package SVN::Notify::Filter::StartHTML;
+    $INC{'SVN/Notify/Filter/StartHTML.pm'} = __FILE__;
+    sub start_html {
+        my ($notifier, $lines) = @_;
+        push @$lines, qq{<meta name="keywords" value="foo" />\n};
         return $lines;
     }
 }
