@@ -342,7 +342,7 @@ BEGIN {
 
         sub READLINE {
             my $fh = shift->{fh};
-            my $line = <$fh> or return;
+            defined( my $line = <$fh> ) or return;
             $line =~ s{^((?:-{3}|[+]{3})\s+)trunk/}{$1};
             return $line;
         }
