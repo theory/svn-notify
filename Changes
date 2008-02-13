@@ -25,6 +25,7 @@ Revision history for Perl extension SVN::Notify
       - The CSS output by SVN::Notify::HTML is now output inside the <body>
         tags, rather than inside the <head> tags, as the former works better
         for Webmail clients.
+      - Eliminated locale warnings during tests.
 
 2.67 2008-02-06T20:15:13
       - Fixed bug where a directory with a valid regular expression character

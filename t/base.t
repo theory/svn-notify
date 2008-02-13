@@ -133,8 +133,11 @@ ok( $notifier = SVN::Notify->new(
 ok $notifier->with_diff, 'with_diff() should return true';
 is $notifier->language, 'en_US', 'language should be "en_US"';
 isa_ok($notifier, 'SVN::Notify');
-ok( $notifier->prepare, "Single method call prepare" );
-ok( $notifier->execute, "Diff notify" );
+NO_BADLANG: {
+    local $ENV{PERL_BADLANG} = 0;
+    ok( $notifier->prepare, "Single method call prepare" );
+    ok( $notifier->execute, "Diff notify" );
+}
 
 # Get the output.
 $email = get_output();
@@ -167,8 +170,11 @@ unlike( $email, qr{Content-Disposition: attachment; filename=},
 ok( $notifier = SVN::Notify->new(%args, attach_diff => 1, language => 'en_US'),
     "Construct new attach diff notifier" );
 isa_ok($notifier, 'SVN::Notify');
-ok( $notifier->prepare, "Single method call prepare" );
-ok( $notifier->execute, "Attach diff notify" );
+NO_BADLANG: {
+    local $ENV{PERL_BADLANG} = 0;
+    ok( $notifier->prepare, "Single method call prepare" );
+    ok( $notifier->execute, "Attach diff notify" );
+}
 
 # Get the output.
 $email = get_output();

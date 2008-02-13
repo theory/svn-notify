@@ -139,8 +139,11 @@ ok( $notifier = SVN::Notify::HTML->new(%args, with_diff => 1, language => 'en_US
     "Construct new HTML diff notifier" );
 isa_ok($notifier, 'SVN::Notify::HTML');
 isa_ok($notifier, 'SVN::Notify');
-ok( $notifier->prepare, "Single method call prepare" );
-ok( $notifier->execute, "HTML diff notify" );
+NO_BADLANG: {
+    local $ENV{PERL_BADLANG} = 0;
+    ok( $notifier->prepare, "Single method call prepare" );
+    ok( $notifier->execute, "HTML diff notify" );
+}
 
 # Get the output.
 $email = get_output();
