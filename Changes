@@ -26,6 +26,9 @@ Revision history for Perl extension SVN::Notify
         tags, rather than inside the <head> tags, as the former works better
         for Webmail clients.
       - Eliminated locale warnings during tests.
+      - Fixed issue running tests with a Perl other than /usr/bin/perl without
+        running `./Build`. If you just did `./Build test`, it could fail with
+        a lot of errors.
 
 2.67 2008-02-06T20:15:13
       - Fixed bug where a directory with a valid regular expression character
