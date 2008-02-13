@@ -320,11 +320,9 @@ BEGIN {
     package SVN::Notify::Filter::StripTrunk;
     $INC{'SVN/Notify/Filter/StripTrunk.pm'} = __FILE__;
     sub file_lists {
-        my ($notifier, $lists) = @_;
-        for my $list ( values %$lists ) {
-            s{^trunk/}{} for @$list;
-        }
-        return $lists;
+        my ($notifier, $lines) = @_;
+        s{^(\s*)trunk/}{$1} for @$lines;
+        return $lines;
     }
 
     package SVN::Notify::Filter::StripTrunkDiff;

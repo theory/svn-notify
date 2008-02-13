@@ -1491,11 +1491,10 @@ pulled in from the C<file_label_map()> class method.
 
 sub output_file_lists {
     my ($self, $out) = @_;
-    my $files = $self->run_filters( file_lists => $self->{files} )
-        or return $self;
+    my $files = $self->{files} or return $self;
     $self->_dbpnt( "Outputting file lists") if $self->{verbose} > 1;
     my $map = $self->file_label_map;
-    # Create the lines that will go underneath the above in the message.
+    # Create the underlines.
     my %dash = ( map { $_ => '-' x length($map->{$_}) } keys %$map );
 
     foreach my $type (qw(U A D _)) {
@@ -1505,10 +1504,16 @@ sub output_file_lists {
           if $self->{verbose} > 2;
 
         # Identify the action and output each file.
-        print $out "\n$map->{$type}:\n$dash{$type}\n";
-        print $out "    $_\n" for @{ $files->{$type} };
+        print $out "\n", @{ $self->run_filters(
+            file_lists => [
+                "$map->{$type}:\n",
+                "$dash{$type}\n",
+                map { "    $_\n" } @{ $files->{$type} }
+            ]
+        ) };
     }
     print $out "\n";
+    return $self;
 }
 
 ##############################################################################
@@ -2282,13 +2287,9 @@ and return values are as follows:
   headers     | Array reference of individual headers lines.
   metadata    | Array reference of lines of metadata.
   log_message | Array reference of lines of log message.
-  file_lists  | A hash reference of array references. Keys correspond to the
-              | types of changes to the files while the valus are arrays of
-              | file names. The keys are as follows:
-              |   U => Modified Paths
-              |   A => Added Paths
-              |   D => Removed Paths
-              |   _ => Property Changed
+  file_lists  | Array reference of lines of files. The first line will be
+              | they type of change for the list, the next a simle line of
+              | dasshes, and each of the rest of the lines a file name.
   diff        | A file handle reference to the diff.
   css         | An array of lines of CSS. Used only by SVN::Notify::HTML.
   start_html  | An array of lines starting an SVN::Notify::HTML document.
@@ -2343,11 +2344,9 @@ Change the format to read "REVISION: 111" instead of "Revision: 111":
 
   package SVN::Notify::Filter::StripTrunk;
   sub file_lists {
-      my ($notifier, $lists) = @_;
-      for my $list ( values %$lists ) {
-          s{^trunk/}{} for @$list;
-      }
-      return $lists;
+      my ($notifier, $lines) = @_;
+      s{^(\s*)trunk/}{$1} for @$lines;
+      return $lines;
   }
 
 =item * Remove leading "trunk/" from file names in a diff
