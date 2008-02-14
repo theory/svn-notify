@@ -270,28 +270,7 @@ details on filters.
 
 sub output_css {
     my ($self, $out) = @_;
-    my @css = (
-        q(#msg dl { border: 1px #006 solid; background: #369; ),
-            qq(padding: 6px; color: #fff; }\n),
-        qq(#msg dt { float: left; width: 6em; font-weight: bold; }\n),
-        qq(#msg dt:after { content:':';}\n),
-        q(#msg dl, #msg dt, #msg ul, #msg li, #header, #footer { font-family: ),
-            qq(verdana,arial,helvetica,sans-serif; font-size: 10pt;  }\n),
-        qq(#msg dl a { font-weight: bold}\n),
-        qq(#msg dl a:link    { color:#fc3; }\n),
-        qq(#msg dl a:active  { color:#ff0; }\n),
-        qq(#msg dl a:visited { color:#cc6; }\n),
-        q(h3 { font-family: verdana,arial,helvetica,sans-serif; ),
-            qq(font-size: 10pt; font-weight: bold; }\n),
-        q(#msg pre, #msg p { overflow: auto; background: #ffc; ),
-            qq(border: 1px #fc0 solid; padding: 6px; }\n),
-        qq(#msg ul { overflow: auto; }\n),
-        q(#header, #footer { color: #fff; background: #636; ),
-        qq(border: 1px #300 solid; padding: 6px; }\n),
-        qq(#patch { width: 100%; }\n),
-    );
-
-    print $out @{ $self->run_filters( css => \@css ) };
+    print $out @{ $self->run_filters( css => $self->_css ) };
     return $self;
 }
 
@@ -604,6 +583,31 @@ Gets or sets the value of the C<linkize> attribute.
 Gets or sets the value of the C<css_url> attribute.
 
 =cut
+
+##############################################################################
+
+sub _css {
+    return [
+        q(#msg dl { border: 1px #006 solid; background: #369; ),
+            qq(padding: 6px; color: #fff; }\n),
+        qq(#msg dt { float: left; width: 6em; font-weight: bold; }\n),
+        qq(#msg dt:after { content:':';}\n),
+        q(#msg dl, #msg dt, #msg ul, #msg li, #header, #footer { font-family: ),
+            qq(verdana,arial,helvetica,sans-serif; font-size: 10pt;  }\n),
+        qq(#msg dl a { font-weight: bold}\n),
+        qq(#msg dl a:link    { color:#fc3; }\n),
+        qq(#msg dl a:active  { color:#ff0; }\n),
+        qq(#msg dl a:visited { color:#cc6; }\n),
+        q(h3 { font-family: verdana,arial,helvetica,sans-serif; ),
+            qq(font-size: 10pt; font-weight: bold; }\n),
+        q(#msg pre, #msg p { overflow: auto; background: #ffc; ),
+            qq(border: 1px #fc0 solid; padding: 6px; }\n),
+        qq(#msg ul { overflow: auto; }\n),
+        q(#header, #footer { color: #fff; background: #636; ),
+        qq(border: 1px #300 solid; padding: 6px; }\n),
+        qq(#patch { width: 100%; }\n),
+    ];
+}
 
 1;
 __END__

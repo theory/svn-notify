@@ -54,36 +54,9 @@ specify C<--handler HTML::ColorDiff>.
 
   $notifier->output_css($file_handle);
 
-This method starts outputs the CSS for the HTML message. It overrides the
-same method on SVN::Notify::HTML to add CSS for the colorized diff.
-
-=cut
-
-sub output_css {
-    my ($self, $out) = @_;
-    $self->SUPER::output_css($out);
-    print $out
-      qq(#patch h4 {font-family: verdana,arial,helvetica,sans-serif;),
-          qq(font-size:10pt;padding:8px;background:#369;color:#fff;),
-          qq(margin:0;}\n),
-      qq(#patch .propset h4, #patch .binary h4 {margin:0;}\n),
-      qq(#patch pre {padding:0;line-height:1.2em;margin:0;}\n),
-      qq(#patch .diff {width:100%;background:#eee;padding: 0 0 10px 0;),
-          qq(overflow:auto;}\n),
-      qq(#patch .propset .diff, #patch .binary .diff  {padding:10px 0;}\n),
-      qq(#patch span {display:block;padding:0 10px;}\n),
-      qq(#patch .modfile, #patch .addfile, #patch .delfile, #patch .propset, ),
-          qq(#patch .binary, #patch .copfile {border:1px solid #ccc;),
-          qq(margin:10px 0;}\n),
-      qq(#patch ins {background:#dfd;text-decoration:none;display:block;),
-          qq(padding:0 10px;}\n),
-      qq(#patch del {background:#fdd;text-decoration:none;display:block;),
-          qq(padding:0 10px;}\n),
-      qq(#patch .lines, .info {color:#888;background:#fff;}\n);
-    return $self;
-}
-
-##############################################################################
+This method starts outputs the CSS for the HTML message.
+SVN::Notify::HTML::ColorDiff adds extra CSS to its output so that it can
+nicely style the diff.
 
 =head3 output_diff
 
@@ -93,6 +66,11 @@ Reads the diff data from C<$diff_file_handle> and prints it to
 C<$out_file_handle> for inclusion in the notification message. The diff is
 output with nice colorized HTML markup. Each line of the diff file is escaped
 by C<HTML::Entities::encode_entities()>.
+
+If there are any C<diff> filters, this method will do no HTML formatting, but
+redispatch to L<SVN::Notify::output_diff|SVN::Notify/"output_diff">. See
+L<Writing Output Filters|SVN::Notify/"Writing Output Filters"> for details on
+filters.
 
 =cut
 
@@ -105,6 +83,9 @@ my %types = (
 
 sub output_diff {
     my ($self, $out, $diff) = @_;
+    if ( $self->filters_for('diff') ) {
+        return $self->SUPER::output_diff($out, $diff);
+    }
     $self->_dbpnt( "Outputting colorized HTML diff") if $self->verbose > 1;
 
     my $in_div;
@@ -231,6 +212,31 @@ sub output_diff {
 
     close $diff or warn "Child process exited: $?\n";
     return $self;
+}
+
+##############################################################################
+
+sub _css {
+    my $css = shift->SUPER::_css;
+    push @$css,
+        qq(#patch h4 {font-family: verdana,arial,helvetica,sans-serif;),
+            qq(font-size:10pt;padding:8px;background:#369;color:#fff;),
+            qq(margin:0;}\n),
+        qq(#patch .propset h4, #patch .binary h4 {margin:0;}\n),
+         qq(#patch pre {padding:0;line-height:1.2em;margin:0;}\n),
+        qq(#patch .diff {width:100%;background:#eee;padding: 0 0 10px 0;),
+            qq(overflow:auto;}\n),
+        qq(#patch .propset .diff, #patch .binary .diff  {padding:10px 0;}\n),
+        qq(#patch span {display:block;padding:0 10px;}\n),
+        qq(#patch .modfile, #patch .addfile, #patch .delfile, #patch .propset, ),
+            qq(#patch .binary, #patch .copfile {border:1px solid #ccc;),
+            qq(margin:10px 0;}\n),
+        qq(#patch ins {background:#dfd;text-decoration:none;display:block;),
+            qq(padding:0 10px;}\n),
+        qq(#patch del {background:#fdd;text-decoration:none;display:block;),
+            qq(padding:0 10px;}\n),
+        qq(#patch .lines, .info {color:#888;background:#fff;}\n);
+    return $css;
 }
 
 1;

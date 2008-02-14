@@ -3,11 +3,12 @@
 # $Id $
 
 use strict;
-use Test::More tests => 96;
+use Test::More tests => 113;
 use File::Spec::Functions;
 
 use_ok('SVN::Notify');
 use_ok('SVN::Notify::HTML');
+use_ok('SVN::Notify::HTML::ColorDiff');
 
 my $ext = $^O eq 'MSWin32' ? '.bat' : '';
 
@@ -251,6 +252,25 @@ ok( $notifier = SVN::Notify::HTML->new(
     with_diff => 1,
     filter => [ 'StripTrunkDiff' ],
 ), 'Construct new diff filter notifier' );
+isa_ok($notifier, 'SVN::Notify::HTML');
+isa_ok($notifier, 'SVN::Notify');
+ok $notifier->prepare, 'Prepare log_message filter checking';
+ok $notifier->execute, 'Notify log_mesage filter checking';
+$email = get_output();
+like $email, qr{^-{3}\s+Params-CallbackRequest/Changes}m, 'leading trunk should be stripped';
+like $email, qr{^[+]{3}\s+Params-CallbackRequest/Changes}m, 'leading trunk should be stripped';
+
+##############################################################################
+# Try the diff filter with SVN::Notify::HTML::ColorDiff.
+##############################################################################
+
+ok( $notifier = SVN::Notify::HTML::ColorDiff->new(
+    %args,
+    with_diff => 1,
+    filter => [ 'StripTrunkDiff' ],
+), 'Construct new diff filter notifier' );
+isa_ok($notifier, 'SVN::Notify::HTML::ColorDiff');
+isa_ok($notifier, 'SVN::Notify::HTML');
 isa_ok($notifier, 'SVN::Notify');
 ok $notifier->prepare, 'Prepare log_message filter checking';
 ok $notifier->execute, 'Notify log_mesage filter checking';
@@ -272,6 +292,23 @@ ok $notifier->prepare, 'Prepare log_message filter checking';
 ok $notifier->execute, 'Notify log_mesage filter checking';
 $email = get_output();
 like $email, qr/^#patch { width: 90%; }/m, 'Should have modified the CSS';
+
+##############################################################################
+# Try a CSS filter with ColofDiff.
+##############################################################################
+
+ok( $notifier = SVN::Notify::HTML::ColorDiff->new(
+    %args,
+    filter => [ 'CSS' ],
+), 'Construct CSS filter notifier' );
+isa_ok($notifier, 'SVN::Notify::HTML::ColorDiff');
+isa_ok($notifier, 'SVN::Notify::HTML');
+isa_ok($notifier, 'SVN::Notify');
+ok $notifier->prepare, 'Prepare log_message filter checking';
+ok $notifier->execute, 'Notify log_mesage filter checking';
+$email = get_output();
+like $email, qr/^#patch .lines, .info {color:#999;background:#fff;}/m,
+    'Should have modified the CSS';
 
 ##############################################################################
 # Functions.
@@ -371,7 +408,7 @@ BEGIN {
     $INC{'SVN/Notify/Filter/CSS.pm'} = __FILE__;
     sub css {
         my ($notifier, $lines) = @_;
-        $lines->[-1] =~ s/100/90/;
+        $lines->[-1] =~ s/100/90/ || $lines->[-1] =~ s/888/999/;
         return $lines;
     }
 
