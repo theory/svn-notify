@@ -58,6 +58,13 @@ This method starts outputs the CSS for the HTML message.
 SVN::Notify::HTML::ColorDiff adds extra CSS to its output so that it can
 nicely style the diff.
 
+=cut
+
+# We use _css() so that ColorDiff can override it and the filters then applied
+# only one to all of the CSS.
+
+##############################################################################
+
 =head3 output_diff
 
   $notifier->output_diff($out_file_handle, $diff_file_handle);

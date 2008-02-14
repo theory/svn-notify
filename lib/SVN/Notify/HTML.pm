@@ -270,6 +270,8 @@ details on filters.
 
 sub output_css {
     my ($self, $out) = @_;
+    # We use _css() so that ColorDiff can override it and the filters then
+    # applied only one to all of the CSS.
     print $out @{ $self->run_filters( css => $self->_css ) };
     return $self;
 }
