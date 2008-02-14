@@ -704,7 +704,7 @@ sub new {
 
     # Set up the environment language.
     $params{env_lang} = "$params{language}.$params{charset}"
-        if $params{language};
+        if $params{language} && !$ENV{LANG};
 
     die qq{Cannot find sendmail and no "smtp" parameter specified}
         unless $params{sendmail} || $params{smtp};

@@ -29,6 +29,9 @@ Revision history for Perl extension SVN::Notify
       - Fixed issue running tests with a Perl other than /usr/bin/perl without
         running `./Build`. If you just did `./Build test`, it could fail with
         a lot of errors.
+      - Now only setting the $LANG environment variable for the execution of
+        `svnlook` and `sendmail` if it is not already set. This allows the
+        existing usages such as `LANG=ja_JP svnnotify ...` to keep working.
 
 2.67 2008-02-06T20:15:13
       - Fixed bug where a directory with a valid regular expression character
