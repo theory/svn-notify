@@ -2244,7 +2244,7 @@ sub get_handle {
     $smtp->to(map { split /\s*,\s*/ } @{ $notifier->{to} });
     $smtp->data;
     tie local(*SMTP), $class, $smtp;
-    return *SMTP;
+    return $] > 5.006 ? *SMTP : \*SMTP;
 }
 
 sub TIEHANDLE {

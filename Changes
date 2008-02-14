@@ -32,6 +32,8 @@ Revision history for Perl extension SVN::Notify
       - Now only setting the $LANG environment variable for the execution of
         `svnlook` and `sendmail` if it is not already set. This allows the
         existing usages such as `LANG=ja_JP svnnotify ...` to keep working.
+      - Fixed use of the SMTP feature under Perl 5.6. Reported by CPAN testers
+        David Cantrell and Slaven Rezic.
 
 2.67 2008-02-06T20:15:13
       - Fixed bug where a directory with a valid regular expression character
