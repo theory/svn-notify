@@ -401,7 +401,8 @@ BEGIN {
         }
 
         sub CLOSE {
-            close shift->{fh};
+            close shift->{fh} or die $! ? "Error closing diff pipe: $!"
+                                        : "Exit status $? from diff pipe"; # "
         }
 
         sub READLINE {

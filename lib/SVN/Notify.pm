@@ -2322,9 +2322,49 @@ Some examples:
 
 =over
 
+=item * Map committers to senders
+
+Map committer user names to email addresses using a lookup table. The "from"
+filter gets and returns a string representing the sender:
+
+  package SVN::Notify::Filter::FromTable;
+  my %committers = (
+      'homer' => 'homer@simpson.com',
+      'bart'  => 'bart@gmail.com',
+      'marge' => 'marge@urbanmamas.com',
+  );
+  sub from {
+      my ($notifier, $from) = @_;
+      return $committers{ $notifier->user } || $from;
+  }
+
+=item * Add a recipient
+
+Easily done from the command-line using C<--to>, but hey, why not just filter
+it?
+
+  package SVN::Notify::Filter::Cc;
+  sub recipients {
+      my ($notifier, $recip) = @_;
+      push @$recip, 'boss@example.com';
+      return $recip;
+  }
+
+=item * Clean up the subject
+
+Need to keep the subject line clean? Just modify the string and return it:
+
+  package SVN::Notify::Filter::FromTable;
+  my $nasties = qr/\b(?:golly|shucks|darn)\b/i;
+  sub subject {
+      my ($notifier, $subject) = @_;
+      $subject =~ s/$nasties/[elided]/g;
+      return $subject;
+  }
+
 =item * Add an extra header
 
-This emulates C<add_header>:
+This emulates C<add_header> to demonstrate header filtering:
 
   package SVN::Notify::Filter::NoSpam;
   sub headers {
@@ -2335,7 +2375,8 @@ This emulates C<add_header>:
 
 =item * Uppercase metadata labels
 
-Change the format to read "REVISION: 111" instead of "Revision: 111":
+Change the format of the commit metadata section of the message to read
+"REVISION: 111" instead of "Revision: 111":
 
   package SVN::Notify::Filter::UpLabels;
   sub metadata {
@@ -2344,18 +2385,23 @@ Change the format to read "REVISION: 111" instead of "Revision: 111":
       return $lines;
   }
 
-=item * Escape HTML in a log message
+=item * Wrap your log message
 
-  package SVN::Notify::Filter::EscapeHTML;
-  use HTML::Entities;
+Log message filtering will probably be quite common, generally to reformat it
+(see, for example, the included
+L<SVN::Notify::Filter::Trac|SVN::Notify::Filter::Trac> filter). Here's a
+simple filter that reformats the log message so that paragraphs are wrapped.
+
+  package SVN::Notify::Filter::WrapMessage;
+  use Text::Wrap ();
   sub log_message {
       my ($notifier, $lines) = @_;
-      my $lines = shift;
-      $_ = encode_entities( $_, '<>&"' ) for @$lines;
-      return $lines;
+      return [ Text::Wrap::wrap( '', '', @$lines ) ];
   }
 
 =item * Remove leading "trunk/" from file names
+
+Just to demonstrate how to filter file lists:
 
   package SVN::Notify::Filter::StripTrunk;
   sub file_lists {
@@ -2366,11 +2412,11 @@ Change the format to read "REVISION: 111" instead of "Revision: 111":
 
 =item * Remove leading "trunk/" from file names in a diff
 
-This one is a little more complicated because you need to return a file
-handle. SVN::Notify tries to be as efficient with resources as it can, so it
-reads each line from the diff file handle one-at-a-time, processing and
-outputing each in turn so as to avoid loading the entire diff into memory. To
-retain this pattern, the best approach is to tie the file handle to a class
+This one is a little more complicated because diff filters need to return a
+file handle. SVN::Notify tries to be as efficient with resources as it can, so
+it reads each line of the diff from the file handle one-at-a-time, processing
+and outputing each in turn so as to avoid loading the entire diff into memory.
+To retain this pattern, the best approach is to tie the file handle to a class
 that does the filtering one line at a time. The requisite C<tie> class needs
 only three methods: C<TIEHANDLE> C<READLINE>, and C<CLOSE>. In this example,
 I've defined them in a different namespace than the filter subroutine, so as
@@ -2391,7 +2437,8 @@ packaged:
   }
 
   sub CLOSE {
-      close shift->{fh};
+      close shift->{fh} or die $! ? "Error closing diff pipe: $!"
+                                  : "Exit status $? from diff pipe";
   }
 
   package SVN::Notify::Filter::StripTrunkDiff;
