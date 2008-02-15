@@ -3,7 +3,7 @@
 # $Id $
 
 use strict;
-use Test::More tests => 113;
+use Test::More tests => 120;
 use File::Spec::Functions;
 
 use_ok('SVN::Notify');
@@ -50,6 +50,22 @@ ok $notifier->execute, 'Notify log_mesage filter checking';
 $email = get_output();
 like $email, qr/DiD THiS, THaT, aND THe oTHeR/,
     'The log message should be uppercase but vowels lowercase';
+
+##############################################################################
+# Recipients, From, and Subject filter.
+##############################################################################
+
+ok( $notifier = SVN::Notify->new(
+    %args,
+    filter => [ 'LowerVowel' ],
+), 'Construct recipients filter notifier' );
+isa_ok($notifier, 'SVN::Notify');
+ok $notifier->prepare, 'Prepare recipients filter checking';
+ok $notifier->execute, 'Notify recipients_mesage filter checking';
+like $email, qr/^To: tEst[@]ExAmplE[.]cOm/m, 'The recipient should be modified';
+like $email, qr/From: thEOry/m, 'The From header should be modified';
+like $email, qr/Subject: \[111\] DId thIs, thAt, And thE OthEr[.]/m,
+    'The Subject should be modified';
 
 ##############################################################################
 # Metadata filter.
@@ -337,6 +353,17 @@ BEGIN {
         tr/AEIOU/aeiou/ for @$lines;
         return $lines;
     }
+    sub recipients {
+        my ($notifier, $recip) = @_;
+        tr/aeiou/AEIOU/ for @$recip;
+        return $recip;
+    }
+    sub from {
+        my ($notifier, $from) = @_;
+        $from =~ tr/aeiou/AEIOU/;
+        return $from;
+    }
+    sub subject { from(@_) }
 
     package SVN::Notify::Filter::CapMeta;
     $INC{'SVN/Notify/Filter/CapMeta.pm'} = __FILE__;

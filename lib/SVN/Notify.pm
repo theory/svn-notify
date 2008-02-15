@@ -985,8 +985,15 @@ context.
 sub prepare_recipients {
     my $self = shift;
     $self->_dbpnt( "Preparing recipients list") if $self->{verbose};
-    return $self unless $self->{to_regex_map} || $self->{subject_cx}
-        || $self->{to_email_map};
+    unless (
+        $self->{to_regex_map}
+     || $self->{subject_cx}
+     || $self->{to_email_map}
+    ) {
+        $self->{to} = $self->run_filters( recipients => $self->{to} );
+        return $self;
+    }
+
     # Prevent duplication.
     my $tos = $self->{to} = [ @{ $self->{to} } ];
 
@@ -1042,6 +1049,7 @@ sub prepare_recipients {
         if $self->{subject_cx} && $self->{verbose} > 1;
     close $fh or warn "Child process exited: $?\n";
     $self->{cx} = $cx;
+    $tos = $self->run_filters( recipients => $tos );
     $self->_dbpnt( 'Recipients: "', join(', ', @$tos), '"')
         if $self->{verbose} > 1;
     return $self;
@@ -1075,6 +1083,8 @@ sub prepare_contents {
         $self->{from} = $self->_encode( $self->{user} )
             . ( $self->{user_domain} ? "\@$self->{user_domain}" : '' );
     }
+    $self->{from} = $self->run_filters( from => $self->{from} );
+
     if ($self->{verbose} > 1) {
         $self->_dbpnt( "From: $self->{from}");
         $self->_dbpnt( "Message: @$lines");
@@ -1194,6 +1204,8 @@ sub prepare_subject {
       if $self->{max_sub_length}
       && length $self->{subject} > $self->{max_sub_length};
 
+    # Now filter it.
+    $self->{subject} = $self->run_filters( subject => $self->{subject} );
     $self->_dbpnt( qq{Subject is "$self->{subject}"}) if $self->{verbose};
 
     # Q-Encoding (RFC 2047)
@@ -2285,6 +2297,9 @@ and return values are as follows:
   Sub Name    | Second Argument
   ------------+---------------------------------------------------------------
   headers     | Array reference of individual headers lines.
+  from        | String with sender address.
+  recipients  | Array reference of email addresses.
+  subject     | String with the subject line.
   metadata    | Array reference of lines of metadata.
   log_message | Array reference of lines of log message.
   file_lists  | Array reference of lines of files. The first line will be
