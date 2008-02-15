@@ -3,6 +3,7 @@ Build.PL
 Changes
 lib/SVN/Notify.pm
 lib/SVN/Notify/Alternative.pm
+lib/SVN/Notify/Filter.pm
 lib/SVN/Notify/Filter/Trac.pm
 lib/SVN/Notify/HTML.pm
 lib/SVN/Notify/HTML/ColorDiff.pm

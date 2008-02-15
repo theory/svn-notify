@@ -45,11 +45,12 @@ Use the class in a custom script:
 
 This class may be used for sending email messages for Subversion repository
 activity. There are a number of different modes supported, and SVN::Notify is
-fully subclassable to easily add new functionality. By default, A list of all
-the files affected by the commit will be assembled and listed in a single
-message. An additional option allows diffs to be calculated for the changes
-and either appended to the message or added as an attachment. See the
-C<with_diff> and C<attach_diff> options below.
+fully subclassable, to add new functionality, and offers L<comprehensive
+content filtering|SVN::Notify::Filter> to easily modify the format of its
+messages. By default, A list of all the files affected by the commit will be
+assembled and listed in a single message. An additional option allows diffs to
+be calculated for the changes and either appended to the message or added as
+an attachment. See the C<with_diff> and C<attach_diff> options below.
 
 =head1 Usage
 
@@ -81,6 +82,10 @@ information on getting SVN::Notify running on Windows. If you have issues with
 asynchronous execution, try using F<HookStart.exe>
 (L<http://www.koders.com/csharp/fidE2724F44EF2D47F1C0FE76C538006435FA20051D.aspx>)
 to run F<svnnotify>.
+
+=head2 Encoding Support
+
+SVN::Notify supports
 
 =cut
 
@@ -480,13 +485,14 @@ differently.
 
   svnnotify --filter Trac -F My::Filter
 
-Specify one or or more module to be loaded in the expectation that they define
-output filters. For example,
-L<SVN::Notify::Filter::Trac|SVN::Notify::Filter::Trac> loads a filter that
-converts log messages from Trac's markup format to HTML. This parameter can be
-specified more than once to load multiple filters. If the value contains "::",
-it is assumed to be a complete module name. Otherwise, it is assumed to bein
-the SVN::Notify::Filter namespace.
+Specify a more module to be loaded in the expectation that it defines output
+filters. For example, L<SVN::Notify::Filter::Trac|SVN::Notify::Filter::Trac>
+loads a filter that converts log messages from Trac's markup format to HTML.
+This parameter can be specified more than once to load multiple filters. If
+the value contains "::", it is assumed to be a complete module name.
+Otherwise, it is assumed to bein the SVN::Notify::Filter namespace. See
+L<SVN::Notify::Filter|SVN::Notify::Filter> for details on writing your own
+output filters (it's really easy, I promise!).
 
 =item author_url
 
@@ -1650,6 +1656,8 @@ sub run_filters {
     return $data;
 }
 
+##############################################################################
+
 =head3 filters_for
 
   my $filters = $notifier->filters_for( $output_type );
@@ -2277,223 +2285,6 @@ __END__
 
 ##############################################################################
 
-=head2 Writing Output Filters
-
-Output filters are simply subroutines defined in a package. That modify content
-output by SVN::Notify. Filters are loaded by the C<filter> parameter to
-C<new()> or by the C<--filter> option to C<svnnotify>.
-
-Writing SVN::Notify filters is easy. The name of each subroutine in a filter
-modulfe determines what content it filters. The filters take two arguments:
-the SVN::Notify object that's creating the notification message, and the
-content to be filtered. They should return the filtered content in the same
-manner as it was passed. This makes it easy to change the output of
-SVN::Notify without the hassle of subclassing or sending patches to the
-maintainer.
-
-The names of the filter subroutines and the types of their second arguments
-and return values are as follows:
-
-  Sub Name    | Second Argument
-  ------------+---------------------------------------------------------------
-  headers     | Array reference of individual headers lines.
-  from        | String with sender address.
-  recipients  | Array reference of email addresses.
-  subject     | String with the subject line.
-  metadata    | Array reference of lines of metadata.
-  log_message | Array reference of lines of log message.
-  file_lists  | Array reference of lines of files. The first line will be
-              | they type of change for the list, the next a simle line of
-              | dasshes, and each of the rest of the lines a file name.
-  diff        | A file handle reference to the diff.
-  css         | An array of lines of CSS. Used only by SVN::Notify::HTML.
-  start_html  | An array of lines starting an SVN::Notify::HTML document.
-  start_body  | Array reference of lines at the start of the message body.
-  end_body    | Array reference of lines at the end of the message body.
-
-The module name can be anything you like; just pass it via the C<filter>
-parameter, e.g., C<< filter => [ 'My::Filter' ] >> (or C<--filter My::Filter>
-on the command-line). If, however, it's in the C<SVN::Notify::Filter>
-namespace, you can just pass the last bit as the filter name, for example C<<
-filter => [ 'NoSpam' ] >> (or C<--filter NoSpam> on the command-line) for
-C<SVN::Notify::Filter::NoSpam>.
-
-Some examples:
-
-=over
-
-=item * Map committers to senders
-
-Map committer user names to email addresses using a lookup table. The "from"
-filter gets and returns a string representing the sender:
-
-  package SVN::Notify::Filter::FromTable;
-  my %committers = (
-      'homer' => 'homer@simpson.com',
-      'bart'  => 'bart@gmail.com',
-      'marge' => 'marge@urbanmamas.com',
-  );
-  sub from {
-      my ($notifier, $from) = @_;
-      return $committers{ $notifier->user } || $from;
-  }
-
-=item * Add a recipient
-
-Easily done from the command-line using C<--to>, but hey, why not just filter
-it?
-
-  package SVN::Notify::Filter::Cc;
-  sub recipients {
-      my ($notifier, $recip) = @_;
-      push @$recip, 'boss@example.com';
-      return $recip;
-  }
-
-=item * Clean up the subject
-
-Need to keep the subject line clean? Just modify the string and return it:
-
-  package SVN::Notify::Filter::FromTable;
-  my $nasties = qr/\b(?:golly|shucks|darn)\b/i;
-  sub subject {
-      my ($notifier, $subject) = @_;
-      $subject =~ s/$nasties/[elided]/g;
-      return $subject;
-  }
-
-=item * Add an extra header
-
-This emulates C<add_header> to demonstrate header filtering:
-
-  package SVN::Notify::Filter::NoSpam;
-  sub headers {
-      my ($notifier, $headers) = @_;
-      push @$headers, 'X-NotSpam: true';
-      return $headers;
-  }
-
-=item * Uppercase metadata labels
-
-Change the format of the commit metadata section of the message to read
-"REVISION: 111" instead of "Revision: 111":
-
-  package SVN::Notify::Filter::UpLabels;
-  sub metadata {
-      my ($notifier, $lines) = @_;
-      s/([^:]+:)/uc $1/eg for @$lines;
-      return $lines;
-  }
-
-=item * Wrap your log message
-
-Log message filtering will probably be quite common, generally to reformat it
-(see, for example, the included
-L<SVN::Notify::Filter::Trac|SVN::Notify::Filter::Trac> filter). Here's a
-simple filter that reformats the log message so that paragraphs are wrapped.
-
-  package SVN::Notify::Filter::WrapMessage;
-  use Text::Wrap ();
-  sub log_message {
-      my ($notifier, $lines) = @_;
-      return [ Text::Wrap::wrap( '', '', @$lines ) ];
-  }
-
-=item * Remove leading "trunk/" from file names
-
-Just to demonstrate how to filter file lists:
-
-  package SVN::Notify::Filter::StripTrunk;
-  sub file_lists {
-      my ($notifier, $lines) = @_;
-      s{^(\s*)trunk/}{$1} for @$lines;
-      return $lines;
-  }
-
-=item * Remove leading "trunk/" from file names in a diff
-
-This one is a little more complicated because diff filters need to return a
-file handle. SVN::Notify tries to be as efficient with resources as it can, so
-it reads each line of the diff from the file handle one-at-a-time, processing
-and outputing each in turn so as to avoid loading the entire diff into memory.
-To retain this pattern, the best approach is to tie the file handle to a class
-that does the filtering one line at a time. The requisite C<tie> class needs
-only three methods: C<TIEHANDLE> C<READLINE>, and C<CLOSE>. In this example,
-I've defined them in a different namespace than the filter subroutine, so as
-to simplify SVN::Notify's loading of filters and to keep thing neatly
-packaged:
-
-  package My::IO::TrunkStripper;
-  sub TIEHANDLE {
-      my ($class, $fh) = @_;
-      bless { fh => $fh }, $class;
-  }
-
-  sub READLINE {
-      my $fh = shift->{fh};
-      defined( my $line = <$fh> ) or return;
-      $line =~ s{^((?:-{3}|[+]{3})\s+)trunk/}{$1};
-      return $line;
-  }
-
-  sub CLOSE {
-      close shift->{fh} or die $! ? "Error closing diff pipe: $!"
-                                  : "Exit status $? from diff pipe";
-  }
-
-  package SVN::Notify::Filter::StripTrunkDiff;
-  use Symbol ();
-
-  sub diff {
-      my ($notifier, $fh) = @_;
-      my $filter = Symbol::gensym;
-      tie *{ $filter }, 'My::IO::TrunkStripper', $fh;
-      return $filter;
-  }
-
-However, if you don't mind loading the entire diff into memory, you can
-simplify things by using a data structure and an exsiting IO module to do the
-same thing:
-
-  package SVN::Notify::Filter::StripTrunkDiff;
-  use IO::ScalarArray;
-
-  sub diff {
-      my ($notifier, $fh) = @_;
-      my @lines;
-      while (<$fh>) {
-          s{^((?:-{3}|[+]{3})\s+)trunk/}{$1};
-          push @lines, $_;
-      }
-      return IO::ScalarArray->new(\@lines);
-  }
-
-But do beware of this approach if you're likely to commit changes that would
-generate very larges diffs!
-
-=item * Filter based on Parameter.
-
-You can also add attributes (and therefor command-line options) to SVN::Notify
-in your filter in order to alter its behavior. This is precisely what the
-included L<SVN::Notify::Filter::Trac|SVN::Notify::Filter::Trac> module does:
-
-  package SVN::Notify::Filter::Trac;
-
-  SVN::Notify->register_attributes(
-      trac_url => 'trac-url=s',
-  );
-
-  sub log_message {
-      my $notify = shift;
-      my $trac = Text::Trac->new(
-          trac_url => $notify->trac_url,
-      );
-      $trac->parse(  join $/, @{ +shift } );
-      return [ $trac->html ];
-  }
-
-=back
-
 =head1 See Also
 
 =over
@@ -2503,6 +2294,10 @@ included L<SVN::Notify::Filter::Trac|SVN::Notify::Filter::Trac> module does:
 =item L<SVN::Notify::HTML::ColorDiff|SVN::Notify::HTML::ColorDiff>
 
 Subclasses SVN::Notify.
+
+=item L<SVN::Notify::Filter|SVN::Notify::Filter>
+
+How to write output filters for SVN::Notify.
 
 =item L<https://sourceforge.net/docs/E09#svn_notify>
 
