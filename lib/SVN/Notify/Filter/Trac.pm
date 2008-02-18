@@ -77,7 +77,7 @@ and the like in your log messages.
 
 =head1 Author
 
-David Wheeler <david@kineticode.com>
+David E. Wheeler <david@kineticode.com>
 
 =head1 Copyright and License
 

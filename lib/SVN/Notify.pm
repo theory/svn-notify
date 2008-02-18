@@ -2329,7 +2329,7 @@ other than all uppercase.
 
 =end comment
 
-David Wheeler <david@kineticode.com>
+David E. Wheeler <david@kineticode.com>
 
 =head1 Copyright and License
 

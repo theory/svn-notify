@@ -2,7 +2,7 @@
 name: SVN-Notify
 version: 2.70
 author:
-  - 'David Wheeler <david@kineticode.com>'
+  - 'David E. Wheeler <david@kineticode.com>'
 abstract: Subversion activity notification
 license: perl
 resources:

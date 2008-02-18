@@ -185,7 +185,7 @@ __END__
 
 Jukka Zitting <jz@yukatan.fi>
 
-David Wheeler <david@kineticode.com>
+David E. Wheeler <david@kineticode.com>
 
 =head1 Copyright and License
 
