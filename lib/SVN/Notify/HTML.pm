@@ -603,7 +603,7 @@ sub _css {
         qq(#msg dl a:visited { color:#cc6; }\n),
         q(h3 { font-family: verdana,arial,helvetica,sans-serif; ),
             qq(font-size: 10pt; font-weight: bold; }\n),
-        q(#logmsg { background: #ffc; border: 1px #fc0 solid; padding: 6px; ),
+        q(#logmsg { background: #ffc; border: 1px #fc0 solid; padding: 0 6px; ),
             q(font-family: verdana,arial,helvetica,sans-serif; ),
             qq(font-size: 10pt; }\n),
         q(#msg pre { overflow: auto; background: #ffc; ),
