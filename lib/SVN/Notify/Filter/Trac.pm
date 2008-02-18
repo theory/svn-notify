@@ -16,15 +16,11 @@ Fake out Test::Pod::Coverage.
 
 =cut
 
-SVN::Notify->register_attributes(
-    trac_url => 'trac-url=s',
-);
+SVN::Notify->register_attributes( trac_url => 'trac-url=s' );
 
 sub log_message {
     my $notify = shift;
-    my $trac = Text::Trac->new(
-        trac_url => $notify->trac_url,
-    );
+    my $trac = Text::Trac->new( trac_url => $notify->trac_url );
     $trac->parse(  join $/, @{ +shift } );
     return [ $trac->html ];
 }
