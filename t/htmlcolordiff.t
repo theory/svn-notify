@@ -392,6 +392,7 @@ ok( $notifier = SVN::Notify::HTML::ColorDiff->new(
     with_diff    => 1,
     revision     => 444,
     linkize      => 1,
+    wrap_log     => 1,
     viewcvs_url  => 'http://viewsvn.bricolage.cc/?rev=%s&view=rev',
     rt_url       => 'http://rt.cpan.org/NoAuth/Bugs.html?id=%s',
     bugzilla_url => 'http://bugzilla.mozilla.org/show_bug.cgi?id=%s',
@@ -411,8 +412,8 @@ ok( $notifier->execute, "Notify complex example" );
 
 $email = get_output();
 
-# Make sure multiple lines are still multiple!
-like($email, qr/link\.\n\nWe/, "Check for multiple lines" );
+# Make sure multiple lines are paragraphs!
+like($email, qr{link\.</p>\n\n<p>We}, "Check for multiple paragraphs" );
 
 # Make sure that binary files in the diff are set up properly.
 like($email,

@@ -55,11 +55,11 @@ an attachment. See the C<with_diff> and C<attach_diff> options below.
 =head1 Usage
 
 To use SVN::Notify, simply add a call to F<svnnotify> to your Subversion
-repository's F<post-commit> script. This script lives at the root of the
-repository directory; consult the documentation in F<post-commit.tmpl> for
-details. Make sure that you specify the complete path to F<svnnotify>, as well
-as to F<svnlook> and F<sendmail> in the options passed to F<svnnotify> so that
-everything executes properly.
+repository's F<post-commit> script. This script lives in the F<hooks>
+directory at the root of the repository directory; consult the documentation
+in F<post-commit.tmpl> for details. Make sure that you specify the complete
+path to F<svnnotify>, as well as to F<svnlook> and F<sendmail> in the options
+passed to F<svnnotify> so that everything executes properly.
 
 =head2 Windows Usage
 
@@ -85,7 +85,7 @@ to run F<svnnotify>.
 
 =head2 Encoding Support
 
-SVN::Notify supports
+SVN::Notify supports XXX Finish this up.
 
 =cut
 

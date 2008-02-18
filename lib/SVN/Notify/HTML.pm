@@ -396,18 +396,19 @@ sub output_log_message {
         }
     }
 
-    # Print it out and return.
-    $self->print_lines(
-        $out,
-        "<h3>Log Message</h3>\n",
-        $filters              ? ($msg, "\n\n")
-            : $self->wrap_log ? (
-                '<p>',
-                join( "</p>\n\n<p>", split /\n\s*\n/, $msg ),
-                "</p>\n\n"
-            )
-            :                   "<pre>$msg</pre>\n\n"
-    );
+    $self->print_lines( $out, "<h3>Log Message</h3>\n" );
+    if ($filters || $self->wrap_log) {
+        $msg = join( "</p>\n\n<p>", '<p>', split( /\n\s*\n/, $msg ), '</p>' )
+            if !$filters && $self->wrap_log;
+        $self->print_lines(
+            $out,
+            qq{<div id="logmsg">\n},
+            $msg,
+            qq{</div>\n\n},
+        )
+    } else {
+        $self->print_lines( $out, "<pre>$msg</pre>\n\n" );
+    }
     return $self;
 }
 
@@ -602,7 +603,10 @@ sub _css {
         qq(#msg dl a:visited { color:#cc6; }\n),
         q(h3 { font-family: verdana,arial,helvetica,sans-serif; ),
             qq(font-size: 10pt; font-weight: bold; }\n),
-        q(#msg pre, #msg p { overflow: auto; background: #ffc; ),
+        q(#logmsg { background: #ffc; border: 1px #fc0 solid; padding: 6px; ),
+            q(font-family: verdana,arial,helvetica,sans-serif; ),
+            qq(font-size: 10pt; }\n),
+        q(#msg pre { overflow: auto; background: #ffc; ),
             qq(border: 1px #fc0 solid; padding: 6px; }\n),
         qq(#msg ul { overflow: auto; }\n),
         q(#header, #footer { color: #fff; background: #636; ),
