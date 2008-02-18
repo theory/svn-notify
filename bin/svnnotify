@@ -111,8 +111,8 @@ Fake-out Pod::Usage
   -v --version                 Print the version number and exit.
 
 More options may be supported by the subclass of SVN::Notify specified by the
-C<--handler> option. Consult the documentation of the relevant subclass for
-details.
+C<--handler> option or by filters specified by the C<--filter> option. Consult
+the documentation of the relevant modules for details.
 
 =head1 See Also
 
