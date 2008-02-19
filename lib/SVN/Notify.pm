@@ -696,6 +696,8 @@ sub new {
     die qq{Missing required "to", "to_regex_map", or "to_email_map" parameter}
         unless @{ $params{to} } || $params{to_regex_map}
         || $params{to_email_map};
+    die qq{Cannot find sendmail and no "smtp" parameter specified}
+        unless $params{sendmail} || $params{smtp};
 
     # Set up default values.
     $params{svnlook}        ||= $ENV{SVNLOOK}  || $class->find_exe('svnlook');
@@ -709,11 +711,12 @@ sub new {
         unless $params{smtp};
 
     # Set up the environment language.
-    $params{env_lang} = "$params{language}.$params{charset}"
-        if $params{language} && !$ENV{LANG};
-
-    die qq{Cannot find sendmail and no "smtp" parameter specified}
-        unless $params{sendmail} || $params{smtp};
+    if ( $params{language} && !$ENV{LANG} ) {
+        ( my $lang_country = $params{language} ) =~ s/_/-/g;
+        my $encoding = $params{charset};
+        $encoding =~ s/-//g if uc($encoding) ne 'UTF-8';
+        $params{env_lang} = "$lang_country.$encoding";
+    }
 
     # Set up the revision URL.
     $params{revision_url} ||= delete $params{svnweb_url}
@@ -1175,16 +1178,22 @@ sub prepare_subject {
     my $self = shift;
     $self->_dbpnt( "Preparing subject") if $self->{verbose};
 
+    # Start the subject as a UTF-8 string.
+    $self->{subject} = $self->_decode('');
+
     # Start with the optional message and revision number..
     if ( defined $self->{subject_prefix} ) {
         if ( index($self->{subject_prefix}, '%d') > 0 ) {
-            $self->{subject} .= sprintf
-                $self->{subject_prefix}, $self->{revision};
+            $self->{subject} .= $self->_decode(
+                sprintf $self->{subject_prefix}, $self->{revision}
+            );
         } else {
-            $self->{subject} .= $self->{subject_prefix} . "[$self->{revision}] ";
+            $self->{subject} .= $self->_decode(
+                $self->{subject_prefix} . "[$self->{revision}] "
+            );
         }
     } else {
-        $self->{subject} .= "[$self->{revision}] ";
+        $self->{subject} .= $self->_decode( "[$self->{revision}] " );
     }
 
     # Add the context if there is one.
@@ -1193,16 +1202,17 @@ sub prepare_subject {
             $self->{cx} =~ s/$_// for @$rx;
         }
         my $space = $self->{no_first_line} ? '' : ': ';
-        $self->{subject} .= $self->{cx}. $space if $self->{cx};
+        $self->{subject} .= $self->_decode( $self->{cx} . $space ) if $self->{cx};
     }
 
     # Add the first sentence/line from the log message.
     unless ($self->{no_first_line}) {
         # Truncate to first period after a minimum of 10 characters.
         my $i = index $self->{message}[0], '. ';
-        $self->{subject} .= $i > 0
-          ? substr($self->{message}[0], 0, $i + 1)
-          : $self->{message}[0];
+        $self->{subject} .= $self->_decode( $i > 0
+            ? substr($self->{message}[0], 0, $i + 1)
+            : $self->{message}[0]
+        );
     }
 
     # Truncate to the last word under 72 characters.
@@ -1213,9 +1223,6 @@ sub prepare_subject {
     # Now filter it.
     $self->{subject} = $self->run_filters( subject => $self->{subject} );
     $self->_dbpnt( qq{Subject is "$self->{subject}"}) if $self->{verbose};
-
-    # Q-Encoding (RFC 2047)
-    $self->{subject} = $self->_encode( $self->{subject}, 'MIME-Q' ) if PERL58;
 
     return $self;
 }
@@ -1334,6 +1341,9 @@ only once for a single email message.
 sub output_headers {
     my ($self, $out) = @_;
     $self->_dbpnt( "Outputting headers") if $self->{verbose} > 2;
+
+    # Q-Encoding (RFC 2047)
+    my $subj = $self->_encode( $self->{subject}, 'MIME-Q' ) if PERL58;
     my @headers = (
         "MIME-Version: 1.0\n",
         "X-Mailer: SVN::Notify " . $self->VERSION
@@ -1341,7 +1351,7 @@ sub output_headers {
         "From: $self->{from}\n",
         "Errors-To: $self->{from}\n",
         "To: " . join ( ', ', @{ $self->{to} } ) . "\n",
-        "Subject: $self->{subject}\n"
+        "Subject: $subj\n"
     );
 
     push @headers, "Reply-To: $self->{reply_to}\n" if $self->{reply_to};
@@ -1522,13 +1532,13 @@ sub output_file_lists {
           if $self->{verbose} > 2;
 
         # Identify the action and output each file.
-        print $out "\n", @{ $self->run_filters(
+        $self->print_lines( $out, "\n", @{ $self->run_filters(
             file_lists => [
                 "$map->{$type}:\n",
                 "$dash{$type}\n",
                 map { "    $_\n" } @{ $files->{$type} }
             ]
-        ) };
+        ) } );
     }
     print $out "\n";
     return $self;
@@ -2233,10 +2243,21 @@ sub _encode {
 }
 
 ##############################################################################
+# This method is just a wrapper of Encode::decode API, with the checks for
+# Perl version.
+##############################################################################
+
+sub _decode {
+    my ($self, $str, $encoding) = @_;
+    return Encode::decode($encoding || $self->{charset}, $str) if PERL58;
+    return $str;
+}
+
+##############################################################################
 # This method is used for debugging output in various verbose modes.
 ##############################################################################
 
-sub _dbpnt { print __PACKAGE__, ": $_[1]\n" }
+sub _dbpnt { shift->print_lines( *STDOUT, __PACKAGE__, ": $_[0]\n" ) };
 
 package SVN::Notify::SMTP;
 

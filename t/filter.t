@@ -24,6 +24,15 @@ my %args = (
     filter     => ['Uppercase'],
 );
 
+my $subj = "DId thIs, thAt, And thE «OthEr».";
+my $qsubj;
+if (SVN::Notify::PERL58()) {
+    Encode::_utf8_on( $subj );
+    $qsubj = quotemeta Encode::encode( 'MIME-Q', $subj );
+} else {
+    $qsubj = quotemeta $subj;
+}
+
 ##############################################################################
 # Basic Functionality.
 ##############################################################################
@@ -33,7 +42,7 @@ isa_ok($notifier, 'SVN::Notify');
 ok $notifier->prepare, 'Prepare log_message filter checking';
 ok $notifier->execute, 'Notify log_mesage filter checking';
 my $email = get_output();
-like $email, qr/DID THIS, THAT, AND THE OTHER/,
+like $email, qr/DID THIS, THAT, AND THE \x{00ab}OTHER\x{00bb}/,
     'The log message should be uppercase';
 
 ##############################################################################
@@ -48,7 +57,7 @@ isa_ok($notifier, 'SVN::Notify');
 ok $notifier->prepare, 'Prepare log_message filter checking';
 ok $notifier->execute, 'Notify log_mesage filter checking';
 $email = get_output();
-like $email, qr/DiD THiS, THaT, aND THe oTHeR/,
+like $email, qr/DiD THiS, THaT, aND THe \x{00ab}oTHeR\x{00bb}/,
     'The log message should be uppercase but vowels lowercase';
 
 ##############################################################################
@@ -64,8 +73,7 @@ ok $notifier->prepare, 'Prepare recipients filter checking';
 ok $notifier->execute, 'Notify recipients_mesage filter checking';
 like $email, qr/^To: tEst[@]ExAmplE[.]cOm/m, 'The recipient should be modified';
 like $email, qr/From: thEOry/m, 'The From header should be modified';
-like $email, qr/Subject: \[111\] DId thIs, thAt, And thE OthEr[.]/m,
-    'The Subject should be modified';
+like $email, qr/Subject: \[111\] $qsubj/m, 'The Subject should be modified';
 
 ##############################################################################
 # Metadata filter.
@@ -210,7 +218,7 @@ SKIP: {
     ok $notifier->prepare, 'Prepare log_message filter checking';
     ok $notifier->execute, 'Notify log_mesage filter checking';
     $email = get_output();
-    like $email, qr{<p>\s*Did this, that, and the other[.] And then I did some more[.] Some\nit was done on a second line[.] \x{201c}Go figure\x{201d}[.] <a class="changeset" href="/changeset/1234">r1234</a>\s*</p>}ms;
+    like $email, qr{<p>\s*Did this, that, and the \x{00ab}other\x{00bb}[.] And then I did some more[.] Some\nit was done on a second line[.] \x{201c}Go figure\x{201d}[.] <a class="changeset" href="/changeset/1234">r1234</a>\s*</p>}ms;
 
     # Try it with SVN::Notify::HTML.
     ok $notifier = SVN::Notify::HTML->new(
@@ -224,7 +232,7 @@ SKIP: {
     ok $notifier->execute, 'Notify HTML header and footer checking';
     # Check the output.
     $email = get_output();
-    like $email, qr{<p>\s*Did this, that, and the other[.] And then I did some more[.] Some\nit was done on a second line[.] \x{201c}Go figure\x{201d}[.] <a class="changeset" href="http://trac[.]example[.]com/changeset/1234">r1234</a>\s*</p>}ms;
+    like $email, qr{<p>\s*Did this, that, and the \x{00ab}other\x{00bb}[.] And then I did some more[.] Some\nit was done on a second line[.] \x{201c}Go figure\x{201d}[.] <a class="changeset" href="http://trac[.]example[.]com/changeset/1234">r1234</a>\s*</p>}ms;
 }
 
 ##############################################################################

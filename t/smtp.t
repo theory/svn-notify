@@ -22,6 +22,18 @@ my %args = (
     to         => ['test@example.com', 'try@example.com'],
 );
 
+my $subj = "Did this, that, and the «other».";
+my $qsubj;
+if (SVN::Notify::PERL58()) {
+    Encode::_utf8_on( $subj );
+    $qsubj = quotemeta Encode::encode( 'MIME-Q', $subj );
+} else {
+    $qsubj = quotemeta $subj;
+}
+
+
+##############################################################################
+
 ok my $notifier = SVN::Notify->new(%args), 'Create new SMTP notifier';
 isa_ok $notifier, 'SVN::Notify', 'it';
 ok $notifier->prepare, 'Prepare notifier';
@@ -39,8 +51,7 @@ ok $smtp->{data}, 'data() should have been called';
 ok $smtp->{dataend}, 'dataend() should have been called';
 ok $smtp->{quit}, 'quit() should have been called';
 
-like $smtp->{datasend}, qr/Subject: \[111\] Did this, that, and the other\.\n/,
-      "Check subject";
+like $smtp->{datasend}, qr/Subject: \[111\] $qsubj\n/, 'Check subject';
 like $smtp->{datasend}, qr/From: theory\n/, 'Check From';
 like $smtp->{datasend}, qr/To:\s+test\@example\.com,\s+try\@example\.com\n/,
     'Check To';
@@ -63,7 +74,7 @@ like $smtp->{datasend}, qr/Date:     2004-04-20 01:33:35 -0700 \(Tue, 20 Apr 200
 
 # Check that the log message is there.
 like $smtp->{datasend},
-    qr/Did this, that, and the other\. And then I did some more\. Some\nit was done on a second line\./,
+    qr/Did this, that, and the «other»\. And then I did some more\. Some\nit was done on a second line\./,
     'Check for log message';
 
 ##############################################################################

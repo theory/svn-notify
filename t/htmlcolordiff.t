@@ -27,6 +27,15 @@ my %args = (
     to         => 'test@example.com',
 );
 
+my $subj = "Did this, that, and the «other».";
+my $qsubj;
+if (SVN::Notify::PERL58()) {
+    Encode::_utf8_on( $subj );
+    $qsubj = quotemeta Encode::encode( 'MIME-Q', $subj );
+} else {
+    $qsubj = quotemeta $subj;
+}
+
 ##############################################################################
 # Basic Functionality.
 ##############################################################################
@@ -42,8 +51,7 @@ ok( $notifier->execute, "HTML notify" );
 my $email = get_output();
 
 # Check the email headers.
-like( $email, qr/Subject: \[111\] Did this, that, and the other\.\n/,
-      "Check HTML subject" );
+like( $email, qr/Subject: \[111\] $qsubj\n/, 'Check HTML subject' );
 like( $email, qr/From: theory\n/, 'Check HTML From');
 like( $email, qr/To: test\@example\.com\n/, 'Check HTML To');
 like( $email, qr{Content-Type: text/html; charset=UTF-8\n},
@@ -80,7 +88,7 @@ like( $email,
       'Check Date');
 
 # Check that the log message is there.
-like( $email, qr{<pre>Did this, that, and the other\. And then I did some more\. Some\nit was done on a second line\. \x{201c}Go figure\x{201d}\. r1234</pre>}, 'Check for HTML log message' );
+like( $email, qr{<pre>Did this, that, and the \x{00ab}other\x{00bb}\. And then I did some more\. Some\nit was done on a second line\. \x{201c}Go figure\x{201d}\. r1234</pre>}, 'Check for HTML log message' );
 
 # Make sure that Class/Meta.pm is listed twice, once for modification and once
 # for its attribute being set.
@@ -110,8 +118,7 @@ ok( $notifier->execute, "HTML notify" );
 $email = get_output();
 
 # Check the email headers.
-like( $email, qr/Subject: \[111\] Did this, that, and the other\.\n/,
-      "Check HTML subject" );
+like( $email, qr/Subject: \[111\] $qsubj\n/, 'Check HTML subject' );
 like( $email, qr/From: theory\n/, 'Check HTML From');
 like( $email, qr/To: test\@example\.com\n/, 'Check HTML To');
 like( $email, qr{Content-Type: text/html; charset=UTF-8\n},
@@ -132,8 +139,7 @@ ok( $notifier->execute, "HTML diff notify" );
 # Get the output.
 $email = get_output();
 
-like( $email, qr/Subject: \[111\] Did this, that, and the other\.\n/,
-      "Check HTML diff subject" );
+like( $email, qr/Subject: \[111\] $qsubj\n/, 'Check HTML diff subject' );
 like( $email, qr/From: theory\n/, 'Check HTML diff From');
 like( $email, qr/To: test\@example\.com\n/, 'Check HTML diff To');
 
@@ -212,8 +218,7 @@ ok( $notifier->execute, "Attach HTML attach diff notify" );
 # Get the output.
 $email = get_output();
 
-like( $email, qr/Subject: \[111\] Did this, that, and the other\.\n/,
-      "Check HTML attach diff subject" );
+like( $email, qr/Subject: \[111\] $qsubj\n/, 'Check HTML attach diff subject' );
 like( $email, qr/From: theory\n/, 'Check HTML attach diff From');
 like( $email, qr/To: test\@example\.com\n/, 'Check HTML attach diff To');
 

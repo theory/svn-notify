@@ -206,7 +206,10 @@ sub start_html {
         qq{</title>\n</head>\n<body>\n\n}
     );
 
-    print $out @{ $self->run_filters( start_html => \@html ) };
+    $self->print_lines(
+        $out,
+        @{ $self->run_filters( start_html => \@html ) }
+    );
     return $self;
 }
 
@@ -454,16 +457,21 @@ sub output_file_lists {
                 my $file = encode_entities($_, '<>&"');
                 if ($file =~ m{/$} && $type ne '_') {
                     # Directories don't link, unless it's a prop change.
-                    print $out qq{<li>$file</li>\n};
+                    $self->print_lines( $out, qq{<li>$file</li>\n} );
                 } else {
                     # Strip out letters illegal for IDs.
                     (my $id = $file) =~ s/[^\w_]//g;
-                    print $out qq{<li><a href="#$id">$file</a></li>\n};
+                    $self->print_lines(
+                        $out,
+                        qq{<li><a href="#$id">$file</a></li>\n},
+                    );
                 }
             }
         } else {
-            print $out "  <li>" . encode_entities($_, '<>&"') . "</li>\n"
-              for @{ $files->{$type} };
+            $self->print_lines(
+                $out,
+                "  <li>", encode_entities($_, '<>&"'), "</li>\n"
+            ) for @{ $files->{$type} };
         }
         print $out "</ul>\n\n";
     }
@@ -546,7 +554,7 @@ sub output_diff {
                 my $action = $1;
                 my $file = encode_entities($2, '<>&"');
                 (my $id = $file) =~ s/[^\w_]//g;
-                print $out qq{<a id="$id">$action: $file</a>\n};
+                $self->print_lines( $out, qq{<a id="$id">$action: $file</a>\n} );
             }
             else {
                 $self->print_lines($out, encode_entities($_, '<>&"'), "\n");

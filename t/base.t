@@ -21,6 +21,15 @@ my %args = (
     to         => ['test@example.com'],
 );
 
+my $subj = "Did this, that, and the «other».";
+my $qsubj;
+if (SVN::Notify::PERL58()) {
+    Encode::_utf8_on( $subj );
+    $qsubj = quotemeta Encode::encode( 'MIME-Q', $subj );
+} else {
+    $qsubj = quotemeta $subj;
+}
+
 ##############################################################################
 # Basic Functionality.
 ##############################################################################
@@ -68,8 +77,7 @@ is($notifier->date, '2004-04-20 01:33:35 -0700 (Tue, 20 Apr 2004)',
 is($notifier->message_size, 103, "Check message_size accessor" );
 isa_ok($notifier->message, 'ARRAY', "Check message accessor" );
 isa_ok($notifier->files, 'HASH', "Check files accessor" );
-is($notifier->subject, '[111] Did this, that, and the other.',
-   "Check subject accessor" );
+is($notifier->subject, "[111] $subj", "Check subject accessor" );
 is($notifier->header, undef, 'Check header accessor');
 is($notifier->footer, undef, 'Check footer accessor');
 is($notifier->ticket_url, undef, 'Check ticket_url');
@@ -83,8 +91,7 @@ ok( $notifier->execute, "Notify" );
 my $email = get_output();
 
 # Check the email headers.
-like( $email, qr/Subject: \[111\] Did this, that, and the other\.\n/,
-      "Check subject" );
+like( $email, qr/Subject: \[111\] $qsubj\n/, "Check subject" );
 like( $email, qr/From: theory\n/, 'Check From');
 like( $email, qr/Errors-To: theory\n/, 'Check Errors-To');
 like( $email, qr/To: test\@example\.com\n/, 'Check To');
@@ -106,7 +113,7 @@ like( $email, qr/Date:     2004-04-20 01:33:35 -0700 \(Tue, 20 Apr 2004\)\n/,
       'Check Date');
 
 # Check that the log message is there.
-like( $email, qr/Did this, that, and the other\. And then I did some more\. Some\nit was done on a second line\. \x{201c}Go figure\x{201d}\./, 'Check for log message' );
+like( $email, qr/Did this, that, and the \x{00ab}other\x{00bb}\. And then I did some more\. Some\nit was done on a second line\. \x{201c}Go figure\x{201d}\./, 'Check for log message' );
 # Make sure that Class/Meta.pm is listed twice, once for modification and once
 # for its attribute being set.
 is( scalar @{[$email =~ m{(trunk/Class-Meta/lib/Class/Meta\.pm)}g]}, 2,
@@ -142,8 +149,7 @@ NO_BADLANG: {
 # Get the output.
 $email = get_output();
 
-like( $email, qr/Subject: \[111\] Did this, that, and the other\.\n/,
-      "Check diff subject" );
+like( $email, qr/Subject: \[111\] $qsubj\n/, "Check diff subject" );
 like( $email, qr/From: theory\n/, 'Check diff From');
 like( $email, qr/To: test\@example\.com\n/, 'Check diff To');
 like( $email, qr/Content-Language: en_US\n/, 'Check diff Content-Language');
@@ -179,8 +185,7 @@ NO_BADLANG: {
 # Get the output.
 $email = get_output();
 
-like( $email, qr/Subject: \[111\] Did this, that, and the other\.\n/,
-      "Check attach diff subject" );
+like( $email, qr/Subject: \[111\] $qsubj\n/, 'Check attach diff subject' );
 like( $email, qr/From: theory\n/, 'Check attach diff From');
 like( $email, qr/To: test\@example\.com\n/, 'Check attach diff To');
 
@@ -266,7 +271,7 @@ like( $email, qr/Reply-To: me\@example\.com\n/, 'Check Reply-To Header');
 ##############################################################################
 # Try subject_prefix.
 ##############################################################################
-ok( $notifier = SVN::Notify->new(%args, subject_prefix => '[Commits] '),
+ok( $notifier = SVN::Notify->new(%args, subject_prefix => '[C] '),
     "Construct new subject_prefix notifier" );
 isa_ok($notifier, 'SVN::Notify');
 ok( $notifier->prepare, "Prepare subject_prefix" );
@@ -274,8 +279,7 @@ ok( $notifier->execute, "Notify subject_prefix" );
 
 # Check the output.
 $email = get_output();
-like( $email, qr/Subject: \[Commits\] \[111\] Did this, that, and the other\.\n/,
-      "Check subject header for prefix" );
+like( $email, qr/Subject: \[C\] \[111\] $qsubj\n/, 'Check subject header for prefix' );
 
 ##############################################################################
 # Try subject_prefix with %n.
@@ -288,7 +292,7 @@ ok( $notifier->execute, "Notify subject_prefix" );
 
 # Check the output.
 $email = get_output();
-like( $email, qr/Subject: \[Commit r111\] Did this, that, and the other\.\n/,
+like( $email, qr/Subject: \[Commit r111\] $qsubj\n/,
       "Check subject header for prefix with %d" );
 
 ##############################################################################
@@ -302,7 +306,8 @@ ok( $notifier->execute, "Notify subject_cx" );
 
 # Check the output.
 $email = get_output();
-like( $email, qr{Subject: \[111\] trunk/Class-Meta: Did this, that, and the other\.\n},
+(my $split_subj = $qsubj) =~ s/that\\,/that\\,\n /;
+like( $email, qr{Subject: \[111\] trunk/Class-Meta: $split_subj\n},
       "Check subject header for CX" );
 
 ##############################################################################
