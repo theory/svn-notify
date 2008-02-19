@@ -42,8 +42,11 @@ isa_ok($notifier, 'SVN::Notify');
 ok $notifier->prepare, 'Prepare log_message filter checking';
 ok $notifier->execute, 'Notify log_mesage filter checking';
 my $email = get_output();
-like $email, qr/DID THIS, THAT, AND THE \x{00ab}OTHER\x{00bb}/,
-    'The log message should be uppercase';
+UTF8: {
+    use utf8;
+    like $email, qr/DID THIS, THAT, AND THE «OTHER»/,
+        'The log message should be uppercase';
+}
 
 ##############################################################################
 # Multiple Filters.
@@ -57,8 +60,11 @@ isa_ok($notifier, 'SVN::Notify');
 ok $notifier->prepare, 'Prepare log_message filter checking';
 ok $notifier->execute, 'Notify log_mesage filter checking';
 $email = get_output();
-like $email, qr/DiD THiS, THaT, aND THe \x{00ab}oTHeR\x{00bb}/,
-    'The log message should be uppercase but vowels lowercase';
+UTF8: {
+    use utf8;
+    like $email, qr/DiD THiS, THaT, aND THe «oTHeR»/,
+        'The log message should be uppercase but vowels lowercase';
+}
 
 ##############################################################################
 # Recipients, From, and Subject filter.
@@ -218,7 +224,10 @@ SKIP: {
     ok $notifier->prepare, 'Prepare log_message filter checking';
     ok $notifier->execute, 'Notify log_mesage filter checking';
     $email = get_output();
-    like $email, qr{<p>\s*Did this, that, and the \x{00ab}other\x{00bb}[.] And then I did some more[.] Some\nit was done on a second line[.] \x{201c}Go figure\x{201d}[.] <a class="changeset" href="/changeset/1234">r1234</a>\s*</p>}ms;
+    UTF8: {
+        use utf8;
+        like $email, qr{<p>\s*Did this, that, and the «other»[.] And then I did some more[.] Some\nit was done on a second line[.] “Go figure”[.] <a class="changeset" href="/changeset/1234">r1234</a>\s*</p>}ms;
+    }
 
     # Try it with SVN::Notify::HTML.
     ok $notifier = SVN::Notify::HTML->new(
@@ -232,7 +241,11 @@ SKIP: {
     ok $notifier->execute, 'Notify HTML header and footer checking';
     # Check the output.
     $email = get_output();
-    like $email, qr{<p>\s*Did this, that, and the \x{00ab}other\x{00bb}[.] And then I did some more[.] Some\nit was done on a second line[.] \x{201c}Go figure\x{201d}[.] <a class="changeset" href="http://trac[.]example[.]com/changeset/1234">r1234</a>\s*</p>}ms;
+    UTF8: {
+        use utf8;
+        like $email, qr{<p>\s*Did this, that, and the «other»[.] And then I did some more[.] Some\nit was done on a second line[.] “Go figure”[.] <a class="changeset" href="http://trac[.]example[.]com/changeset/1234">r1234</a>\s*</p>}ms;
+    }
+
 }
 
 ##############################################################################

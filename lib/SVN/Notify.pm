@@ -1343,7 +1343,9 @@ sub output_headers {
     $self->_dbpnt( "Outputting headers") if $self->{verbose} > 2;
 
     # Q-Encoding (RFC 2047)
-    my $subj = $self->_encode( $self->{subject}, 'MIME-Q' ) if PERL58;
+    my $subj = PERL58
+        ? $self->_encode( $self->{subject}, 'MIME-Q' )
+        : $self->{subject};
     my @headers = (
         "MIME-Version: 1.0\n",
         "X-Mailer: SVN::Notify " . $self->VERSION

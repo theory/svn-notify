@@ -99,7 +99,10 @@ like( $email,
       'Check Date');
 
 # Check that the log message is there.
-like( $email, qr{<pre>Did this, that, and the \x{00ab}other\x{00bb}\. And then I did some more\. Some\nit was done on a second line\. \x{201c}Go figure\x{201d}\. r1234</pre>}, 'Check for HTML log message' );
+UTF8: {
+    use utf8;
+    like( $email, qr{<pre>Did this, that, and the «other»\. And then I did some more\. Some\nit was done on a second line\. “Go figure”\. r1234</pre>}, 'Check for HTML log message' );
+}
 
 # Make sure that Class/Meta.pm is listed twice, once for modification and once
 # for its attribute being set.
