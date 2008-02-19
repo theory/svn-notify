@@ -1,6 +1,6 @@
 #!perl -w
 
-# $Id $
+# $Id$
 
 use strict;
 use Test::More tests => 120;
