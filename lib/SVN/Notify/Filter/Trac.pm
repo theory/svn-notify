@@ -21,7 +21,10 @@ SVN::Notify->register_attributes( trac_url => 'trac-url=s' );
 sub log_message {
     my $notify = shift;
     my $trac = Text::Trac->new( trac_url => $notify->trac_url );
-    $trac->parse(  join $/, @{ +shift } );
+    my $msg = join $/, @{ +shift };
+    $msg =~ s/^\s+//g;
+    $msg =~ s/\s+$//g;
+    $trac->parse( $msg );
     return [ $trac->html ];
 }
 
