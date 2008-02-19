@@ -387,6 +387,7 @@ unlike($email,
 ##############################################################################
 # Major linkize and Bug tracking URLs, as well as complex diff.
 ##############################################################################
+my $year = 1900 + (localtime)[5];
 ok( $notifier = SVN::Notify::HTML::ColorDiff->new(
     %args,
     with_diff    => 1,
@@ -401,7 +402,7 @@ ok( $notifier = SVN::Notify::HTML::ColorDiff->new(
     ticket_regex => '\[?\s*(Custom\s*#\s*(\d+))\s*\]?',
     header       => 'This commit is brought to you by Kineticode. '
                   . 'Setting knowledge in motion.',
-    footer       => '<span>Copyright &reg; Kineticode, Inc., 2004-2006. '
+    footer       => "<span>Copyright &reg; Kineticode, Inc., 2004-$year. "
                   . 'Some rights reserved.</span>',
 ),
     "Construct new complex notifier" );
@@ -411,7 +412,6 @@ ok( $notifier->prepare, "Prepare complex example" );
 ok( $notifier->execute, "Notify complex example" );
 
 $email = get_output();
-
 # Make sure multiple lines are paragraphs!
 like($email, qr{link\.</p>\n\n<p>We}, "Check for multiple paragraphs" );
 
