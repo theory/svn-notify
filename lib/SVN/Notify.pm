@@ -2264,7 +2264,7 @@ sub get_handle {
     $smtp->to(map { split /\s*,\s*/ } @{ $notifier->{to} });
     $smtp->data;
     tie local(*SMTP), $class, $smtp;
-    return PERL58 ? *SMTP : \*SMTP;
+    return SVN::Notify::PERL58 ? *SMTP : \*SMTP;
 }
 
 sub TIEHANDLE {
