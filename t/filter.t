@@ -210,7 +210,7 @@ SKIP: {
     ok $notifier->prepare, 'Prepare log_message filter checking';
     ok $notifier->execute, 'Notify log_mesage filter checking';
     $email = get_output();
-    like $email, qr{<p>\s*Did this, that, and the other[.] And then I did some more[.] Some\nit was done on a second line[.] “Go figure”[.] <a class="changeset" href="/changeset/1234">r1234</a>\s*</p>}ms;
+    like $email, qr{<p>\s*Did this, that, and the other[.] And then I did some more[.] Some\nit was done on a second line[.] \x{201c}Go figure\x{201d}[.] <a class="changeset" href="/changeset/1234">r1234</a>\s*</p>}ms;
 
     # Try it with SVN::Notify::HTML.
     ok $notifier = SVN::Notify::HTML->new(
@@ -224,7 +224,7 @@ SKIP: {
     ok $notifier->execute, 'Notify HTML header and footer checking';
     # Check the output.
     $email = get_output();
-    like $email, qr{<p>\s*Did this, that, and the other[.] And then I did some more[.] Some\nit was done on a second line[.] “Go figure”[.] <a class="changeset" href="http://trac[.]example[.]com/changeset/1234">r1234</a>\s*</p>}ms;
+    like $email, qr{<p>\s*Did this, that, and the other[.] And then I did some more[.] Some\nit was done on a second line[.] \x{201c}Go figure\x{201d}[.] <a class="changeset" href="http://trac[.]example[.]com/changeset/1234">r1234</a>\s*</p>}ms;
 }
 
 ##############################################################################

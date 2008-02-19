@@ -106,7 +106,7 @@ like( $email, qr/Date:     2004-04-20 01:33:35 -0700 \(Tue, 20 Apr 2004\)\n/,
       'Check Date');
 
 # Check that the log message is there.
-like( $email, qr/Did this, that, and the other\. And then I did some more\. Some\nit was done on a second line\. “Go figure”\./, 'Check for log message' );
+like( $email, qr/Did this, that, and the other\. And then I did some more\. Some\nit was done on a second line\. \x{201c}Go figure\x{201d}\./, 'Check for log message' );
 # Make sure that Class/Meta.pm is listed twice, once for modification and once
 # for its attribute being set.
 is( scalar @{[$email =~ m{(trunk/Class-Meta/lib/Class/Meta\.pm)}g]}, 2,

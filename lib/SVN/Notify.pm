@@ -2185,7 +2185,8 @@ sub _pipe {
             ? q{"}  . join(q{" "}, @_) . q{"|}
             : q{|"} . join(q{" "}, @_) . q{"};
         open PIPE, $cmd or die "Cannot fork: $!\n";
-        binmode PIPE, "encoding($encode)" if PERL58 && $encode;
+        binmode PIPE, "encoding($encode)"
+            if PERL58 && $encode && lc($encode) ne 'utf-8';
         return *PIPE;
     }
 
@@ -2194,7 +2195,8 @@ sub _pipe {
 
     if ($pid) {
         # Parent process. Set the encoing layer and return the file handle.
-        binmode PIPE, "encoding($encode)" if PERL58 && $encode;
+        binmode PIPE, "encoding($encode)"
+            if PERL58 && $encode && lc($encode) ne 'utf-8';
         return *PIPE;
     } else {
         # Child process. Execute the commands.
