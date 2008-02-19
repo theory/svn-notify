@@ -481,16 +481,19 @@ F<svnnotify>. Be sure to read the documentation for your subclass of choice,
 as there may be additional parameters and existing parameters may behave
 differently.
 
-=item filter
+=item filters
 
   svnnotify --filter Trac -F My::Filter
+
+  SVN::Notify->new( %params, filters => ['Trac', 'My::Filter'] );
 
 Specify a more module to be loaded in the expectation that it defines output
 filters. For example, L<SVN::Notify::Filter::Trac|SVN::Notify::Filter::Trac>
 loads a filter that converts log messages from Trac's markup format to HTML.
-This parameter can be specified more than once to load multiple filters. If
-the value contains "::", it is assumed to be a complete module name.
-Otherwise, it is assumed to bein the SVN::Notify::Filter namespace. See
+This command-line option can be specified more than once to load multiple
+filters. The C<filters> parameter to C<new()> should be an array reference of
+modules names. If a value contains "::", it is assumed to be a complete module
+name. Otherwise, it is assumed to be in the SVN::Notify::Filter namespace. See
 L<SVN::Notify::Filter|SVN::Notify::Filter> for details on writing your own
 output filters (it's really easy, I promise!).
 
@@ -660,14 +663,14 @@ sub new {
     }
 
     # Load any filters.
-    $params{filters} = {};
-    if (my $filts = delete $params{filter}) {
-        for my $pkg (@$filts) {
+    my $filts = {};
+    if (my $f = delete $params{filters}) {
+        for my $pkg (@$f) {
             $pkg = "SVN::Notify::Filter::$pkg" if $pkg !~ /::/;
             if ($filters{$pkg}) {
                 while (my ($k, $v) = each %{ $filters{$pkg} }) {
-                    $params{filters}->{$k} ||= [];
-                    push @{ $params{filters}->{$k} }, $v;
+                    $filts->{$k} ||= [];
+                    push @{ $filts->{$k} }, $v;
                 }
             } else {
                 eval "require $pkg" or die $@;
@@ -676,12 +679,13 @@ sub new {
                 while ( my ($k, $v) = each %{ "$pkg\::" } ) {
                     my $code = *{$v}{CODE} or next;
                     $filters{$pkg}->{$k} = $code;
-                    $params{filters}->{$k} ||= [];
-                    push @{ $params{filters}->{$k} }, $code;
+                    $filts->{$k} ||= [];
+                    push @{ $filts->{$k} }, $code;
                 }
             }
         }
     }
+    $params{filts} = $filts;
 
     # Make sure that the tos are an arrayref.
     $params{to} = [ $params{to} || () ] unless ref $params{to};
@@ -852,7 +856,7 @@ sub get_options {
         'max-sub-length|i=i'  => \$opts->{max_sub_length},
         'max-diff-length|e=i' => \$opts->{max_diff_length},
         'handler|H=s'         => \$opts->{handler},
-        'filter|F=s@'         => \$opts->{filter},
+        'filter|F=s@'         => \$opts->{filters},
         'author-url|A=s'      => \$opts->{author_url},
         'ticket-regex=s'      => \$opts->{ticket_regex},
         'ticket-map=s%'       => \$opts->{ticket_map},
@@ -1663,7 +1667,7 @@ and by subclasses.
 
 sub run_filters {
     my ($self, $type, $data) = @_;
-    my $filters = $self->{filters}{$type} or return $data;
+    my $filters = $self->{filts}{$type} or return $data;
     $data = $_->($self, $data) for @$filters;
     return $data;
 }
@@ -1680,7 +1684,7 @@ Returns C<undef> if there are no filters have been loaded for C<$output_type>.
 =cut
 
 sub filters_for {
-    shift->{filters}{+shift};
+    shift->{filts}{+shift};
 }
 
 ##############################################################################

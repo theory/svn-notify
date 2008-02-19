@@ -21,7 +21,7 @@ my %args = (
     repos_path => 'tmp',
     revision   => '111',
     to         => ['test@example.com'],
-    filter     => ['Uppercase'],
+    filters    => ['Uppercase'],
 );
 
 my $subj = "DId thIs, thAt, And thE «OthEr».";
@@ -54,7 +54,7 @@ UTF8: {
 
 ok( $notifier = SVN::Notify->new(
     %args,
-    filter => [ 'Uppercase', 'LowerVowel' ],
+    filters => [ 'Uppercase', 'LowerVowel' ],
 ), 'Construct new multi filter notifier' );
 isa_ok($notifier, 'SVN::Notify');
 ok $notifier->prepare, 'Prepare log_message filter checking';
@@ -72,7 +72,7 @@ UTF8: {
 
 ok( $notifier = SVN::Notify->new(
     %args,
-    filter => [ 'LowerVowel' ],
+    filters => [ 'LowerVowel' ],
 ), 'Construct recipients filter notifier' );
 isa_ok($notifier, 'SVN::Notify');
 ok $notifier->prepare, 'Prepare recipients filter checking';
@@ -87,7 +87,7 @@ like $email, qr/Subject: \[111\] $qsubj/m, 'The Subject should be modified';
 
 ok( $notifier = SVN::Notify->new(
     %args,
-    filter => [ 'CapMeta' ],
+    filters => [ 'CapMeta' ],
 ), 'Construct new metadata filter notifier' );
 isa_ok($notifier, 'SVN::Notify');
 ok $notifier->prepare, 'Prepare log_message filter checking';
@@ -102,7 +102,7 @@ like $email, qr/AUTHOR:   theory/, 'Author header should be uppercase';
 
 ok( $notifier = SVN::Notify->new(
     %args,
-    filter => [ 'AddHeader' ],
+    filters => [ 'AddHeader' ],
 ), 'Construct new headers filter notifier' );
 isa_ok($notifier, 'SVN::Notify');
 ok $notifier->prepare, 'Prepare log_message filter checking';
@@ -116,7 +116,7 @@ like $email, qr/X-Foo: Bar\nContent-Type:/, 'New header should be included';
 
 ok( $notifier = SVN::Notify->new(
     %args,
-    filter => [ 'StartEnd' ],
+    filters => [ 'StartEnd' ],
 ), 'Construct start and end filter notifier' );
 isa_ok($notifier, 'SVN::Notify');
 ok $notifier->prepare, 'Prepare log_message filter checking';
@@ -131,7 +131,7 @@ like $email, qr/The end[.]/, 'End text should be present';
 
 ok( $notifier = SVN::Notify::HTML->new(
     %args,
-    filter => [ 'StartEnd' ],
+    filters => [ 'StartEnd' ],
 ), 'Construct HTML start and end filter notifier' );
 isa_ok($notifier, 'SVN::Notify');
 ok $notifier->prepare, 'Prepare log_message filter checking';
@@ -147,7 +147,7 @@ like $email, qr{</html>\nThe end[.]}m, 'End text should be present';
 
 ok( $notifier = SVN::Notify::HTML->new(
     %args,
-    filter => [ 'StartHTML' ],
+    filters => [ 'StartHTML' ],
 ), 'Construct new headers filter notifier' );
 isa_ok($notifier, 'SVN::Notify::HTML');
 isa_ok($notifier, 'SVN::Notify');
@@ -163,7 +163,7 @@ like $email, qr{<meta name="keywords" value="foo" />},
 
 ok( $notifier = SVN::Notify->new(
     %args,
-    filter => [ 'StripTrunk' ],
+    filters => [ 'StripTrunk' ],
 ), 'Construct new file lists filter notifier' );
 isa_ok($notifier, 'SVN::Notify');
 ok $notifier->prepare, 'Prepare log_message filter checking';
@@ -178,7 +178,7 @@ like $email, qr{^\s+Class-Meta/Changes}m, 'trunk/ should be stripped out';
 ok( $notifier = SVN::Notify->new(
     %args,
     with_diff => 1,
-    filter => [ 'StripTrunkDiff' ],
+    filters => [ 'StripTrunkDiff' ],
 ), 'Construct new diff filter notifier' );
 isa_ok($notifier, 'SVN::Notify');
 ok $notifier->prepare, 'Prepare log_message filter checking';
@@ -198,7 +198,7 @@ SKIP: {
     ok( $notifier = SVN::Notify->new(
         %args,
         with_diff => 1,
-        filter => [ 'SimpleStripTrunkDiff' ],
+        filters => [ 'SimpleStripTrunkDiff' ],
     ), 'Construct new diff filter notifier' );
     isa_ok($notifier, 'SVN::Notify');
     ok $notifier->prepare, 'Prepare log_message filter checking';
@@ -218,7 +218,7 @@ SKIP: {
 
     ok( $notifier = SVN::Notify->new(
         %args,
-        filter => [ 'Trac' ],
+        filters => [ 'Trac' ],
     ), 'Construct Trac filter notifier' );
     isa_ok($notifier, 'SVN::Notify');
     ok $notifier->prepare, 'Prepare log_message filter checking';
@@ -232,7 +232,7 @@ SKIP: {
     # Try it with SVN::Notify::HTML.
     ok $notifier = SVN::Notify::HTML->new(
         %args,
-        filter => [ 'Trac' ],
+        filters => [ 'Trac' ],
         trac_url => 'http://trac.example.com/'
     ), 'Construct Trac filtered log notifier';
     isa_ok($notifier, 'SVN::Notify::HTML');
@@ -253,7 +253,7 @@ SKIP: {
 ##############################################################################
 ok( $notifier = SVN::Notify::HTML->new(
     %args,
-    filter => [ 'CapMeta' ],
+    filters => [ 'CapMeta' ],
 ), 'Construct new metadata filter notifier' );
 isa_ok($notifier, 'SVN::Notify::HTML');
 isa_ok($notifier, 'SVN::Notify');
@@ -270,7 +270,7 @@ like $email, qr/AUTHOR:   theory/, 'Author header should be uppercase';
 
 ok( $notifier = SVN::Notify::HTML->new(
     %args,
-    filter => [ 'StripTrunk' ],
+    filters => [ 'StripTrunk' ],
 ), 'Construct new file lists filter notifier' );
 isa_ok($notifier, 'SVN::Notify::HTML');
 isa_ok($notifier, 'SVN::Notify');
@@ -287,7 +287,7 @@ like $email, qr{^\s+Class-Meta/Changes}m, 'trunk/ should be stripped out';
 ok( $notifier = SVN::Notify::HTML->new(
     %args,
     with_diff => 1,
-    filter => [ 'StripTrunkDiff' ],
+    filters => [ 'StripTrunkDiff' ],
 ), 'Construct new diff filter notifier' );
 isa_ok($notifier, 'SVN::Notify::HTML');
 isa_ok($notifier, 'SVN::Notify');
@@ -304,7 +304,7 @@ like $email, qr{^[+]{3}\s+Params-CallbackRequest/Changes}m, 'leading trunk shoul
 ok( $notifier = SVN::Notify::HTML::ColorDiff->new(
     %args,
     with_diff => 1,
-    filter => [ 'StripTrunkDiff' ],
+    filters => [ 'StripTrunkDiff' ],
 ), 'Construct new diff filter notifier' );
 isa_ok($notifier, 'SVN::Notify::HTML::ColorDiff');
 isa_ok($notifier, 'SVN::Notify::HTML');
@@ -321,7 +321,7 @@ like $email, qr{^[+]{3}\s+Params-CallbackRequest/Changes}m, 'leading trunk shoul
 
 ok( $notifier = SVN::Notify::HTML->new(
     %args,
-    filter => [ 'CSS' ],
+    filters => [ 'CSS' ],
 ), 'Construct CSS filter notifier' );
 isa_ok($notifier, 'SVN::Notify::HTML');
 isa_ok($notifier, 'SVN::Notify');
@@ -336,7 +336,7 @@ like $email, qr/^#patch { width: 90%; }/m, 'Should have modified the CSS';
 
 ok( $notifier = SVN::Notify::HTML::ColorDiff->new(
     %args,
-    filter => [ 'CSS' ],
+    filters => [ 'CSS' ],
 ), 'Construct CSS filter notifier' );
 isa_ok($notifier, 'SVN::Notify::HTML::ColorDiff');
 isa_ok($notifier, 'SVN::Notify::HTML');
