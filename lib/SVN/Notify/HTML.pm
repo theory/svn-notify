@@ -609,7 +609,7 @@ sub _css {
         qq(#logmsg { background: #ffc; border: 1px #fc0 solid; padding: 0 6px; font-family: verdana,arial,helvetica,sans-serif; font-size: 10pt; }\n),
         qq(#logmsg ul, #logmsg ul { padding-left: 1em; }\n),
         qq(#logmsg pre { background: #ddd; }\n),
-        qq(#logmsg blockquote { margin: 0; border: 1px solid #fc0; border-left-width: 10px; padding-left: 1em; }\n),
+        qq(#logmsg blockquote { margin: 0; border: 1px solid #fc0; border-left-width: 10px; padding-left: 1em; background: white;}\n),
         q(#header, #footer { color: #fff; background: #636; ),
         qq(border: 1px #300 solid; padding: 6px; }\n),
         qq(#patch { width: 100%; }\n),
