@@ -226,7 +226,9 @@ SKIP: {
     $email = get_output();
     UTF8: {
         use utf8;
-        like $email, qr{<p>\s*Did this, that, and the «other»[.] And then I did some more[.] Some\nit was done on a second line[.] “Go figure”[.] <a class="changeset" href="/changeset/1234">r1234</a>\s*</p>}ms;
+        like $email,
+            qr{^Did this, that, and the «other»[.] And then I did some more[.] Some\nit was done on a second line[.] “Go figure”[.] r1234\n}ms,
+            'The text output should not be HTML formatted';
     }
 
     # Try it with SVN::Notify::HTML.
@@ -243,7 +245,9 @@ SKIP: {
     $email = get_output();
     UTF8: {
         use utf8;
-        like $email, qr{<p>\s*Did this, that, and the «other»[.] And then I did some more[.] Some\nit was done on a second line[.] “Go figure”[.] <a class="changeset" href="http://trac[.]example[.]com/changeset/1234">r1234</a>\s*</p>}ms;
+        like $email,
+            qr{<p>\s*Did this, that, and the «other»[.] And then I did some more[.] Some\nit was done on a second line[.] “Go figure”[.] <a class="changeset" href="http://trac[.]example[.]com/changeset/1234">r1234</a>\s*</p>}ms,
+            'HTML output should have Track wiki conveted to HTML';
     }
 
 }

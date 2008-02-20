@@ -663,9 +663,10 @@ sub new {
     }
 
     # Load any filters.
-    my $filts = {};
-    if (my $f = delete $params{filters}) {
-        for my $pkg (@$f) {
+    $params{filters} ||= {};
+    if (ref $params{filters} eq 'ARRAY') {
+        my $filts = {};
+        for my $pkg ( @{ $params{filters} } ) {
             $pkg = "SVN::Notify::Filter::$pkg" if $pkg !~ /::/;
             if ($filters{$pkg}) {
                 while (my ($k, $v) = each %{ $filters{$pkg} }) {
@@ -684,8 +685,8 @@ sub new {
                 }
             }
         }
+        $params{filters} = $filts;
     }
-    $params{filts} = $filts;
 
     # Make sure that the tos are an arrayref.
     $params{to} = [ $params{to} || () ] unless ref $params{to};
@@ -1667,7 +1668,7 @@ and by subclasses.
 
 sub run_filters {
     my ($self, $type, $data) = @_;
-    my $filters = $self->{filts}{$type} or return $data;
+    my $filters = $self->{filters}{$type} or return $data;
     $data = $_->($self, $data) for @$filters;
     return $data;
 }
@@ -1684,7 +1685,7 @@ Returns C<undef> if there are no filters have been loaded for C<$output_type>.
 =cut
 
 sub filters_for {
-    shift->{filts}{+shift};
+    shift->{filters}{+shift};
 }
 
 ##############################################################################

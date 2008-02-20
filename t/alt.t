@@ -7,7 +7,7 @@ use Test::More;
 use File::Spec::Functions;
 
 if (eval { require HTML::Entities }) {
-    plan tests => 85;
+    plan tests => 92;
 } else {
     plan skip_all => "SVN::Notify::Alternative requires HTML::Entities";
 }
@@ -263,11 +263,45 @@ like $email, qr{Diff output truncated at 1024 characters.},
     'Check for truncation message';
 
 ##############################################################################
+# Try using the Trac filter.
+##############################################################################
+SKIP: {
+    eval 'require Text::Trac';
+    skip 'Text::Trac did not load', 11 if $@;
+
+    ok $notifier = SVN::Notify->new(
+        %args,
+        filters => ['Trac'],
+    ), 'Construct Trac-filtered alt notifier';
+
+    isa_ok $notifier, 'SVN::Notify::Alternative';
+    isa_ok $notifier, 'SVN::Notify';
+    ok $notifier->prepare, 'Prepare alt notifier';
+    ok $notifier->execute, 'Execute the alt notifier';
+
+    # Check the output.
+    $email = get_output();
+    my ($bound) = $email
+        =~ m{Content-Type: multipart/alternative; boundary="([^"]+)"};
+    my @parts = split "--$bound", $email;
+    my $text = $parts[1];
+    use utf8;
+    like $text,
+        qr/^Did this, that, and the «other»\. And then I did some more\. Some\nit was done on a second line\. “Go figure”\. r1234\n/m,
+        'Should have plain text log message in the plain text part';
+    my $html = $parts[2];
+    like $html,
+        qr{<p>\s*Did this, that, and the «other»[.] And then I did some more[.] Some\nit was done on a second line[.] “Go figure”[.] <a class="changeset" href="/changeset/1234">r1234</a>\s*</p>}ms,
+        'Check for Trac formatting in the HTML part';
+}
+
+##############################################################################
 # Functions.
 ##############################################################################
 
 sub get_output {
     my $outfile = catfile qw(t data output.txt);
     open CAP, "<$outfile" or die "Cannot open '$outfile': $!\n";
+    binmode CAP, 'utf8' if SVN::Notify::PERL58();
     return join '', <CAP>;
 }
