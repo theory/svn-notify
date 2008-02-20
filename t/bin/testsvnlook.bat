@@ -23,6 +23,8 @@ my $rev = pop;
 my $file = catfile($FindBin::Bin, updir, 'data', $command, "$rev.txt");
 
 open F, "<$file" or die "Cannot open '$file': $!\n";
+binmode F, ':raw';
+binmode STDOUT, ':raw';
 print for <F>;
 close F;
 

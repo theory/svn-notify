@@ -1349,7 +1349,7 @@ sub output_headers {
 
     # Q-Encoding (RFC 2047)
     my $subj = PERL58
-        ? $self->_encode( $self->{subject}, 'MIME-Q' )
+        ? Encode::encode( 'MIME-Q', $self->{subject} )
         : $self->{subject};
     my @headers = (
         "MIME-Version: 1.0\n",
@@ -2202,7 +2202,7 @@ sub _pipe {
             ? q{"}  . join(q{" "}, @_) . q{"|}
             : q{|"} . join(q{" "}, @_) . q{"};
         open PIPE, $cmd or die "Cannot fork: $!\n";
-        binmode PIPE, "encoding($encode)"
+        binmode PIPE, ":encoding($encode)"
             if PERL58 && $encode && lc($encode) ne 'utf-8';
         return *PIPE;
     }
@@ -2212,8 +2212,7 @@ sub _pipe {
 
     if ($pid) {
         # Parent process. Set the encoing layer and return the file handle.
-        binmode PIPE, "encoding($encode)"
-            if PERL58 && $encode && lc($encode) ne 'utf-8';
+        binmode PIPE, ":encoding($encode)" if PERL58 && $encode;
         return *PIPE;
     } else {
         # Child process. Execute the commands.
@@ -2245,7 +2244,7 @@ sub _read_pipe {
 sub _encode {
     my ($self, $str, $encoding) = @_;
     return Encode::encode($encoding || $self->{charset}, $str)
-        if PERL58 && Encode::is_utf8($str);
+        if PERL58 && Encode::is_utf8($str) && $encoding && $encoding eq 'MIME-Q';
     return $str;
 }
 
@@ -2256,7 +2255,7 @@ sub _encode {
 
 sub _decode {
     my ($self, $str, $encoding) = @_;
-    return Encode::decode($encoding || $self->{charset}, $str) if PERL58;
+#    return Encode::decode($encoding || $self->{charset}, $str) if PERL58;
     return $str;
 }
 

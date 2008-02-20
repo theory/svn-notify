@@ -20,6 +20,8 @@ use File::Spec::Functions;
 my $file = catfile($FindBin::Bin, updir, 'data', "output.txt");
 
 open F, ">$file" or die "Cannot open '$file': $!\n";
+binmode F, ':raw';
+binmode STDIN, ':raw';
 while (<STDIN>) { print F }
 close F;
 
