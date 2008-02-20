@@ -23,8 +23,8 @@ sub log_message {
     return $lines unless $notify->isa( 'SVN::Notify::HTML' );
     my $trac = Text::Trac->new( trac_url => $notify->trac_url );
     my $msg = join $/, @{ $lines };
-    $msg =~ s/^\s+//g;
-    $msg =~ s/\s+$//g;
+    $msg =~ s/^\n+//g;
+    $msg =~ s/\n+$//g;
     return [ $trac->parse( $msg ) ];
 }
 
