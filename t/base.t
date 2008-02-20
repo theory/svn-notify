@@ -3,7 +3,7 @@
 # $Id$
 
 use strict;
-use Test::More tests => 233;
+use Test::More tests => 239;
 use File::Spec::Functions;
 
 use_ok('SVN::Notify');
@@ -57,6 +57,9 @@ is($notifier->charset, 'UTF-8', "Check charset accessor" );
 is($notifier->svn_charset, 'UTF-8', "Check svn_charset accessor" );
 is($notifier->diff_charset, 'UTF-8', "Check diff_charset accessor" );
 is($notifier->language, undef, "Check language accessor" );
+is($notifier->env_lang, undef, "Check env_lang accessor" );
+is($notifier->svn_env_lang, undef, "Check svn_env_lang accessor" );
+is($notifier->diff_env_lang, undef, "Check diff_env_lang accessor" );
 is($notifier->with_diff, $args{with_diff}, "Check with_diff accessor" );
 is($notifier->attach_diff, $args{attach_diff}, "Check attach_diff accessor" );
 is($notifier->diff_switches, $args{diff_switches},
@@ -136,6 +139,7 @@ unlike( $email, qr{Modified: trunk/Params-CallbackRequest/Changes},
 ##############################################################################
 # Include diff and language.
 ##############################################################################
+local $ENV{LANG} = undef;
 ok( $notifier = SVN::Notify->new(
     %args,
     with_diff => 1,
@@ -143,6 +147,9 @@ ok( $notifier = SVN::Notify->new(
 ), 'Construct new diff notifier' );
 ok $notifier->with_diff, 'with_diff() should return true';
 is $notifier->language, 'en_US', 'language should be "en_US"';
+is($notifier->env_lang, 'en_US.UTF-8', "Check env_lang accessor" );
+is($notifier->svn_env_lang, 'en_US.UTF-8', "Check svn_env_lang accessor" );
+is($notifier->diff_env_lang, 'en_US.UTF-8', "Check diff_env_lang accessor" );
 isa_ok($notifier, 'SVN::Notify');
 NO_BADLANG: {
     local $ENV{PERL_BADLANG} = 0;

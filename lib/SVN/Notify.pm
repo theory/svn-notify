@@ -718,10 +718,13 @@ sub new {
 
     # Set up the environment language.
     if ( $params{language} && !$ENV{LANG} ) {
-        ( my $lang_country = $params{language} ) =~ s/_/-/g;
-        my $encoding = $params{charset};
-        $encoding =~ s/-//g if uc($encoding) ne 'UTF-8';
-        $params{env_lang} = "$lang_country.$encoding";
+        ( my $lang_country = $params{language} ) =~ s/-/_/g;
+        for my $p qw(charset svn_charset diff_charset) {
+            my $encoding = $params{$p};
+            $encoding =~ s/-//g if uc($encoding) ne 'UTF-8';
+            (my $label = $p ) =~ s/(_?)charset/$1/;
+            $params{"${label}env_lang"} = "$lang_country.$encoding";
+        }
     }
 
     # Set up the revision URL.
@@ -1031,7 +1034,7 @@ sub prepare_recipients {
         $regexen = [];
     }
 
-    local $ENV{LANG} = "$self->{env_lang}" if $self->{env_lang};
+    local $ENV{LANG} = "$self->{svn_env_lang}" if $self->{svn_env_lang};
     my $fh = $self->_pipe(
         $self->{svn_charset},
         '-|', $self->{svnlook},
@@ -1085,7 +1088,7 @@ be used in the email) and the log message.
 sub prepare_contents {
     my $self = shift;
     $self->_dbpnt( "Preparing contents") if $self->{verbose};
-    local $ENV{LANG} = "$self->{env_lang}" if $self->{env_lang};
+    local $ENV{LANG} = "$self->{svn_env_lang}" if $self->{svn_env_lang};
     my $lines = $self->_read_pipe($self->{svnlook}, 'info', $self->{repos_path},
                                   '-r', $self->{revision});
     $self->{user} = shift @$lines;
@@ -1129,7 +1132,7 @@ sub prepare_files {
     my $self = shift;
     $self->_dbpnt( "Preparing file lists") if $self->{verbose};
     my %files;
-    local $ENV{LANG} = "$self->{env_lang}" if $self->{env_lang};
+    local $ENV{LANG} = "$self->{svn_env_lang}" if $self->{svn_env_lang};
     my $fh = $self->_pipe(
         $self->{svn_charset},
         '-|', $self->{svnlook},
@@ -1725,7 +1728,7 @@ sub diff_handle {
     # etc., to be output in the localized string encoded with another charset
     # from diff contents. HTML and HTML::ColorDiff also expect the terms
     # printed in English.
-    local $ENV{LANG} = "C";
+    local $ENV{LANG} = "$self->{diff_env_lang}" if $self->{diff_env_lang};
 
     return $self->_pipe(
         $self->{diff_charset},
@@ -1796,6 +1799,8 @@ __PACKAGE__->_accessors(qw(
     diff_charset
     svn_charset
     env_lang
+    svn_env_lang
+    diff_env_lang
     language
     with_diff
     attach_diff
@@ -1966,12 +1971,26 @@ Gets or sets the value of the C<smtp> attribute.
 
 Gets or sets the value of the C<charset> attribute.
 
+=head3 svn_charset
+
+  my $svn_charset = $notifier->svn_charset;
+  $notifier = $notifier->svn_charset($svn_charset);
+
+Gets or sets the value of the C<svn_charset> attribute.
+
 =head3 diff_charset
 
   my $diff_charset = $notifier->diff_charset;
   $notifier = $notifier->diff_charset($diff_charset);
 
 Gets or sets the value of the C<diff_charset> attribute.
+
+=head3 language
+
+  my $language = $notifier->language;
+  $notifier = $notifier->language($language);
+
+Gets or sets the value of the C<language> attribute.
 
 =head3 env_lang
 
@@ -1981,21 +2000,30 @@ Gets or sets the value of the C<diff_charset> attribute.
 Gets or sets the value of the C<env_lang> attribute, which is set to C<<
 $notify->language . '.' . $notify->charset >> when C<language> is set, and
 otherwise is C<undef>. This attribute is used to set the C<$LANG> enviornment
-variable before executing C<svnlook> or C<sendmail>.
+variable, if it is not already set by the environment, before executing
+C<sendmail>.
 
-=head3 svn_charset
+=head3 svn_env_lang
 
-  my $svn_charset = $notifier->svn_charset;
-  $notifier = $notifier->svn_charset($svn_charset);
+  my $svn_env_lang = $notifier->svn_env_lang;
+  $notifier = $notifier->svn_env_lang($svn_env_lang);
 
-Gets or sets the value of the C<svn_charset> attribute.
+Gets or sets the value of the C<svn_env_lang> attribute, which is set to C<<
+$notify->language . '.' . $notify->svn_charset >> when C<language> is set, and
+otherwise is C<undef>. This attribute is used to set the C<$LANG> enviornment
+variable, if it is not already set by the environment, before executing
+C<svnlook>.
 
-=head3 language
+=head3 diff_env_lang
 
-  my $language = $notifier->language;
-  $notifier = $notifier->language($language);
+  my $diff_env_lang = $notifier->diff_env_lang;
+  $notifier = $notifier->diff_env_lang($diff_env_lang);
 
-Gets or sets the value of the C<language> attribute.
+Gets or sets the value of the C<diff_env_lang> attribute, which is set to C<<
+$notify->language . '.' . $notify->diff_charset >> when C<language> is set,
+and otherwise is C<undef>. This attribute is used to set the C<$LANG>
+enviornment variable, if it is not already set by the environment, before
+executing C<svnlook diff>.
 
 =head3 with_diff
 
