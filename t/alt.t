@@ -267,7 +267,7 @@ like $email, qr{Diff output truncated at 1024 characters.},
 ##############################################################################
 SKIP: {
     eval 'require Text::Trac';
-    skip 'Text::Trac did not load', 11 if $@;
+    skip 'Text::Trac did not load', 7 if $@;
 
     ok $notifier = SVN::Notify->new(
         %args,
