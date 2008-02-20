@@ -701,8 +701,6 @@ sub new {
     die qq{Missing required "to", "to_regex_map", or "to_email_map" parameter}
         unless @{ $params{to} } || $params{to_regex_map}
         || $params{to_email_map};
-    die qq{Cannot find sendmail and no "smtp" parameter specified}
-        unless $params{sendmail} || $params{smtp};
 
     # Set up default values.
     $params{svnlook}        ||= $ENV{SVNLOOK}  || $class->find_exe('svnlook');
@@ -714,6 +712,9 @@ sub new {
     $params{smtp_authtype}  ||= 'PLAIN';
     $params{sendmail}       ||= $ENV{SENDMAIL} || $class->find_exe('sendmail')
         unless $params{smtp};
+
+    die qq{Cannot find sendmail and no "smtp" parameter specified}
+        unless $params{sendmail} || $params{smtp};
 
     # Set up the environment language.
     if ( $params{language} && !$ENV{LANG} ) {
