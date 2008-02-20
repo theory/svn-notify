@@ -297,15 +297,21 @@ links in your commit messages. See the documentation for
 L<register_attributes()|SVN::Notify/"register_attributes"> for details on its
 arguments mapping attribute names to L<Getopt::Long|Getopt::Long> rules.
 
+Note that this example also makes use of the C<content_type()> method of
+SVN::Notify to determine whether or not to actually do the filtering. This
+prvents it from inadvertently converting the log file to HTML in plain text
+messages, such as those sent by default by SVN::Notify, or the plain text part
+sent by L<SVN::Notify::Alternative|SVN::Notify::Alternative>.
+
   package SVN::Notify::Filter::Trac;
 
   SVN::Notify->register_attributes( trac_url => 'trac-url=s' );
 
   sub log_message {
-      my $notify = shift;
-      my $trac = Text::Trac->new( trac_url => $notify->trac_url );
-      $trac->parse(  join $/, @{ +shift } );
-      return [ $trac->html ];
+    my ($notify, $lines) = @_;
+    return $lines unless $notify->content_type eq 'text/html';
+    my $trac = Text::Trac->new( trac_url => $notify->trac_url );
+    return [ $trac->parse( join $/, @{ $lines } ) ];
   }
 
 =back
