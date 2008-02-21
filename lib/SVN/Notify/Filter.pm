@@ -308,10 +308,10 @@ sent by L<SVN::Notify::Alternative|SVN::Notify::Alternative>.
   SVN::Notify->register_attributes( trac_url => 'trac-url=s' );
 
   sub log_message {
-    my ($notify, $lines) = @_;
-    return $lines unless $notify->content_type eq 'text/html';
-    my $trac = Text::Trac->new( trac_url => $notify->trac_url );
-    return [ $trac->parse( join $/, @{ $lines } ) ];
+      my ($notify, $lines) = @_;
+      return $lines unless $notify->content_type eq 'text/html';
+      my $trac = Text::Trac->new( trac_url => $notify->trac_url );
+      return [ $trac->parse( join $/, @{ $lines } ) ];
   }
 
 =back
