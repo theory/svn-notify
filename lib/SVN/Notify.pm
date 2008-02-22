@@ -1098,7 +1098,7 @@ sub prepare_contents {
 
     # Set up the from address.
     unless ($self->{from}) {
-        $self->{from} = $self->_encode( $self->{user} )
+        $self->{from} = $self->{user}
             . ( $self->{user_domain} ? "\@$self->{user_domain}" : '' );
     }
     $self->{from} = $self->run_filters( from => $self->{from} );
@@ -1187,22 +1187,19 @@ sub prepare_subject {
     my $self = shift;
     $self->_dbpnt( "Preparing subject") if $self->{verbose};
 
-    # Start the subject as a UTF-8 string.
-    $self->{subject} = $self->_decode('');
+    $self->{subject} = '';
 
     # Start with the optional message and revision number..
     if ( defined $self->{subject_prefix} ) {
         if ( index($self->{subject_prefix}, '%d') > 0 ) {
-            $self->{subject} .= $self->_decode(
-                sprintf $self->{subject_prefix}, $self->{revision}
-            );
+            $self->{subject} .=
+                sprintf $self->{subject_prefix}, $self->{revision};
         } else {
-            $self->{subject} .= $self->_decode(
-                $self->{subject_prefix} . "[$self->{revision}] "
-            );
+            $self->{subject} .=
+                $self->{subject_prefix} . "[$self->{revision}] ";
         }
     } else {
-        $self->{subject} .= $self->_decode( "[$self->{revision}] " );
+        $self->{subject} .= "[$self->{revision}] ";
     }
 
     # Add the context if there is one.
@@ -1211,17 +1208,16 @@ sub prepare_subject {
             $self->{cx} =~ s/$_// for @$rx;
         }
         my $space = $self->{no_first_line} ? '' : ': ';
-        $self->{subject} .= $self->_decode( $self->{cx} . $space ) if $self->{cx};
+        $self->{subject} .= $self->{cx} . $space if $self->{cx};
     }
 
     # Add the first sentence/line from the log message.
     unless ($self->{no_first_line}) {
         # Truncate to first period after a minimum of 10 characters.
         my $i = index $self->{message}[0], '. ';
-        $self->{subject} .= $self->_decode( $i > 0
+        $self->{subject} .= $i > 0
             ? substr($self->{message}[0], 0, $i + 1)
-            : $self->{message}[0]
-        );
+            : $self->{message}[0];
     }
 
     # Truncate to the last word under 72 characters.
@@ -1467,7 +1463,7 @@ sub output_metadata {
 
     push @lines, "Date:     $self->{date}\n";
 
-    $self->print_lines( $out, @{ $self->run_filters( metadata => \@lines ) } );
+    print $out @{ $self->run_filters( metadata => \@lines ) };
     return $self;
 }
 
@@ -1488,7 +1484,7 @@ sub output_log_message {
         $self->run_filters( log_message => $self->{message} )
     };
 
-    $self->print_lines($out, "Log Message:\n-----------\n$msg\n");
+    print $out "Log Message:\n-----------\n$msg\n";
 
     # Make Revision links.
     if (my $url = $self->{revision_url}) {
@@ -1543,13 +1539,13 @@ sub output_file_lists {
           if $self->{verbose} > 2;
 
         # Identify the action and output each file.
-        $self->print_lines( $out, "\n", @{ $self->run_filters(
+        print $out "\n", @{ $self->run_filters(
             file_lists => [
                 "$map->{$type}:\n",
                 "$dash{$type}\n",
                 map { "    $_\n" } @{ $files->{$type} }
             ]
-        ) } );
+        ) };
     }
     print $out "\n";
     return $self;
@@ -1694,23 +1690,6 @@ sub filters_for {
 
 ##############################################################################
 
-=head3 print_lines
-
-  $notifier->print_lines( $fh, @lines );
-
-Prints C<@lines> to the file handle. On Perl 5.8.0 and later, each line is
-first converted to its proper encoding as determined by the C<charset>
-attribute. This method is intended mainly for use by subclasses.
-
-=cut
-
-sub print_lines {
-    my ($self, $out) = (shift, shift);
-    print $out map { $self->_encode( $_ ) } @_;
-}
-
-##############################################################################
-
 =head3 diff_handle
 
   my $diff = $notifier->diff_handle;
@@ -1761,7 +1740,7 @@ sub _dump_diff {
         while (<$diff>) {
             s/[\n\r]+$//;
             if (($length += length) < $max) {
-                $self->print_lines($out, "$_\n");
+                print $out $_, "\n";
             }
             else {
                 print $out
@@ -1774,7 +1753,7 @@ sub _dump_diff {
     else {
         while (<$diff>) {
             s/[\n\r]+$//;
-            $self->print_lines($out, "$_\n");
+            print $out $_, "\n";
         }
     }
     close $diff or warn "Child process exited: $?\n";
@@ -2266,33 +2245,11 @@ sub _read_pipe {
 }
 
 ##############################################################################
-# This method is just a wrapper of Encode::encode API, with the checks for
-# Perl version and UTF8-ness flag.
-##############################################################################
-
-sub _encode {
-    my ($self, $str, $encoding) = @_;
-    return Encode::encode($encoding || $self->{charset}, $str)
-        if PERL58 && Encode::is_utf8($str) && $encoding && $encoding eq 'MIME-Q';
-    return $str;
-}
-
-##############################################################################
-# This method is just a wrapper of Encode::decode API, with the checks for
-# Perl version.
-##############################################################################
-
-sub _decode {
-    my ($self, $str, $encoding) = @_;
-#    return Encode::decode($encoding || $self->{charset}, $str) if PERL58;
-    return $str;
-}
-
-##############################################################################
 # This method is used for debugging output in various verbose modes.
 ##############################################################################
 
-sub _dbpnt { shift->print_lines( *STDOUT, __PACKAGE__, ": $_[0]\n" ) };
+# XXX Encode.
+sub _dbpnt { print __PACKAGE__, ": $_[0]\n" }
 
 package SVN::Notify::SMTP;
 

@@ -170,7 +170,7 @@ sub output_diff {
                 $in_span = '';
             } elsif ($line =~ /^\@\@/) {
                 print $out "</$in_span>" if $in_span;
-                $self->print_lines(
+                print $out (
                     $out,
                     qq{<span class="lines">},
                     encode_entities($line, '<>&"'),
@@ -180,14 +180,10 @@ sub output_diff {
             } elsif ($line =~ /^([-+])/) {
                 my $type = $1 eq '+' ? 'ins' : 'del';
                 if ($in_span eq $type) {
-                    $self->print_lines(
-                        $out,
-                        encode_entities($line, '<>&"'), "\n",
-                    );
+                    print $out encode_entities($line, '<>&"'), "\n";
                 } else {
                     print $out "</$in_span>" if $in_span;
-                    $self->print_lines(
-                        $out,
+                    print $out (
                         qq{<$type>},
                         encode_entities($line, '<>&"'),
                         "\n",
@@ -196,14 +192,10 @@ sub output_diff {
                 }
             } else {
                 if ($in_span eq 'cx') {
-                    $self->print_lines(
-                        $out,
-                        encode_entities($line, '<>&"'), "\n",
-                    );
+                    print $out encode_entities($line, '<>&"'), "\n";
                 } else {
                     print $out "</$in_span>" if $in_span;
-                    $self->print_lines(
-                        $out,
+                    print $out (
                         qq{<span class="cx">},
                         encode_entities($line, '<>&"'),
                         "\n",

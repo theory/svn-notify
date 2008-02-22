@@ -175,7 +175,7 @@ sub content_type { 'text/html' }
 This method starts the HTML of the notification message. It outputs the
 opening C<< <html> >>, C<< <head> >>, and C<< <body> >> tags. Note that if the
 C<language> attribute is set to a value, it will be specified in the
-C<< <html> >> tag.
+ C<< <html> >> tag.
 
 All of the HTML will be passed to any "start_html" output filters. See
 L<Writing Output Filters|SVN::Notify/"Writing Output Filters"> for details on
@@ -206,10 +206,7 @@ sub start_html {
         qq{</title>\n</head>\n<body>\n\n}
     );
 
-    $self->print_lines(
-        $out,
-        @{ $self->run_filters( start_html => \@html ) }
-    );
+    print $out @{ $self->run_filters( start_html => \@html ) };
     return $self;
 }
 
@@ -303,7 +300,7 @@ sub output_metadata {
         return $self->SUPER::output_metadata($out);
     }
 
-    $self->print_lines($out, "<dl>\n<dt>Revision</dt> <dd>");
+    print $out "<dl>\n<dt>Revision</dt> <dd>";
 
     my $rev = $self->revision;
     if (my $url = $self->revision_url) {
@@ -326,8 +323,7 @@ sub output_metadata {
         print $out $user;
     }
 
-    $self->print_lines(
-        $out,
+    print $out (
         "</dd>\n",
         '<dt>Date</dt> <dd>',
         encode_entities($self->date, '<>&"'), "</dd>\n",
@@ -399,18 +395,17 @@ sub output_log_message {
         }
     }
 
-    $self->print_lines( $out, "<h3>Log Message</h3>\n" );
+    print $out "<h3>Log Message</h3>\n";
     if ($filters || $self->wrap_log) {
         $msg = join( "</p>\n\n<p>", '<p>', split( /\n\s*\n/, $msg ), '</p>' )
             if !$filters && $self->wrap_log;
-        $self->print_lines(
-            $out,
+        print $out (
             qq{<div id="logmsg">\n},
             $msg,
             qq{</div>\n\n},
         )
     } else {
-        $self->print_lines( $out, "<pre>$msg</pre>\n\n" );
+        print $out "<pre>$msg</pre>\n\n";
     }
     return $self;
 }
@@ -457,21 +452,16 @@ sub output_file_lists {
                 my $file = encode_entities($_, '<>&"');
                 if ($file =~ m{/$} && $type ne '_') {
                     # Directories don't link, unless it's a prop change.
-                    $self->print_lines( $out, qq{<li>$file</li>\n} );
+                    print $out qq{<li>$file</li>\n};
                 } else {
                     # Strip out letters illegal for IDs.
                     (my $id = $file) =~ s/[^\w_]//g;
-                    $self->print_lines(
-                        $out,
-                        qq{<li><a href="#$id">$file</a></li>\n},
-                    );
+                    print $out qq{<li><a href="#$id">$file</a></li>\n};
                 }
             }
         } else {
-            $self->print_lines(
-                $out,
-                "  <li>", encode_entities($_, '<>&"'), "</li>\n"
-            ) for @{ $files->{$type} };
+            print $out "  <li>", encode_entities($_, '<>&"'), "</li>\n"
+                for @{ $files->{$type} };
         }
         print $out "</ul>\n\n";
     }
@@ -554,10 +544,10 @@ sub output_diff {
                 my $action = $1;
                 my $file = encode_entities($2, '<>&"');
                 (my $id = $file) =~ s/[^\w_]//g;
-                $self->print_lines( $out, qq{<a id="$id">$action: $file</a>\n} );
+                print $out qq{<a id="$id">$action: $file</a>\n};
             }
             else {
-                $self->print_lines($out, encode_entities($_, '<>&"'), "\n");
+                print $out encode_entities($_, '<>&"'), "\n";
             }
         } else {
             print $out

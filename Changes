@@ -1,20 +1,19 @@
 Revision history for Perl extension SVN::Notify
 
 2.70
-      - Rewrote character encoding handling, based on a patch submitted by
-        Toshikazu Kinkoh. Hopefully these changes will help solve the various
-        encoding problems that continue to crop up:
+      - Fixed issues with character encoding handling, based on a patch
+        submitted by Toshikazu Kinkoh and my own experimentation. Hopefully
+        these changes will help solve the various encoding problems that
+        continue to crop up:
         + Removed --io-layer, which never actually worked.
         + Added --svn-charset, which identifies the encoding in which data
-          is stored in SVN. It outputs the value of --charset.
+          is stored in SVN. It defaults to the value of --charset.
         + Added --diff-charset, which identifies the encoding in which files
           are stored in SVN. This is useful for the case when log messages
           are written in one encoding and files stored in another. Defaults
-          to --svn-charset.
+          to the value of --svn-charset.
         + The --language option is now used to set the C<$LANG> environment
           variable for the execution of `svnlook` as well as `sendmail`.
-        + Added the `print_lines` method to SVN::Notify to encapsulate
-          encoding lines of text and sending them to a file handle.
       - Added a link to SVN::Notify's Subversion repository.
       - Added support for output filtering. This allows users to easily
         modify content befor it's output. As an example and likely common
@@ -25,7 +24,15 @@ Revision history for Perl extension SVN::Notify
       - The CSS output by SVN::Notify::HTML is now output inside the <body>
         tags, rather than inside the <head> tags, as the former works better
         for Webmail clients.
+      - Added SVN::Notify::Filter, which fully documents the interface for
+        filtering (it's really easy!).
+      - Added SVN::Notify::Filter:Trac, which parses log messages from the
+        Trac wiki syntax to HTML. Useful for use with SVN::Notify::HTML
+        and SVN::Notify::HTML::ColorDiff, and as a nice example of filtering.
       - Eliminated locale warnings during tests.
+      - Tweaked the CSS emitted by SVN::Notify::HTML to support a lot of
+        formatting in the log message, since such formatting can come from
+        the use of SVN::Notify::Filter::Trac.
       - Fixed issue running tests with a Perl other than /usr/bin/perl without
         running `./Build`. If you just did `./Build test`, it could fail with
         a lot of errors.
