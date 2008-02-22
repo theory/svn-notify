@@ -83,10 +83,6 @@ asynchronous execution, try using F<HookStart.exe>
 (L<http://www.koders.com/csharp/fidE2724F44EF2D47F1C0FE76C538006435FA20051D.aspx>)
 to run F<svnnotify>.
 
-=head2 Encoding Support
-
-SVN::Notify supports XXX Finish this up.
-
 =cut
 
 # Map the svnlook changed codes to nice labels.
@@ -300,7 +296,8 @@ list. Defaults to "PLAIN".
 The character set typically used on the repository for log messages, file
 names, and file contents. Used to specify the character set in the email
 Content-Type headers and, when the C<language> paremeter is specified, the
-C<$LANG> environment variable when launching C<sendmail>. Defaults to "UTF-8".
+C<$LANG> environment variable when launching C<sendmail>. See L</"Encoding
+Support"> for more information. Defaults to "UTF-8".
 
 =item svn_charset
 
@@ -310,8 +307,8 @@ The character set used in files and log messages managed in Subversion. It's
 useful to set this option if you store files in Subversion using one character
 set but want to send notification messages in a different character set.
 Therefore C<charset> would be used for the notification message, and
-C<svn_charset> would be used to read in data from Subversion. Defaults to
-value stored in C<charset>.
+C<svn_charset> would be used to read in data from Subversion. See L</"Encoding
+Support"> for more information. Defaults to the value stored in C<charset>.
 
 =item diff_charset
 
@@ -320,9 +317,9 @@ value stored in C<charset>.
 The character set used by files in Subversion, and thus present in the the
 diff. It's useful to set this option if you store files in Subversion using
 one character write log messages in a different character set. Therefore
-C<svn_charset> would be used to read the log message and C<diff_charset>
-would be used to read the diff from Subversion. Defaults to value stored in
-C<svn_charset>.
+C<svn_charset> would be used to read the log message and C<diff_charset> would
+be used to read the diff from Subversion. See L</"Encoding Support"> for more
+information. Defaults to the value stored in C<svn_charset>.
 
 =item language
 
@@ -335,7 +332,7 @@ set the C<$LANG> environment variable to C<< $notify->language . '.' .
 $notify->charset >> before executing C<svnlook> and C<sendmail> (but not for
 sending data to Net::SMTP). Undefined by default, meaning that no
 Content-Language header is output and the C<$LANG> environment variable will
-not be set.
+not be set. See L</"Encoding Support"> for more information.
 
 =item with_diff
 
@@ -2299,6 +2296,101 @@ sub CLOSE  {
 __END__
 
 ##############################################################################
+
+=head2 Encoding Support
+
+SVN::Notify has comprehensive support for character encodings, but since it
+cannot always know what encodings your system supports or in which your data
+is stored in Subversion, it needs your help. In plain English, here's what you
+need to know to make non-ASCII characters look right in SVN::Notify's mesages:
+
+=over
+
+=item * The encoding for messages
+
+To tell SVN::Notify what character encoding to use when it sends messages, use
+the C<--charset> option. It defaults to "UTF-8", which should cover the vast
+majority of needs. You're using it in your code already, right?
+
+=item * The character set you use in your log messages
+
+To tell SVN::Notify the character encoding that you use in Subversion commit
+log messages, as well as the names of the files in Subversion, use the
+C<--svn-charset> option, which defaults to the same value as C<--charset>. If,
+for example, you want messages sent in UTF-8 even though you write log
+messages in Big5, pass C<--svn-charset Big5>.
+
+=item * The character set you use in your code
+
+To tell SVN::Notify the character encoding that you use in the files stored in
+Subversion, and therefore that will be output in diffs, use the
+C<--diff-charset> option, which defaults to the same value as
+C<--svn-charset>. If, for example, you write code in euc-jp but write your
+commit log messages in some other encoding, pass C<--diff-charset euc-jp>.
+
+=item * The locales supported by your OS
+
+SVN::Notify uses the values passed to C<--charset>, C<--svn-charset>, and
+C<--diff-charset> to read in data from F<svnlook>, convert it to Perl's
+internal encoding, and to output messages the proper encoding. Most of the
+time, if you write code in UTF-8 and want messages delivered in UTF-8, you can
+ignore these options.
+
+Sometimes, however, F<svnlook> converts its output to some other encoding.
+This encoding is controlled by the C<$LANG> environment variable, which
+corresponds to a locale supported by your OS. (See
+L<perllocale|perllocale/"Finding locales"> to find out what locales are
+supported by your system.) If your system supports UTF-8 locales (and most
+modern systems do) but defaults to using some other locale (causing F<svnlook>
+to output log messages in the wrong encoding), then all you have to do is pass
+the C<--language> option to get SVN::Notify to tell F<svnlook> to use it. For
+example, if all of your data is in UTF-8, pass C<--language en_US> to get
+SVN::Notify to use the en_US.UTF-8 locale. Likewise, pass C<--language sv_SE>
+to force the use of the sv_SE.UTF-8 locale.
+
+Sometimes, however, the system does not support UTF-8 locales. Or perhaps you
+use something other than UTF-8 in your log messages or source code. But this
+should be no problem, either, as SVN::Notify uses the charset options to
+determine the locales to use. For example, if your OS offers the
+en_US.ISO88591 locale, pass both C<--svn-charset> and C<--language>,
+like so:
+
+  --svn-charset ISO-8859-1 --language en_US
+
+SVN::Notify will set the C<$LANG> environment variable to "en_US.ISO88591",
+which F<svnlook> will use to convert log messages from its internal form to
+ISO-8859-1. SVN::Notify will convert the output from F<svnlook> to UTF-8 (or
+whatever C<--charset> you've specified) before sending the message. Of course,
+if you have characters that don't correspond to ISO-8859-1, you'll still get
+some garbage characters. It is ideal when the OS locale supports the same
+encodings as you use in your source code and log messages, though that's not
+always the case.
+
+And finally, because the names and spellings that OS vendors use for locales
+can vary widely, SVN::Notify will occaisionally get the name of the encoding
+wrong, in which case you'll see warnings such as this:
+
+  perl: warning: Setting locale failed.
+  perl: warning: Please check that your locale settings:
+      LC_ALL = (unset),
+	  LANG = "en_US.ISO88591"
+      are supported and installed on your system.
+  perl: warning: Falling back to the standard locale ("C").
+
+In such a case, if all of your data and your log messages are stored in the
+same encoding, you can set the C<$LANG> environment variable directly in your
+F<post-commit> script before running F<svnnotify>:
+
+  LANG=en_US.ISO-88591 svnnotify -p "$1" -r "$2"
+
+If the C<$LANG> environment variable is already set in this way, SVN::Notify
+will not set it before shelling out to F<svnlook>.
+
+=back
+
+This looks like a lot of information, and it is. But in most cases, if you
+exclusively use UTF-8 (or ASCII!) in your source code and log messages, and
+your OS defaults to a UTF-8 locale, things should just work.
 
 =head1 See Also
 
