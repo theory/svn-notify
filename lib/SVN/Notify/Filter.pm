@@ -11,15 +11,16 @@ SVN::Notify::Filter - Create output filters for SVN::Notify
 
   sub log_message {
       my ($notifier, $lines) = @_;
+      return $lines unless $notify->content_type eq 'text/html';
       return [ Text::Textile->new->process( join $/, @$lines ) ];
   }
 
 =head1 Description
 
 This document covers the output filtering capabilities of
-L<SVN::Notify|SVN::Notify>. Output filters are simply subroutines defined in a
-package that modify content output by SVN::Notify. The idea is to provide a
-simple interface for anyone to use to change the format of the messages that
+L<SVN::Notify|SVN::Notify>. Output filters are simply subroutines that modify
+content before SVN::Notify outputs it. The idea is to provide a simple
+interface for anyone to use to change the format of the messages that
 SVN::Notify creates. Filters are loaded by the C<filter> parameter to C<new()>
 or by the C<--filter> option to the C<svnnotify> command-line program.
 
@@ -37,6 +38,7 @@ and put it somewhere in the Perl path. Something like this:
 
   sub log_message {
       my ($notifier, $lines) = @_;
+      return $lines unless $notify->content_type eq 'text/html';
       return [ Text::Markdown->new->markdown( join $/, @$lines ) ];
   }
 
@@ -48,11 +50,12 @@ notification message, and the second argument will always be the content to be
 filtered.
 
 In this example, we wanted to filter the commit log message, so we just
-defined a subroutine named C<log_message()> and passed the lines of the commit
-message to L<Text::Markdown|Text::Markdown> to format, returning a new array
-reference. And that's all there is to writing SVN::Notify filters: Define a
-subroutine, process the second argument, and return a data structure in the
-same format as that argument (usually an array reference).
+defined a subroutine named C<log_message()> and, if the message will be HTML,
+passed the lines of the commit message to L<Text::Markdown|Text::Markdown> to
+format, returning a new array reference. And that's all there is to writing
+SVN::Notify filters: Define a subroutine, process the second argument, and
+return a data structure in the same format as that argument (usually an array
+reference).
 
 Now, to use this filter, just use the C<--filter> option:
 
@@ -60,12 +63,12 @@ Now, to use this filter, just use the C<--filter> option:
 
 SVN::Notify will assume that a filter option without "::" is in the
 SVN::Notify::Filter name space, and will load it accordingly. If you instead
-created your filter in some other name space, say My::Filter::Markdown, then
-you'd specify the full package name in the C<--filter> option:
+created your filter in some other name space, say C<My::Filter::Markdown>,
+then you'd specify the full package name in the C<--filter> option:
 
   svnnotify -p "$1" -r "$2" --handler HTML --filter My::Filter::Markdown
 
-And that's it! The filter modify the contents of the log message before
+And that's it! The filter modifies the contents of the log message before
 SVN::Notify::HTML spits it out.
 
 =head2 The Details
@@ -74,29 +77,29 @@ Writing SVN::Notify filters is easy. The name of each subroutine in a filter
 module determines what content it filters. The filter subroutines take two
 arguments: the SVN::Notify object that's creating the notification message,
 and the content to be filtered. They should return the filtered content in the
-same data structure as it was passed. This makes it easy to change the output
-of SVN::Notify without the hassle of subclassing or sending patches to the
-maintainer.
+same data structure as that in which it was passed. This makes it easy to
+change the output of SVN::Notify without the hassle of subclassing or sending
+patches to the maintainer.
 
 The names of the filter subroutines and the types of their content arguments
 and return values are as follows:
 
   Sub Name    | Second Argument
   ------------+---------------------------------------------------------------
-  headers     | Array reference of individual headers lines.
+  headers     | Array reference of individual email headers lines.
   from        | String with sender address.
   recipients  | Array reference of email addresses.
   subject     | String with the subject line.
   metadata    | Array reference of lines of the metadata part of the message.
   log_message | Array reference of lines of log message.
   file_lists  | Array reference of lines of file names. The first line will be
-              | they type of change for the list, the next a simple line of
+              | the type of change for the list, the next a simple line of
               | dashes, and each of the rest of the lines a file name.
   diff        | A file handle reference to the diff.
-  css         | An array of lines of CSS. Used only by SVN::Notify::HTML.
-  start_html  | An array of lines starting an SVN::Notify::HTML document.
   start_body  | Array reference of lines at the start of the message body.
   end_body    | Array reference of lines at the end of the message body.
+  css         | An array of lines of CSS. Used only by SVN::Notify::HTML.
+  start_html  | An array of lines starting an SVN::Notify::HTML document.
 
 Note that the data passed to the filters by SVN::Notify subclasses
 (L<SVN::Notify::HTML|SVN::Notify::HTML> and
@@ -179,7 +182,7 @@ Need to keep the subject line clean? Just modify the string and return it:
 
 This emulates C<add_header> to demonstrate header filtering. Maybe you have a
 special header that tells your spam filtering service to skip filtering for
-certain messages (not a good idea, but what the hell!):
+certain messages (not a good idea, but what the hell?):
 
   package SVN::Notify::Filter::NoSpam;
   sub headers {
@@ -193,9 +196,15 @@ certain messages (not a good idea, but what the hell!):
 Change the format of the commit metadata section of the message to uppercase
 all of the headers, so that "Revision: 111" becomes "REVISION: 111":
 
+Note that this example also makes use of the C<content_type()> method of
+SVN::Notify to determine whether or not to actually do the filtering. This
+prvents it from being applied to HTML messages, where it likely wouldn't be
+able to do much.
+
   package SVN::Notify::Filter::UpLabels;
   sub metadata {
       my ($notifier, $lines) = @_;
+      return $lines unless $notify->content_type eq 'text/plain';
       s/([^:]+:)/uc $1/eg for @$lines;
       return $lines;
   }
@@ -237,7 +246,9 @@ a class that does the filtering one line at a time. The requisite C<tie> class
 needs only three methods: C<TIEHANDLE> C<READLINE>, and C<CLOSE>. In this
 example, I've defined them in a different name space than the filter
 subroutine, so as to simplify SVN::Notify's loading of filters and to keep
-thing neatly packaged:
+thing neatly packaged. Note that this filter is applied before
+SVN::Notify::HTML outputs its diff, so you can modify things before they get
+marked up by, say, SVN::Notify::HTML::ColorDiff.
 
   package My::IO::TrunkStripper;
   sub TIEHANDLE {
@@ -268,8 +279,9 @@ thing neatly packaged:
   }
 
 However, if you don't mind loading the entire diff into memory (because you
-just I<know> that all of your commits are small), you can simplify things by
-using a data structure and an existing IO module to do the same thing:
+just I<know> that all of your commits are small [you know that's not true,
+right?]), you can simplify things by using a data structure and an existing IO
+module to do the same thing:
 
   package SVN::Notify::Filter::StripTrunkDiff;
   use IO::ScalarArray;
@@ -339,6 +351,8 @@ don't have to keep adding cruft to SVN::Notify itself!
 
 =item L<SVN::Notify|SVN::Notify>
 
+=item L<SVN::Notify::HTML|SVN::Notify::HTML>
+
 =item L<SVN::Notify::Filter::Trac|SVN::Notify::Filter::Trac>
 
 =back
@@ -355,5 +369,3 @@ This module is free software; you can redistribute it and/or modify it under
 the same terms as Perl itself.
 
 =cut
-
-
