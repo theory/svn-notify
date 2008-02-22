@@ -11,7 +11,7 @@ SVN::Notify::Filter - Create output filters for SVN::Notify
 
   sub log_message {
       my ($notifier, $lines) = @_;
-      return [ Text::Textile->new->process( join '', @$lines ) ];
+      return [ Text::Textile->new->process( join $/, @$lines ) ];
   }
 
 =head1 Description
@@ -37,7 +37,7 @@ and put it somewhere in the Perl path. Something like this:
 
   sub log_message {
       my ($notifier, $lines) = @_;
-      return [ Text::Markdown->new->markdown( join '', @$lines ) ];
+      return [ Text::Markdown->new->markdown( join $/, @$lines ) ];
   }
 
 Put this code in a file named F<SVN/Notify/Filter/Markdown.pm> somewhere in
