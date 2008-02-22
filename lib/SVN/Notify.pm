@@ -296,8 +296,8 @@ list. Defaults to "PLAIN".
 The character set typically used on the repository for log messages, file
 names, and file contents. Used to specify the character set in the email
 Content-Type headers and, when the C<language> paremeter is specified, the
-C<$LANG> environment variable when launching C<sendmail>. See L</"Encoding
-Support"> for more information. Defaults to "UTF-8".
+C<$LANG> environment variable when launching C<sendmail>. See L</"Character
+Encoding Support"> for more information. Defaults to "UTF-8".
 
 =item svn_charset
 
@@ -307,8 +307,9 @@ The character set used in files and log messages managed in Subversion. It's
 useful to set this option if you store files in Subversion using one character
 set but want to send notification messages in a different character set.
 Therefore C<charset> would be used for the notification message, and
-C<svn_charset> would be used to read in data from Subversion. See L</"Encoding
-Support"> for more information. Defaults to the value stored in C<charset>.
+C<svn_charset> would be used to read in data from Subversion. See
+L</"Character Encoding Support"> for more information. Defaults to the value
+stored in C<charset>.
 
 =item diff_charset
 
@@ -318,8 +319,8 @@ The character set used by files in Subversion, and thus present in the the
 diff. It's useful to set this option if you store files in Subversion using
 one character write log messages in a different character set. Therefore
 C<svn_charset> would be used to read the log message and C<diff_charset> would
-be used to read the diff from Subversion. See L</"Encoding Support"> for more
-information. Defaults to the value stored in C<svn_charset>.
+be used to read the diff from Subversion. See L</"Character Encoding Support">
+for more information. Defaults to the value stored in C<svn_charset>.
 
 =item language
 
@@ -332,7 +333,7 @@ set the C<$LANG> environment variable to C<< $notify->language . '.' .
 $notify->charset >> before executing C<svnlook> and C<sendmail> (but not for
 sending data to Net::SMTP). Undefined by default, meaning that no
 Content-Language header is output and the C<$LANG> environment variable will
-not be set. See L</"Encoding Support"> for more information.
+not be set. See L</"Character Encoding Support"> for more information.
 
 =item with_diff
 
@@ -2297,7 +2298,7 @@ __END__
 
 ##############################################################################
 
-=head2 Encoding Support
+=head2 Character Encoding Support
 
 SVN::Notify has comprehensive support for character encodings, but since it
 cannot always know what encodings your system supports or in which your data

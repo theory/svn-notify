@@ -116,7 +116,9 @@ the documentation of the relevant modules for details.
 
 =head1 See Also
 
-See L<SVN::Notify|SVN::Notify> for the complete documentation.
+See L<SVN::Notify|SVN::Notify> for the complete documentation. If you're
+having issues with character encodings, see especially the L<Character
+Encoding Support|SVN::Notify/"Chraracter Encoding Support"> section.
 
 =head1 Author
 

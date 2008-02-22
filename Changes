@@ -45,6 +45,8 @@ Revision history for Perl extension SVN::Notify
         option with SVN::Notify::HTML.
       - Fixed the encoding of the subject line so that Unicode characters
         show up properly. Reported by Ian Anderson (Ticket # 24138).
+      - Added extensive documentation on how to deal with character encodings
+        under "Character Encoding Support" in the SVN::Notify docs.
 
 2.67 2008-02-06T20:15:13
       - Fixed bug where a directory with a valid regular expression character
