@@ -717,7 +717,7 @@ sub new {
     # Set up the environment language.
     if ( $params{language} && !$ENV{LANG} ) {
         ( my $lang_country = $params{language} ) =~ s/-/_/g;
-        for my $p qw(charset svn_charset diff_charset) {
+        for my $p qw(charset svn_charset) {
             my $encoding = $params{$p};
             $encoding =~ s/-//g if uc($encoding) ne 'UTF-8';
             (my $label = $p ) =~ s/(_?)charset/$1/;
@@ -1705,7 +1705,7 @@ sub diff_handle {
     # etc., to be output in the localized string encoded with another charset
     # from diff contents. HTML and HTML::ColorDiff also expect the terms
     # printed in English.
-    local $ENV{LANG} = "$self->{diff_env_lang}" if $self->{diff_env_lang};
+    local $ENV{LANG} = 'C';
 
     return $self->_pipe(
         $self->{diff_charset},
@@ -1777,7 +1777,6 @@ __PACKAGE__->_accessors(qw(
     svn_charset
     env_lang
     svn_env_lang
-    diff_env_lang
     language
     with_diff
     attach_diff
@@ -1987,20 +1986,12 @@ C<sendmail>.
 
 Gets or sets the value of the C<svn_env_lang> attribute, which is set to C<<
 $notify->language . '.' . $notify->svn_charset >> when C<language> is set, and
-otherwise is C<undef>. This attribute is used to set the C<$LANG> enviornment
+otherwise is C<undef>. This attribute is used to set the C<$LANG> environment
 variable, if it is not already set by the environment, before executing
-C<svnlook>.
-
-=head3 diff_env_lang
-
-  my $diff_env_lang = $notifier->diff_env_lang;
-  $notifier = $notifier->diff_env_lang($diff_env_lang);
-
-Gets or sets the value of the C<diff_env_lang> attribute, which is set to C<<
-$notify->language . '.' . $notify->diff_charset >> when C<language> is set,
-and otherwise is C<undef>. This attribute is used to set the C<$LANG>
-enviornment variable, if it is not already set by the environment, before
-executing C<svnlook diff>.
+C<svnlook>. It is not used for C<svnlook diff>, however, as the diff itself
+will be emitted in raw octets except for headers such as "Modified", which
+need to be in English so that subclasses can parse them. Thus, C<$LANG> is
+always set to "C" for the execution of C<svnlook diff>.
 
 =head3 with_diff
 
