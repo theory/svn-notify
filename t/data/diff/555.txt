@@ -1,0 +1,24 @@
+Modified: SVN-Notify/trunk/lib/SVN/Notify/HTML.pm
+===================================================================
+--- SVN-Notify/trunk/lib/SVN/Notify/HTML.pm	2008-02-24 00:00:08 UTC (rev 3460)
++++ SVN-Notify/trunk/lib/SVN/Notify/HTML.pm	2008-02-24 00:31:10 UTC (rev 3461)
+@@ -603,14 +603,12 @@
+             qq(font-size: 10pt; font-weight: bold; }\n),
+         q(#msg pre { overflow: auto; background: #ffc; ),
+             qq(border: 1px #fc0 solid; padding: 6px; }\n),
+-        qq(#logmsg { background: #ffc; border: 1px #fc0 solid; padding: 0 6px; }\n),
+-        qq(#logmsg ul, #logmsg ol { padding: 0 0 0 1em; margin: 0; list-style-position: outside; }\n),
+-        qq(#logmsg ul { margin: 1em 0 0 0; }\n),
+-        qq(#logmsg ol { margin: 1em; }\n),
+-        qq(#logmsg li p { margin: .5em 0 0 0; }\n),
++        qq(#logmsg { background: #ffc; border: 1px #fc0 solid; padding: 6px 6px 0 6px; }\n),
++        qq(#logmsg p, #logmsg ul, #logmsg ol, #logmsg pre, #logmsg blockquote { margin: 0 0 1em 0; }\n),
++        qq(#logmsg ul, #logmsg ol { padding: 0; list-style-position: inside;}\n),
+         qq(#logmsg code, #logmsg tt { background: #ccc; padding: 3px; }\n),
+-        qq(#logmsg pre, #logmsg code { background: #ddd; }\n),
+-        qq(#logmsg blockquote { margin: 0; border: 1px solid #fc0; border-left-width: 10px; padding: 0 1em; background: white;}\n),
++        qq(#logmsg pre { background: #ddd; padding: 1em; }\n),
++        qq(#logmsg blockquote { border: 1px solid #fc0; border-left-width: 10px; padding: 1em 1em 0 1em; background: white;}\n),
+         q(#header, #footer { color: #fff; background: #636; ),
+         qq(border: 1px #300 solid; padding: 6px; }\n),
+         qq(#patch { width: 100%; }\n),

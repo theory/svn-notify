@@ -3,7 +3,7 @@
 # $Id$
 
 use strict;
-use Test::More tests => 120;
+use Test::More tests => 126;
 use File::Spec::Functions;
 
 use_ok('SVN::Notify');
@@ -350,6 +350,23 @@ ok $notifier->execute, 'Notify log_mesage filter checking';
 $email = get_output();
 like $email, qr/^#patch .lines, .info {color:#999;background:#fff;}/m,
     'Should have modified the CSS';
+
+##############################################################################
+# This is just to generate the Trac demo message.
+##############################################################################
+ok( $notifier = SVN::Notify::HTML::ColorDiff->new(
+    %args,
+    revision   => '555',
+    trac_url   => 'http://trac.example.com/',
+    with_diff  => 1,
+    filters    => [ 'Trac' ],
+), 'Construct CSS filter notifier' );
+isa_ok($notifier, 'SVN::Notify::HTML::ColorDiff');
+isa_ok($notifier, 'SVN::Notify::HTML');
+isa_ok($notifier, 'SVN::Notify');
+ok $notifier->prepare, 'Prepare log_message filter checking';
+ok $notifier->execute, 'Notify log_mesage filter checking';
+
 
 ##############################################################################
 # Functions.
