@@ -620,6 +620,7 @@ sub _css {
         qq(#logmsg table td { text-align: right; border-top: 1px dotted #fa0; padding: 0.2em 0.5em; }\n),
         qq(#logmsg table thead th { text-align: center; border-bottom: 1px solid #fa0; }\n),
         qq(#logmsg table th.Corner { text-align: left; }\n),
+        qq(#logmsg hr { border: none 0; border-top: 2px dashed #fa0; height: 1px; }\n),
         q(#header, #footer { color: #fff; background: #636; ),
         qq(border: 1px #300 solid; padding: 6px; }\n),
         qq(#patch { width: 100%; }\n),
