@@ -81,7 +81,7 @@ like( $email, qr|<meta http-equiv="content-type" content="text/html; charset=utf
       'There should be a meta http-equiv tag');
 like( $email, qr/<\/style>/, "Check for </style> tag" );
 like( $email,
-      qr/#msg dl { border: 1px #006 solid; background: #369; padding: 6px; color: #fff; }/,
+      qr/#msg dl.meta { border: 1px #006 solid; background: #369; padding: 6px; color: #fff; }/,
       "Check for style" );
 like( $email, qr/<div id="msg">/, "Check for msg div" );
 
@@ -573,7 +573,7 @@ ok $notifier->execute, 'Notify header and footer checking';
 
 # Check the output.
 $email = get_output();
-like $email, qr{<div id="header">This is the &amp;header</div>\n<dl>},
+like $email, qr{<div id="header">This is the &amp;header</div>\n<dl class="meta">},
       'Check for the header';
 
 like $email,
@@ -598,7 +598,7 @@ ok $notifier->execute, 'Notify HTML header and footer checking';
 
 # Check the output.
 $email = get_output();
-like $email, qr{<div id="header"><p>&laquo;Welcome!&raquo;</p></div>\n<dl>},
+like $email, qr{<div id="header"><p>&laquo;Welcome!&raquo;</p></div>\n<dl class="meta">},
       'Check for the header';
 
 like $email,

@@ -300,7 +300,7 @@ sub output_metadata {
         return $self->SUPER::output_metadata($out);
     }
 
-    print $out "<dl>\n<dt>Revision</dt> <dd>";
+    print $out qq{<dl class="meta">\n<dt>Revision</dt> <dd>};
 
     my $rev = $self->revision;
     if (my $url = $self->revision_url) {
@@ -589,7 +589,7 @@ Gets or sets the value of the C<css_url> attribute.
 
 sub _css {
     return [
-        q(#msg dl { border: 1px #006 solid; background: #369; ),
+        q(#msg dl.meta { border: 1px #006 solid; background: #369; ),
             qq(padding: 6px; color: #fff; }\n),
         qq(#msg dt { float: left; width: 6em; font-weight: bold; }\n),
         qq(#msg dt:after { content:':';}\n),

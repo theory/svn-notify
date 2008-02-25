@@ -31,7 +31,6 @@ if (SVN::Notify::PERL58()) {
     $qsubj = quotemeta $subj;
 }
 
-
 ##############################################################################
 
 ok my $notifier = SVN::Notify->new(%args), 'Create new SMTP notifier';
