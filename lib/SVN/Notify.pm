@@ -2268,7 +2268,11 @@ sub get_handle {
     $smtp->to(map { split /\s*,\s*/ } @{ $notifier->{to} });
     $smtp->data;
     tie local(*SMTP), $class, $smtp;
-    return SVN::Notify::PERL58 ? *SMTP : \*SMTP;
+    return \*SMTP unless SVN::Notify::PERL58;
+    if (my $encode = $notifier->charset) {
+        binmode SMTP, ":encoding($encode)" if lc $encode ne 'utf-8';
+    }
+    return *SMTP;
 }
 
 sub TIEHANDLE {

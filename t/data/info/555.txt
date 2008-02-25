@@ -62,8 +62,16 @@ And then this one. Or the paragraphs at the beginning of this message.
 == Preformatted Text ==
 
 {{{
- def HelloWorld():
-     print "Hello World"
+package SVN::Notify::Filter::Trac;
+
+SVN::Notify->register_attributes( trac_url => 'trac-url=s' );
+
+sub log_message {
+    my ($notify, $lines) = @_;
+    return $lines unless $notify->content_type eq 'text/html';
+    my $trac = Text::Trac->new( trac_url => $notify->trac_url );
+    return [ $trac->parse( join $/, @{ $lines } ) ];
+}
 }}}
 
 == Blockquotes ==
