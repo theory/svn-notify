@@ -1,6 +1,6 @@
 theory
 2008-02-23 16:49:35 -0700 (Sat, 23 Feb 2008)
-3821
+4226
 
 = Trac-Style Log Message Formatting =
 
@@ -83,7 +83,7 @@ sub log_message {
 
 == Blockquotes ==
 
-As of `[http://search.cpan.org/perldoc?Text::Trac Text::Trac]` 0.08, there apears to be a bug in how it renders blockquotes. I can't quite figure out why it works for the attribution paragraph here, but not the actual quote paragraph. :-(
+As of `[http://search.cpan.org/perldoc?Text::Trac Text::Trac]` 0.08, there apears to be a bug in how it renders blockquotes. I can't quite figure out why it works for the attribution paragraph here, but not the actual quote paragraph. See the related [http://trac.edgewall.org/ticket/6887 Trac bug report] and [http://rt.cpan.org/Ticket/Display.html?id=33575 Text::Trac bug report].
 
   Ask not what your country can do for you. Ask what you can do for your country.
   
@@ -91,7 +91,7 @@ As of `[http://search.cpan.org/perldoc?Text::Trac Text::Trac]` 0.08, there apear
 
 == Discussion Citations ==
 
-As of version 0.08 of `[http://search.cpan.org/perldoc?Text::Trac Text::Trac]`, citations aren't supported.
+As of version 0.08 of `[http://search.cpan.org/perldoc?Text::Trac Text::Trac]`, citations aren't supported. See the [http://rt.cpan.org/Ticket/Display.html?id=33575 bug report] for details.
 
 >> Someone's original text
 > Someone else's reply text
@@ -112,7 +112,7 @@ I borrowed this example table, as well its style, from [http://fluidmind.org/tes
 == Links ==
 
  * External link: [http://search.cpan.org/dist/SVN-Notify/ SVN::Notify on CPAN]
- * Wiki link: [wiki:SomePage Some Page]
+ * Wiki link: [wiki:SomePage Some Page] (See [http://rt.cpan.org/Ticket/Display.html?id=33576 this bug report] for the formatting of this link.)
  * Ticket: #1
  * Report: report:1
  * Changeset: r1
@@ -123,6 +123,9 @@ This paragraph has what appears to be a !TracLink, because of the camel-casing o
 
 == Horizontal Rules ==
 
-As of version 0.08 of `[http://search.cpan.org/perldoc?Text::Trac Text::Trac]`, Horizontal rules (`<HR>`) aren't supported.
+Although the Trac documentation says to use `----` for a horizontal rule (`<hr />`), as of 0.08,  `[http://search.cpan.org/perldoc?Text::Trac Text::Trac]` supports `====`, instead:
 
-----
+====
+
+And that's it!
+
