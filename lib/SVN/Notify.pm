@@ -288,39 +288,41 @@ available authentication types include "PLAIN", "NTLM", "CRAM_MD5", and
 others. Consult the L<Authen::SASL|Authen::SASL> documentation for a complete
 list. Defaults to "PLAIN".
 
-=item charset
+=item encoding
 
-  svnnotify --charset UTF-8
+  svnnotify --encoding UTF-8
   svnnotify -c Big5
 
 The character set typically used on the repository for log messages, file
 names, and file contents. Used to specify the character set in the email
 Content-Type headers and, when the C<language> paremeter is specified, the
 C<$LANG> environment variable when launching C<sendmail>. See L</"Character
-Encoding Support"> for more information. Defaults to "UTF-8".
+Encoding Support"> for more information. C<--charset> is an alias for this
+option preserved for backward compatibility. Defaults to "UTF-8".
 
-=item svn_charset
+=item svn_encoding
 
-  svnnotify --svn-charset euc-jp
+  svnnotify --svn-encoding euc-jp
 
 The character set used in files and log messages managed in Subversion. It's
 useful to set this option if you store files in Subversion using one character
 set but want to send notification messages in a different character set.
-Therefore C<charset> would be used for the notification message, and
-C<svn_charset> would be used to read in data from Subversion. See
+Therefore C<encoding> would be used for the notification message, and
+C<svn_encoding> would be used to read in data from Subversion. See
 L</"Character Encoding Support"> for more information. Defaults to the value
-stored in C<charset>.
+stored in C<encoding>.
 
-=item diff_charset
+=item diff_encoding
 
-  svnnotify --diff-charset iso-2022-jp
+  svnnotify --diff-encoding iso-2022-jp
 
 The character set used by files in Subversion, and thus present in the the
 diff. It's useful to set this option if you store files in Subversion using
 one character write log messages in a different character set. Therefore
-C<svn_charset> would be used to read the log message and C<diff_charset> would
-be used to read the diff from Subversion. See L</"Character Encoding Support">
-for more information. Defaults to the value stored in C<svn_charset>.
+C<svn_encoding> would be used to read the log message and C<diff_encoding>
+would be used to read the diff from Subversion. See L</"Character Encoding
+Support"> for more information. Defaults to the value stored in
+C<svn_encoding>.
 
 =item language
 
@@ -330,7 +332,7 @@ for more information. Defaults to the value stored in C<svn_charset>.
 The language typically used on the repository for log messages, file names,
 and file contents. Used to specify the email Content-Language header and to
 set the C<$LANG> environment variable to C<< $notify->language . '.' .
-$notify->charset >> before executing C<svnlook> and C<sendmail> (but not for
+$notify->encoding >> before executing C<svnlook> and C<sendmail> (but not for
 sending data to Net::SMTP). Undefined by default, meaning that no
 Content-Language header is output and the C<$LANG> environment variable will
 not be set. See L</"Character Encoding Support"> for more information.
@@ -704,9 +706,9 @@ sub new {
     $params{svnlook}        ||= $ENV{SVNLOOK}  || $class->find_exe('svnlook');
     $params{with_diff}      ||= $params{attach_diff};
     $params{verbose}        ||= 0;
-    $params{charset}        ||= 'UTF-8';
-    $params{svn_charset}    ||= $params{charset};
-    $params{diff_charset}   ||= $params{svn_charset};
+    $params{encoding}       ||= $params{charset} || 'UTF-8';
+    $params{svn_encoding}   ||= $params{encoding};
+    $params{diff_encoding}  ||= $params{svn_encoding};
     $params{smtp_authtype}  ||= 'PLAIN';
     $params{sendmail}       ||= $ENV{SENDMAIL} || $class->find_exe('sendmail')
         unless $params{smtp};
@@ -717,10 +719,10 @@ sub new {
     # Set up the environment language.
     if ( $params{language} && !$ENV{LANG} ) {
         ( my $lang_country = $params{language} ) =~ s/-/_/g;
-        for my $p qw(charset svn_charset) {
+        for my $p qw(encoding svn_encoding) {
             my $encoding = $params{$p};
             $encoding =~ s/-//g if uc($encoding) ne 'UTF-8';
-            (my $label = $p ) =~ s/(_?)charset/$1/;
+            (my $label = $p ) =~ s/(_?)encoding/$1/;
             $params{"${label}env_lang"} = "$lang_country.$encoding";
         }
     }
@@ -844,9 +846,9 @@ sub get_options {
         'sendmail|s=s'        => \$opts->{sendmail},
         'set-sender|E'        => \$opts->{set_sender},
         'smtp=s'              => \$opts->{smtp},
-        'charset|c=s'         => \$opts->{charset},
-        'diff-charset=s'      => \$opts->{diff_charset},
-        'svn-charset=s'       => \$opts->{svn_charset},
+        'encoding|charset|c=s'=> \$opts->{encoding},
+        'diff-encoding=s'     => \$opts->{diff_encoding},
+        'svn-encoding=s'      => \$opts->{svn_encoding},
         'language|g=s'        => \$opts->{language},
         'with-diff|d'         => \$opts->{with_diff},
         'attach-diff|a'       => \$opts->{attach_diff},
@@ -1034,7 +1036,7 @@ sub prepare_recipients {
 
     local $ENV{LANG} = "$self->{svn_env_lang}" if $self->{svn_env_lang};
     my $fh = $self->_pipe(
-        $self->{svn_charset},
+        $self->{svn_encoding},
         '-|', $self->{svnlook},
         'dirs-changed',
         $self->{repos_path},
@@ -1132,7 +1134,7 @@ sub prepare_files {
     my %files;
     local $ENV{LANG} = "$self->{svn_env_lang}" if $self->{svn_env_lang};
     my $fh = $self->_pipe(
-        $self->{svn_charset},
+        $self->{svn_encoding},
         '-|', $self->{svnlook},
         'changed',
         $self->{repos_path},
@@ -1251,7 +1253,7 @@ sub execute {
     my $out = $self->{smtp} ? SVN::Notify::SMTP->get_handle($self) : do {
         local $ENV{LANG} = $self->{env_lang} if $self->{env_lang};
         $self->_pipe(
-            $self->{charset},
+            $self->{encoding},
             '|-', $self->{sendmail},
             '-oi', '-t',
             ($self->{set_sender} ? ('-f', $self->{from}) : ())
@@ -1383,7 +1385,7 @@ boundary string will be generated and the Content-Type set to
 "multipart/mixed" and stored as the C<boundary> attribute.
 
 Arter that, this method outputs the content type returned by
-C<content_type()>, the character set specified by the C<charset> attribute,
+C<content_type()>, the character set specified by the C<encoding> attribute,
 and a Content-Transfer-Encoding of "8bit". Subclasses can either rely on this
 functionality or override this method to provide their own content type
 headers.
@@ -1407,7 +1409,7 @@ sub output_content_type {
 
     my $ctype = $self->content_type;
     print $out "--$self->{boundary}\n" if $self->{attach_diff};
-    print $out "Content-Type: $ctype; charset=$self->{charset}\n",
+    print $out "Content-Type: $ctype; charset=$self->{encoding}\n",
       ($self->{language} ? "Content-Language: $self->{language}\n" : ()),
       "Content-Transfer-Encoding: 8bit\n\n";
     return $self;
@@ -1605,7 +1607,7 @@ sub output_attached_diff {
     print $out "\n--$self->{boundary}\n",
       "Content-Disposition: attachment; filename=",
       "r$self->{revision}-$self->{user}.diff\n",
-      "Content-Type: text/plain; charset=$self->{charset}\n",
+      "Content-Type: text/plain; charset=$self->{encoding}\n",
       ($self->{language} ? "Content-Language: $self->{language}\n" : ()),
       "Content-Transfer-Encoding: 8bit\n\n";
     $self->_dump_diff($out, $diff);
@@ -1702,13 +1704,13 @@ C<output_attached_diff()>.
 sub diff_handle {
     my $self = shift;
     # To avoid svnlook output except for diff contents, such as "Modified"
-    # etc., to be output in the localized string encoded with another charset
+    # etc., to be output in the localized string encoded with another encoding
     # from diff contents. HTML and HTML::ColorDiff also expect the terms
     # printed in English.
     local $ENV{LANG} = 'C';
 
     return $self->_pipe(
-        $self->{diff_charset},
+        $self->{diff_encoding},
         '-|'   => $self->{svnlook},
         'diff' => $self->{repos_path},
         '-r'   => $self->{revision},
@@ -1772,9 +1774,9 @@ __PACKAGE__->_accessors(qw(
     set_sender
     add_headers
     smtp
-    charset
-    diff_charset
-    svn_charset
+    encoding
+    diff_encoding
+    svn_encoding
     env_lang
     svn_env_lang
     language
@@ -1825,6 +1827,7 @@ sub _accessors {
 # Aliases for deprecated attributes.
 sub svnweb_url   { shift->revision_url(@_) }
 sub viewcvs_url  { shift->revision_url(@_) }
+sub charset      { shift->encoding(@_)     }
 
 # Deprecated ticket URL systems.
 for my $tick (qw(rt bugzilla jira gnats)) {
@@ -1940,26 +1943,27 @@ Gets or sets the value of the C<set_sender> attribute.
 
 Gets or sets the value of the C<smtp> attribute.
 
-=head3 charset
+=head3 encoding
 
-  my $charset = $notifier->charset;
-  $notifier = $notifier->charset($charset);
+  my $encoding = $notifier->encoding;
+  $notifier = $notifier->encoding($encoding);
 
-Gets or sets the value of the C<charset> attribute.
+Gets or sets the value of the C<encoding> attribute. C<charset> is an alias
+preserved for backward compatibility.
 
-=head3 svn_charset
+=head3 svn_encoding
 
-  my $svn_charset = $notifier->svn_charset;
-  $notifier = $notifier->svn_charset($svn_charset);
+  my $svn_encoding = $notifier->svn_encoding;
+  $notifier = $notifier->svn_encoding($svn_encoding);
 
-Gets or sets the value of the C<svn_charset> attribute.
+Gets or sets the value of the C<svn_encoding> attribute.
 
-=head3 diff_charset
+=head3 diff_encoding
 
-  my $diff_charset = $notifier->diff_charset;
-  $notifier = $notifier->diff_charset($diff_charset);
+  my $diff_encoding = $notifier->diff_encoding;
+  $notifier = $notifier->diff_encoding($diff_encoding);
 
-Gets or sets the value of the C<diff_charset> attribute.
+Gets or sets the value of the C<diff_encoding> attribute.
 
 =head3 language
 
@@ -1974,7 +1978,7 @@ Gets or sets the value of the C<language> attribute.
   $notifier = $notifier->env_lang($env_lang);
 
 Gets or sets the value of the C<env_lang> attribute, which is set to C<<
-$notify->language . '.' . $notify->charset >> when C<language> is set, and
+$notify->language . '.' . $notify->encoding >> when C<language> is set, and
 otherwise is C<undef>. This attribute is used to set the C<$LANG> enviornment
 variable, if it is not already set by the environment, before executing
 C<sendmail>.
@@ -1985,13 +1989,13 @@ C<sendmail>.
   $notifier = $notifier->svn_env_lang($svn_env_lang);
 
 Gets or sets the value of the C<svn_env_lang> attribute, which is set to C<<
-$notify->language . '.' . $notify->svn_charset >> when C<language> is set, and
-otherwise is C<undef>. This attribute is used to set the C<$LANG> environment
-variable, if it is not already set by the environment, before executing
-C<svnlook>. It is not used for C<svnlook diff>, however, as the diff itself
-will be emitted in raw octets except for headers such as "Modified", which
-need to be in English so that subclasses can parse them. Thus, C<$LANG> is
-always set to "C" for the execution of C<svnlook diff>.
+$notify->language . '.' . $notify->svn_encoding >> when C<language> is set,
+and otherwise is C<undef>. This attribute is used to set the C<$LANG>
+environment variable, if it is not already set by the environment, before
+executing C<svnlook>. It is not used for C<svnlook diff>, however, as the diff
+itself will be emitted in raw octets except for headers such as "Modified",
+which need to be in English so that subclasses can parse them. Thus, C<$LANG>
+is always set to "C" for the execution of C<svnlook diff>.
 
 =head3 with_diff
 
@@ -2227,7 +2231,7 @@ sub _pipe {
 
 sub _read_pipe {
     my $self = shift;
-    my $fh = $self->_pipe( $self->{svn_charset}, '-|', @_ );
+    my $fh = $self->_pipe( $self->{svn_encoding}, '-|', @_ );
     local $/; my @lines = split /(?:\r\n|\r|\n)/, <$fh>;
     close $fh or warn "Child process exited: $?\n";
     return \@lines;
@@ -2269,7 +2273,7 @@ sub get_handle {
     $smtp->data;
     tie local(*SMTP), $class, $smtp;
     return \*SMTP unless SVN::Notify::PERL58;
-    if (my $encode = $notifier->charset) {
+    if (my $encode = $notifier->encoding) {
         binmode SMTP, ":encoding($encode)" if lc $encode ne 'utf-8';
     }
     return *SMTP;
@@ -2305,29 +2309,29 @@ need to know to make non-ASCII characters look right in SVN::Notify's mesages:
 =item * The encoding for messages
 
 To tell SVN::Notify what character encoding to use when it sends messages, use
-the C<--charset> option. It defaults to "UTF-8", which should cover the vast
+the C<--encoding> option. It defaults to "UTF-8", which should cover the vast
 majority of needs. You're using it in your code already, right?
 
 =item * The character set you use in your log messages
 
 To tell SVN::Notify the character encoding that you use in Subversion commit
 log messages, as well as the names of the files in Subversion, use the
-C<--svn-charset> option, which defaults to the same value as C<--charset>. If,
-for example, you want messages sent in UTF-8 even though you write log
-messages in Big5, pass C<--svn-charset Big5>.
+C<--svn-encoding> option, which defaults to the same value as C<--encoding>.
+If, for example, you want messages sent in UTF-8 even though you write log
+messages in Big5, pass C<--svn-encoding Big5>.
 
 =item * The character set you use in your code
 
 To tell SVN::Notify the character encoding that you use in the files stored in
 Subversion, and therefore that will be output in diffs, use the
-C<--diff-charset> option, which defaults to the same value as
-C<--svn-charset>. If, for example, you write code in euc-jp but write your
-commit log messages in some other encoding, pass C<--diff-charset euc-jp>.
+C<--diff-encoding> option, which defaults to the same value as
+C<--svn-encoding>. If, for example, you write code in euc-jp but write your
+commit log messages in some other encoding, pass C<--diff-encoding euc-jp>.
 
 =item * The locales supported by your OS
 
-SVN::Notify uses the values passed to C<--charset>, C<--svn-charset>, and
-C<--diff-charset> to read in data from F<svnlook>, convert it to Perl's
+SVN::Notify uses the values passed to C<--encoding>, C<--svn-encoding>, and
+C<--diff-encoding> to read in data from F<svnlook>, convert it to Perl's
 internal encoding, and to output messages the proper encoding. Most of the
 time, if you write code in UTF-8 and want messages delivered in UTF-8, you can
 ignore these options.
@@ -2346,32 +2350,28 @@ to force the use of the sv_SE.UTF-8 locale.
 
 Sometimes, however, the system does not support UTF-8 locales. Or perhaps you
 use something other than UTF-8 in your log messages or source code. But this
-should be no problem, either, as SVN::Notify uses the charset options to
+should be no problem, either, as SVN::Notify uses the encoding options to
 determine the locales to use. For example, if your OS offers the
-en_US.ISO88591 locale, pass both C<--svn-charset> and C<--language>,
-like so:
+en_US.ISO88591 locale, pass both C<--svn-encoding> and C<--language>, like so:
 
-  --svn-charset ISO-8859-1 --language en_US
+  --svn-encoding ISO-8859-1 --language en_US
 
 SVN::Notify will set the C<$LANG> environment variable to "en_US.ISO88591",
 which F<svnlook> will use to convert log messages from its internal form to
 ISO-8859-1. SVN::Notify will convert the output from F<svnlook> to UTF-8 (or
-whatever C<--charset> you've specified) before sending the message. Of course,
-if you have characters that don't correspond to ISO-8859-1, you'll still get
-some garbage characters. It is ideal when the OS locale supports the same
-encodings as you use in your source code and log messages, though that's not
-always the case.
+whatever C<--encoding> you've specified) before sending the message. Of
+course, if you have characters that don't correspond to ISO-8859-1, you'll
+still get some garbage characters. It is ideal when the OS locale supports the
+same encodings as you use in your source code and log messages, though that's
+not always the case.
 
 And finally, because the names and spellings that OS vendors use for locales
 can vary widely, SVN::Notify will occaisionally get the name of the encoding
 wrong, in which case you'll see warnings such as this:
 
-  perl: warning: Setting locale failed.
-  perl: warning: Please check that your locale settings:
-      LC_ALL = (unset),
-	  LANG = "en_US.ISO88591"
-      are supported and installed on your system.
-  perl: warning: Falling back to the standard locale ("C").
+  svnlook: warning: cannot set LC_CTYPE locale
+  svnlook: warning: environment variable LANG is en_US.ISO88591
+  svnlook: warning: please check that your locale name is correct
 
 In such a case, if all of your data and your log messages are stored in the
 same encoding, you can set the C<$LANG> environment variable directly in your

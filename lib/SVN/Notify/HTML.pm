@@ -186,7 +186,7 @@ filters.
 sub start_html {
     my ($self, $out) = @_;
     my $lang = $self->language;
-    my $char = lc $self->charset;
+    my $char = lc $self->encoding;
 
     my @html = (
         qq{<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN"\n},

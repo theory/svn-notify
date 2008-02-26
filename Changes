@@ -6,12 +6,14 @@ Revision history for Perl extension SVN::Notify
         these changes will help solve the various encoding problems that
         continue to crop up:
         + Removed --io-layer, which never actually worked.
-        + Added --svn-charset, which identifies the encoding in which data
-          is stored in SVN. It defaults to the value of --charset.
-        + Added --diff-charset, which identifies the encoding in which files
+        + Changed --charset to --encoding, although the former is still
+          supported for backwards compatibility.
+        + Added --svn-encoding, which identifies the encoding in which data
+          is stored in SVN. It defaults to the value of --encoding.
+        + Added --diff-encoding, which identifies the encoding in which files
           are stored in SVN. This is useful for the case when log messages
           are written in one encoding and files stored in another. Defaults
-          to the value of --svn-charset.
+          to the value of --svn-encoding.
         + The --language option is now used to set the C<$LANG> environment
           variable for the execution of `svnlook` as well as `sendmail`.
         + Fixed character encoding when sending messages via SMTP.

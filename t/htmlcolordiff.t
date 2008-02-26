@@ -308,16 +308,16 @@ like( $email,
       'Check for HTML URL');
 
 ##############################################################################
-# Try charset.
+# Try encoding.
 ##############################################################################
 ok( $notifier = SVN::Notify::HTML::ColorDiff->new(
     %args,
-    charset => 'ISO-8859-1'
-), "Construct new charset notifier" );
+    encoding => 'ISO-8859-1'
+), "Construct new encoding notifier" );
 isa_ok($notifier, 'SVN::Notify::HTML::ColorDiff');
 isa_ok($notifier, 'SVN::Notify');
-ok( $notifier->prepare, "Prepare charset" );
-ok( $notifier->execute, "Notify charset" );
+ok( $notifier->prepare, "Prepare encoding" );
+ok( $notifier->execute, "Notify encoding" );
 
 # Check the output.
 $email = get_output();

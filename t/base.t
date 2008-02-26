@@ -53,9 +53,9 @@ is($notifier->user_domain, $args{user_domain},
    "Check user_domain accessor" );
 is($notifier->svnlook, $args{svnlook}, "Check svnlook accessor" );
 is($notifier->sendmail, $args{sendmail}, "Check sendmail accessor" );
-is($notifier->charset, 'UTF-8', "Check charset accessor" );
-is($notifier->svn_charset, 'UTF-8', "Check svn_charset accessor" );
-is($notifier->diff_charset, 'UTF-8', "Check diff_charset accessor" );
+is($notifier->encoding, 'UTF-8', "Check encoding accessor" );
+is($notifier->svn_encoding, 'UTF-8', "Check svn_encoding accessor" );
+is($notifier->diff_encoding, 'UTF-8', "Check diff_encoding accessor" );
 is($notifier->language, undef, "Check language accessor" );
 is($notifier->env_lang, undef, "Check env_lang accessor" );
 is($notifier->svn_env_lang, undef, "Check svn_env_lang accessor" );
@@ -410,16 +410,16 @@ like( $email, qr|Author:\s+theory\n\s+http://svn\.example\.com/~theory/\n|,
       'Check for author URL');
 
 ##############################################################################
-# Try charset.
+# Try encoding.
 ##############################################################################
-ok( $notifier = SVN::Notify->new(%args, charset => 'ISO-8859-1'),
-    "Construct new charset notifier" );
+ok( $notifier = SVN::Notify->new(%args, encoding => 'ISO-8859-1'),
+    "Construct new encoding notifier" );
 isa_ok($notifier, 'SVN::Notify');
-is( $notifier->charset, 'ISO-8859-1', 'Check charset');
-is( $notifier->svn_charset, 'ISO-8859-1', 'Check charset');
-is( $notifier->diff_charset, 'ISO-8859-1', 'Check charset');
-ok( $notifier->prepare, "Prepare charset" );
-ok( $notifier->execute, "Notify charset" );
+is( $notifier->encoding, 'ISO-8859-1', 'Check encoding');
+is( $notifier->svn_encoding, 'ISO-8859-1', 'Check encoding');
+is( $notifier->diff_encoding, 'ISO-8859-1', 'Check encoding');
+ok( $notifier->prepare, "Prepare encoding" );
+ok( $notifier->execute, "Notify encoding" );
 
 # Check the output.
 $email = get_output();
@@ -428,12 +428,12 @@ like( $email, qr{Content-Type: text/plain; charset=ISO-8859-1\n},
 
 ok( $notifier = SVN::Notify->new(
     %args,
-    svn_charset => 'ISO-8859-1',
-    diff_charset => 'US-ASCII',
-), 'Constrcut new multi-charset notifier' );
-is( $notifier->charset, 'UTF-8', 'Check charset');
-is( $notifier->svn_charset, 'ISO-8859-1', 'Check charset');
-is( $notifier->diff_charset, 'US-ASCII', 'Check charset');
+    svn_encoding => 'ISO-8859-1',
+    diff_encoding => 'US-ASCII',
+), 'Constrcut new multi-encoding notifier' );
+is( $notifier->encoding, 'UTF-8', 'Check encoding');
+is( $notifier->svn_encoding, 'ISO-8859-1', 'Check encoding');
+is( $notifier->diff_encoding, 'US-ASCII', 'Check encoding');
 
 ##############################################################################
 # Try Bug tracking URLs.
