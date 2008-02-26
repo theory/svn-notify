@@ -138,7 +138,7 @@ unlike( $email, qr{Modified: trunk/Params-CallbackRequest/Changes},
 ##############################################################################
 # Include diff and language.
 ##############################################################################
-local $ENV{LANG} = undef;
+local $ENV{LANG};
 ok( $notifier = SVN::Notify->new(
     %args,
     with_diff => 1,
