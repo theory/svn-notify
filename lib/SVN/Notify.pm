@@ -2276,25 +2276,32 @@ sub get_handle {
     $smtp->mail($notifier->{from});
     $smtp->to(map { split /\s*,\s*/ } @{ $notifier->{to} });
     $smtp->data;
-    tie local(*SMTP), $class, $smtp;
-    return \*SMTP unless SVN::Notify::PERL58;
-    if (my $encode = $notifier->encoding) {
-        binmode SMTP, ":encoding($encode)" if lc $encode ne 'utf-8';
-    }
-    return *SMTP;
+    tie local(*SMTP), $class, $smtp, $notifier;
+    # Perl 5.6 requires the escape.
+    return SVN::Notify::PERL58 ? *SMTP : \*SMTP;
 }
 
 sub TIEHANDLE {
-    my ($class, $smtp) = @_;
-    bless \$smtp, $class;
+    my ($class, $smtp, $notifier) = @_;
+    bless { smtp => $smtp, notifier => $notifier }, $class;
 }
 
-sub PRINT  { ${+shift}->datasend(@_) }
-sub PRINTF { ${+shift}->datasend(sprintf shift, @_) }
+sub PRINT {
+    my $self = shift;
+    if (SVN::Notify::PERL58) {
+        my $encode = $self->{notifier}->encoding;
+        return $self->{smtp}->datasend( map {
+            Encode::encode( $encode, $_ )
+        } @_ )
+    }
+    return $self->{smtp}->datasend(@_);
+}
+
+sub PRINTF { shift->PRINT( sprintf @_ ) }
 sub CLOSE  {
     my $self = shift;
-    $$self->dataend;
-    $$self->quit;
+    $self->{smtp}->dataend;
+    $self->{smtp}->quit;
 }
 
 1;

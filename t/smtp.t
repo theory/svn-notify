@@ -72,12 +72,9 @@ like $smtp->{datasend}, qr/Date:     2004-04-20 01:33:35 -0700 \(Tue, 20 Apr 200
       'Check Date';
 
 # Check that the log message is there.
-UTF8: {
-    use utf8;
-    like $smtp->{datasend},
-        qr/Did this, that, and the «other»\. And then I did some more\. Some\nit was done on a second line\./,
-        'Check for log message';
-}
+like $smtp->{datasend},
+    qr/Did this, that, and the «other»\. And then I did some more\. Some\nit was done on a second line\./,
+    'Check for log message, which should be UTF-8, but not utf8.';
 
 ##############################################################################
 # Test authentication and Debug.

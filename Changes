@@ -1,11 +1,12 @@
 Revision history for Perl extension SVN::Notify
 
 2.70
-      - Fixed issues with character encoding handling, based on a patch
-        submitted by Toshikazu Kinkoh and my own experimentation. Hopefully
-        these changes will help solve the various encoding problems that
-        continue to crop up:
-        + Removed --io-layer, which never actually worked.
+
+      - Fixed issues with character encoding handling, starting from a patch
+        submitted by Toshikazu Kinkoh, and with a lot of experimentation and
+        testing by Toshikasu and myself. Hopefully these changes will help
+        solve the various encoding problems that continue to crop up:
+        + Removed --io-layer, which, it seems, never actually worked.
         + Changed --charset to --encoding, although the former is still
           supported for backwards compatibility.
         + Added --svn-encoding, which identifies the encoding in which data
@@ -15,7 +16,8 @@ Revision history for Perl extension SVN::Notify
           are written in one encoding and files stored in another. Defaults
           to the value of --svn-encoding.
         + The --language option is now used to set the C<$LANG> environment
-          variable for the execution of `svnlook` as well as `sendmail`.
+          variable for the execution of `svnlook` as well as `sendmail`,
+          although not `svnlook diff`.
         + Fixed character encoding when sending messages via SMTP.
       - Added a link to SVN::Notify's Subversion repository.
       - Added support for output filtering. This allows users to easily
