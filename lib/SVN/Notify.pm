@@ -2335,8 +2335,7 @@ majority of needs. You're using it in your code already, right?
 To tell SVN::Notify the character encoding that you use in Subversion commit
 log messages, as well as the names of the files in Subversion, use the
 C<--svn-encoding> option, which defaults to the same value as C<--encoding>.
-If, for example, you want messages sent in UTF-8 even though you write log
-messages in Big5, pass C<--svn-encoding Big5>.
+If, for example, you write log messages in Big5, pass C<--svn-encoding Big5>.
 
 =item * The character set you use in your code
 
@@ -2350,27 +2349,27 @@ commit log messages in some other encoding, pass C<--diff-encoding euc-jp>.
 
 SVN::Notify uses the values passed to C<--encoding>, C<--svn-encoding>, and
 C<--diff-encoding> to read in data from F<svnlook>, convert it to Perl's
-internal encoding, and to output messages the proper encoding. Most of the
+internal encoding, and to output messages in the proper encoding. Most of the
 time, if you write code in UTF-8 and want messages delivered in UTF-8, you can
 ignore these options.
 
 Sometimes, however, F<svnlook> converts its output to some other encoding.
-This encoding is controlled by the C<$LANG> environment variable, which
+That encoding is controlled by the C<$LANG> environment variable, which
 corresponds to a locale supported by your OS. (See
-L<perllocale|perllocale/"Finding locales"> to find out what locales are
-supported by your system.) If your system supports UTF-8 locales (and most
-modern systems do) but defaults to using some other locale (causing F<svnlook>
-to output log messages in the wrong encoding), then all you have to do is pass
-the C<--language> option to get SVN::Notify to tell F<svnlook> to use it. For
-example, if all of your data is in UTF-8, pass C<--language en_US> to get
-SVN::Notify to use the en_US.UTF-8 locale. Likewise, pass C<--language sv_SE>
-to force the use of the sv_SE.UTF-8 locale.
+L<perllocale|perllocale/"Finding locales"> for instructions for finding the
+locales supported by your system.) If your system supports UTF-8 locales but
+defaults to using some other locale (causing F<svnlook> to output log messages
+in the wrong encoding), then all you have to do is pass the C<--language>
+option to get SVN::Notify to tell F<svnlook> to use it. For example, if all of
+your data is in UTF-8, pass C<--language en_US> to get SVN::Notify to use the
+F<en_US.UTF-8> locale. Likewise, pass C<--language sv_SE> to force the use of
+the F<sv_SE.UTF-8> locale.
 
 Sometimes, however, the system does not support UTF-8 locales. Or perhaps you
-use something other than UTF-8 in your log messages or source code. But this
-should be no problem, either, as SVN::Notify uses the encoding options to
-determine the locales to use. For example, if your OS offers the
-en_US.ISO88591 locale, pass both C<--svn-encoding> and C<--language>, like so:
+use something other than UTF-8 in your log messages or source code. This
+should be no problem, as SVN::Notify uses the encoding options to determine
+the locales to use. For example, if your OS offers the F<en_US.ISO88591>
+locale, pass both C<--svn-encoding> and C<--language>, like so:
 
   --svn-encoding ISO-8859-1 --language en_US
 
