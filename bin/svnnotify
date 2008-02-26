@@ -76,8 +76,8 @@ Fake-out Pod::Usage
      --smtp-authtype AUTHTYPE  Type of SMTP authentication.
   -c --encoding ENCODING       The character encoding for reading and writing
                                data.
-     --svn-encoding ENCOING    The character encoding of the log message and the
-                               repository files.
+     --svn-encoding ENCODING   The character encoding of the log message and
+                               the repository files.
      --diff-encoding ENCODING  The character encoding of the repository files.
   -g --language LANGUAGE       Value for the Content-Language header and $LANG
                                environment variable.
