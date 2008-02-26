@@ -8,6 +8,13 @@ use constant PERL58 => $] > 5.007;
 require Encode if PERL58;
 $SVN::Notify::VERSION = '2.70';
 
+# Make sure any output (such as from _dbpnt()) triggers no Perl warnings.
+if (PERL58) {
+    # Dupe them?
+    binmode STDOUT, ':utf8';
+    binmode STDERR, ':utf8';
+}
+
 =begin comment
 
 Fake-out Module::Build. Delete if it ever changes to support =head1 headers
@@ -721,7 +728,7 @@ sub new {
     die qq{Cannot find sendmail and no "smtp" parameter specified}
         unless $params{sendmail} || $params{smtp};
 
-    # Set up the environment language.
+    # Set up the environment locale.
     if ( $params{language} && !$ENV{LANG} ) {
         ( my $lang_country = $params{language} ) =~ s/-/_/g;
         for my $p qw(encoding svn_encoding) {
@@ -2246,8 +2253,7 @@ sub _read_pipe {
 # This method is used for debugging output in various verbose modes.
 ##############################################################################
 
-# XXX Encode.
-sub _dbpnt { print __PACKAGE__, ": $_[0]\n" }
+sub _dbpnt { print ref(shift), ': ', join ' ', @_; }
 
 package SVN::Notify::SMTP;
 
