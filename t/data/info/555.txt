@@ -1,6 +1,6 @@
 theory
 2008-02-23 16:49:35 -0700 (Sat, 23 Feb 2008)
-4226
+4281
 
 = Trac-Style Log Message Formatting =
 
@@ -112,7 +112,8 @@ I borrowed this example table, as well its style, from [http://fluidmind.org/tes
 == Links ==
 
  * External link: [http://search.cpan.org/dist/SVN-Notify/ SVN::Notify on CPAN]
- * Wiki link: [wiki:SomePage Some Page] (See [http://rt.cpan.org/Ticket/Display.html?id=33576 this bug report] for the formatting of this link.)
+ * Long wiki link: [wiki:TracProject Trac open source project] (See [http://rt.cpan.org/Ticket/Display.html?id=33576 this bug report] for the formatting of this link.)
+ * Short wiki link: TracProject
  * Ticket: #1
  * Report: report:1
  * Changeset: r1

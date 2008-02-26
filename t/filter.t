@@ -357,7 +357,7 @@ like $email, qr/^#patch .lines, .info {color:#999;background:#fff;}/m,
 ok( $notifier = SVN::Notify::HTML::ColorDiff->new(
     %args,
     revision   => '555',
-    trac_url   => 'http://trac.example.com/',
+    trac_url   => 'http://trac.edgewall.org/',
     with_diff  => 1,
     filters    => [ 'Trac' ],
 ), 'Construct CSS filter notifier' );
