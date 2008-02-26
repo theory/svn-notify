@@ -3,7 +3,7 @@
 # $Id$
 
 use strict;
-use Test::More tests => 126;
+use Test::More tests => 129;
 use File::Spec::Functions;
 
 use_ok('SVN::Notify');
@@ -352,24 +352,33 @@ like $email, qr/^#patch .lines, .info {color:#999;background:#fff;}/m,
     'Should have modified the CSS';
 
 ##############################################################################
-# This is just to generate the Trac demo message.
+# This is mainly just to generate the Trac demo message.
 ##############################################################################
 SKIP: {
     eval 'require Text::Trac';
-    skip 'Text::Trac did not load', 6 if $@;
+    skip 'Text::Trac did not load', 9 if $@;
 
+    $ENV{FOO} = 1;
     ok( $notifier = SVN::Notify::HTML::ColorDiff->new(
         %args,
+        to         => ['test@example.com'],
         revision   => '555',
         trac_url   => 'http://trac.edgewall.org/',
         with_diff  => 1,
         filters    => [ 'Trac' ],
-    ), 'Construct CSS filter notifier' );
+    ), 'Construct Trac filter notifier' );
     isa_ok($notifier, 'SVN::Notify::HTML::ColorDiff');
     isa_ok($notifier, 'SVN::Notify::HTML');
     isa_ok($notifier, 'SVN::Notify');
-    ok $notifier->prepare, 'Prepare log_message filter checking';
-    ok $notifier->execute, 'Notify log_mesage filter checking';
+    ok $notifier->filters_for( 'log_message' ),
+        'There should be log_message filters';
+    ok !$notifier->filters_for( 'recipients' ),
+        'There should not be recipients filters';
+    ok $notifier->prepare, 'Prepare Trac filter checking';
+    ok $notifier->execute, 'Notify Trac filter checking';
+    $email = get_output();
+    unlike $email, qr/^To: tEst[@]ExAmplE[.]cOm/m,
+        'The recipient should not be modified';
 }
 
 ##############################################################################
