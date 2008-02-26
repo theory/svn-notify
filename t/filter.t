@@ -354,19 +354,23 @@ like $email, qr/^#patch .lines, .info {color:#999;background:#fff;}/m,
 ##############################################################################
 # This is just to generate the Trac demo message.
 ##############################################################################
-ok( $notifier = SVN::Notify::HTML::ColorDiff->new(
-    %args,
-    revision   => '555',
-    trac_url   => 'http://trac.edgewall.org/',
-    with_diff  => 1,
-    filters    => [ 'Trac' ],
-), 'Construct CSS filter notifier' );
-isa_ok($notifier, 'SVN::Notify::HTML::ColorDiff');
-isa_ok($notifier, 'SVN::Notify::HTML');
-isa_ok($notifier, 'SVN::Notify');
-ok $notifier->prepare, 'Prepare log_message filter checking';
-ok $notifier->execute, 'Notify log_mesage filter checking';
+SKIP: {
+    eval 'require Text::Trac';
+    skip 'Text::Trac did not load', 6 if $@;
 
+    ok( $notifier = SVN::Notify::HTML::ColorDiff->new(
+        %args,
+        revision   => '555',
+        trac_url   => 'http://trac.edgewall.org/',
+        with_diff  => 1,
+        filters    => [ 'Trac' ],
+    ), 'Construct CSS filter notifier' );
+    isa_ok($notifier, 'SVN::Notify::HTML::ColorDiff');
+    isa_ok($notifier, 'SVN::Notify::HTML');
+    isa_ok($notifier, 'SVN::Notify');
+    ok $notifier->prepare, 'Prepare log_message filter checking';
+    ok $notifier->execute, 'Notify log_mesage filter checking';
+}
 
 ##############################################################################
 # Functions.
