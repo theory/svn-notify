@@ -547,7 +547,7 @@ sub output_diff {
                 print $out qq{<a id="$id">$action: $file</a>\n};
             }
             else {
-                print $out encode_entities($_, '<>&"'), "\n";
+                print $out ( encode_entities($_, '<>&"'), "\n" );
             }
         } else {
             print $out
