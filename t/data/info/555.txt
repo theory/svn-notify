@@ -1,7 +1,6 @@
 theory
 2008-02-23 16:49:35 -0700 (Sat, 23 Feb 2008)
-4281
-
+4280
 = Trac-Style Log Message Formatting =
 
 This "commit" demonstrates how log messages look when they are written in [http://trac.edgewall.org/wiki/WikiFormatting Trac wiki syntax] and converted to HTML by `[http://search.cpan.org/perldoc?Text::Trac Text::Trac]` via the `[http://search.cpan.org/perldoc?SVN::Notify::Filter::Trac SVN::Notify::Filter::Trac]` filter. All of the various features of that syntax are demonstrated here.
@@ -107,7 +106,7 @@ I borrowed this example table, as well its style, from [http://fluidmind.org/tes
 ||MSIE 4.x||30||12||4||1||< 1||
 ||Netscape 6+/Mozilla||—||—||< 1||< 1||< 2||
 ||Netscape 4-||18||10||4||1||< 1||
-||Opera-||< 1||< 1||< 1||< 1||1||
+||Opera||< 1||< 1||< 1||< 1||1||
 
 == Links ==
 
