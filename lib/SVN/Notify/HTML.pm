@@ -607,6 +607,7 @@ sub _css {
         qq(#logmsg p, #logmsg pre, #logmsg blockquote { margin: 0 0 1em 0; }\n),
         qq(#logmsg p, #logmsg li, #logmsg dt, #logmsg dd { line-height: 14pt; }\n),
         qq(#logmsg h1, #logmsg h2, #logmsg h3, #logmsg h4, #logmsg h5, #logmsg h6 { margin: .5em 0; }\n),
+        qq(#logmsg h1:first-child, #logmsg h2:first-child, #logmsg h3:first-child, #logmsg h4:first-child, #logmsg h5:first-child, #logmsg h6:first-child { margin-top: 0; }\n),
         qq(#logmsg ul, #logmsg ol { padding: 0; list-style-position: inside; margin: 0 0 0 1em; }\n),
         qq(#logmsg > ul, #logmsg > ol { margin-left: 0; margin: 0 0 1em 0; }\n),
         qq(#logmsg pre { background: #eee; padding: 1em; }\n),
