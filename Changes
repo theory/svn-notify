@@ -48,6 +48,8 @@ Revision history for Perl extension SVN::Notify
         David Cantrell and Slaven Rezic.
       - Fixed the formatting of the log message when using the --wrap-log
         option with SVN::Notify::HTML.
+      - Eliminated a bogus empty paragraph when using the --wrap-log option
+        with SVN::Notify::HTML.
       - Fixed the encoding of the subject line so that Unicode characters
         show up properly. Reported by Ian Anderson (Ticket # 24138).
       - Added extensive documentation on how to deal with character encodings

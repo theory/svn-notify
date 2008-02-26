@@ -397,7 +397,7 @@ sub output_log_message {
 
     print $out "<h3>Log Message</h3>\n";
     if ($filters || $self->wrap_log) {
-        $msg = join( "</p>\n\n<p>", '<p>', split( /\n\s*\n/, $msg ), '</p>' )
+        $msg = '<p>' . join( "</p>\n\n<p>", split /\n\s*\n/, $msg ) . '</p>'
             if !$filters && $self->wrap_log;
         print $out (
             qq{<div id="logmsg">\n},
