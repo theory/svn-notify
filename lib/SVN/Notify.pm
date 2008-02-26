@@ -297,8 +297,13 @@ The character set typically used on the repository for log messages, file
 names, and file contents. Used to specify the character set in the email
 Content-Type headers and, when the C<language> paremeter is specified, the
 C<$LANG> environment variable when launching C<sendmail>. See L</"Character
-Encoding Support"> for more information. C<--charset> is an alias for this
-option preserved for backward compatibility. Defaults to "UTF-8".
+Encoding Support"> for more information. Defaults to "UTF-8".
+
+=item charset
+
+  svnnotify --charset UTF-8
+
+Deprecated. Use C<encoding> instead.
 
 =item svn_encoding
 
