@@ -14,6 +14,7 @@ Revision history for Perl extension SVN::Notify
           to the value of --svn-charset.
         + The --language option is now used to set the C<$LANG> environment
           variable for the execution of `svnlook` as well as `sendmail`.
+        + Fixed character encoding when sending messages via SMTP.
       - Added a link to SVN::Notify's Subversion repository.
       - Added support for output filtering. This allows users to easily
         modify content befor it's output. As an example and likely common
