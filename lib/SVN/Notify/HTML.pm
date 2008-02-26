@@ -603,7 +603,7 @@ sub _css {
             qq(font-size: 10pt; font-weight: bold; }\n),
         q(#msg pre { overflow: auto; background: #ffc; ),
             qq(border: 1px #fa0 solid; padding: 6px; }\n),
-        qq(#logmsg { background: #ffc; border: 1px #fa0 solid; padding: 6px 6px 0 6px; }\n),
+        qq(#logmsg { background: #ffc; border: 1px #fa0 solid; padding: 1em 1em 0 1em; }\n),
         qq(#logmsg p, #logmsg pre, #logmsg blockquote { margin: 0 0 1em 0; }\n),
         qq(#logmsg p, #logmsg li, #logmsg dt, #logmsg dd { line-height: 14pt; }\n),
         qq(#logmsg h1, #logmsg h2, #logmsg h3, #logmsg h4, #logmsg h5, #logmsg h6 { margin: .5em 0; }\n),
