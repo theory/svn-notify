@@ -171,7 +171,6 @@ sub output_diff {
             } elsif ($line =~ /^\@\@/) {
                 print $out "</$in_span>" if $in_span;
                 print $out (
-                    $out,
                     qq{<span class="lines">},
                     encode_entities($line, '<>&"'),
                     "\n</span>",
