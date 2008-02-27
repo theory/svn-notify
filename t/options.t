@@ -3,7 +3,7 @@
 # $Id$
 
 use strict;
-use Test::More tests => 9;
+use Test::More tests => 11;
 
 BEGIN { use_ok 'SVN::Notify' };
 
@@ -94,6 +94,26 @@ SKIP: {
     ok my $notifier = SVN::Notify->new(%$opts), 'Construct SVN::Notify';
     is $notifier->trac_url, 'http://trac.example.com/', 'trac_url attribute should be set';
 }
+
+# Test --to-regex-map.
+local @ARGV = (
+    %testopts,
+    '--to-regex-map', 'f@example.com=^this/',
+    '--to-regex-map', 'b@example.com=^that/',
+    '--to-regex-map', 'z@example.com=^that/',
+);
+
+ok $opts = SVN::Notify->get_options, "Get SVN::Notify + HTML options";
+delete $params{$_} for qw(linkize css_url wrap_log);
+$params{add_headers} = { foo => ['bar']};
+$params{handler} = $params{ticket_url} = undef;
+$params{to_regex_map} = {
+    'f@example.com' => '^this/',
+    'b@example.com' => '^that/',
+    'z@example.com' => '^that/',
+};
+
+is_deeply $opts, \%params, 'Should have to_regex_map hash';
 
 BEGIN {
     package HTML::Entities;
