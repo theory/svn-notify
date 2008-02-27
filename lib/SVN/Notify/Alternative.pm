@@ -128,7 +128,13 @@ sub output {
 
     # Output the multipart/alternative header.
     my $salt = join '', ('.', '/', 0..9, 'A'..'Z', 'a'..'z')[rand 64, rand 64];
-    my $bound = crypt $self->subject, $salt;
+    my $bound = crypt(
+        ( SVN::Notify::PERL58
+            ? Encode::encode_utf8( $self->subject )
+            : $self->subject
+        ),
+        $salt
+    );
     print $out qq{Content-Type: multipart/alternative; boundary="$bound"\n},
                  "Content-Transfer-Encoding: 8bit\n\n";
 

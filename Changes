@@ -27,8 +27,9 @@ Revision history for Perl extension SVN::Notify
       - Split up the output of the HTML <head> section and the <body> section
         into two methods in SVN::Notify::HTML in order to simplify filtering.
       - The CSS output by SVN::Notify::HTML is now output inside the <body>
-        tags, rather than inside the <head> tags, as the former works better
-        for Webmail clients.
+        tags, rather than inside the <head> tags. This isn't valid, but will
+        hopefully it will allow messages to display better in Webmail clients
+        such as Gmail.
       - Added SVN::Notify::Filter, which fully documents the interface for
         filtering (it's really easy!).
       - Added SVN::Notify::Filter:Trac, which parses log messages from the
