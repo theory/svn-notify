@@ -1,6 +1,6 @@
 theory
 2008-02-23 16:49:35 -0700 (Sat, 23 Feb 2008)
-4511
+4549
 = Trac-Style Log Message Formatting =
 
 This "commit" demonstrates how log messages look when they are written in [http://trac.edgewall.org/wiki/WikiFormatting Trac wiki syntax] and converted to HTML by `[http://search.cpan.org/perldoc?Text::Trac Text::Trac]` via the `[http://search.cpan.org/perldoc?SVN::Notify::Filter::Trac SVN::Notify::Filter::Trac]` filter. All of the various features of that syntax are demonstrated here.
@@ -82,7 +82,7 @@ sub log_message {
 
 == Blockquotes ==
 
-Unlike the official Trac format (see Ticket: #6887 for the details), `[http://search.cpan.org/perldoc?Text::Trac Text::Trac]` 0.09 nicely includes multiple indented paragraphs in a single block:
+Unlike the official Trac format (see ticket #6887 for the details), `[http://search.cpan.org/perldoc?Text::Trac Text::Trac]` 0.09 nicely includes multiple indented paragraphs in a single block:
 
   Ask not what your country can do for you. Ask what you can do for your country.
   
