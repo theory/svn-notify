@@ -37,7 +37,10 @@ my $build = $class->new(
     add_to_cleanup     => ['t/data/output.txt'],
     script_files       => ['bin/svnnotify'],
     configure_requires => { 'Module::Build' => '0.2701' },
-    requires           => { 'Getopt::Long' => '2.34' },
+    requires           => {
+        'Getopt::Long' => '2.34',
+        'perl'         => 5.006,
+    },
     build_requires     => {
         'Test::More'    => '0.17',
         'Module::Build' => '0.26',

@@ -3,6 +3,7 @@ package SVN::Notify;
 # $Id$
 
 use strict;
+require 5.006;
 use constant WIN32  => $^O eq 'MSWin32';
 use constant PERL58 => $] > 5.007;
 require Encode if PERL58;
