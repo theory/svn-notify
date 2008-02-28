@@ -38,6 +38,11 @@ sub css {
         qq(#logmsg blockquote.citation .citation { border-color: #4b4; }\n),
         qq(#logmsg blockquote.citation .citation .citation  { border-color: #44b; }\n),
         qq(#logmsg blockquote.citation .citation .citation .citation { border-color: #c55; }\n),
+        qq(#logmsg ol.loweralpha { list-style-type: lower-alpha; }\n),
+        qq(#logmsg ol.upperalpha { list-style-type: upper-alpha; }\n),
+        qq(#logmsg ol.lowerroman { list-style-type: lower-roman; }\n),
+        qq(#logmsg ol.upperroman { list-style-type: upper-roman; }\n),
+        qq(#logmsg ol.arabic     { list-style-type: decimal; }\n),
     );
     return $css;
 }

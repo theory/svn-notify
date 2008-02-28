@@ -1,6 +1,6 @@
 theory
 2008-02-23 16:49:35 -0700 (Sat, 23 Feb 2008)
-4439
+4298
 = Trac-Style Log Message Formatting =
 
 This "commit" demonstrates how log messages look when they are written in [http://trac.edgewall.org/wiki/WikiFormatting Trac wiki syntax] and converted to HTML by `[http://search.cpan.org/perldoc?Text::Trac Text::Trac]` via the `[http://search.cpan.org/perldoc?SVN::Notify::Filter::Trac SVN::Notify::Filter::Trac]` filter. All of the various features of that syntax are demonstrated here.
@@ -125,9 +125,9 @@ This paragraph has what appears to be a !TracLink, because of the camel-casing o
 
 == Horizontal Rules ==
 
-Although the Trac documentation says to use `----` for a horizontal rule (`<hr />`), as of 0.08,  `[http://search.cpan.org/perldoc?Text::Trac Text::Trac]` supports `====`, instead:
+This is exactly what you'd think it is:
 
-====
+----
 
 And that's it!
 

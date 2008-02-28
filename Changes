@@ -4,8 +4,9 @@ Revision history for Perl extension SVN::Notify
 
       - Fixed issues with character encoding handling, starting from a patch
         submitted by Toshikazu Kinkoh, and with a lot of experimentation and
-        testing by Toshikasu and myself. Hopefully these changes will help
-        solve the various encoding problems that continue to crop up:
+        testing by Toshikasu, Martin Lindhe, and myself. Hopefully these
+        changes will help solve the various encoding problems that continue to
+        crop up:
         + Removed --io-layer, which, it seems, never actually worked.
         + Changed --charset to --encoding, although the former is still
           supported for backwards compatibility.
