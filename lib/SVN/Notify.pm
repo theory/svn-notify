@@ -1410,11 +1410,7 @@ sub output_content_type {
     # Output the content type.
     if ($self->{attach_diff}) {
         # We need a boundary string.
-        unless ($self->{boundary}) {
-            my $salt = join '',
-              ('.', '/', 0..9, 'A'..'Z', 'a'..'z')[rand 64, rand 64];
-            $self->{boundary} = crypt($self->{subject}, $salt);
-        }
+        $self->{boundary} ||= join '', ('a'..'z', 'A'..'Z', 0..9)[ map { rand 62 } 0..10];
         print $out
           qq{Content-Type: multipart/mixed; boundary="$self->{boundary}"\n\n};
     }
