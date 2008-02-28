@@ -1,6 +1,6 @@
 theory
 2008-02-23 16:49:35 -0700 (Sat, 23 Feb 2008)
-4280
+4511
 = Trac-Style Log Message Formatting =
 
 This "commit" demonstrates how log messages look when they are written in [http://trac.edgewall.org/wiki/WikiFormatting Trac wiki syntax] and converted to HTML by `[http://search.cpan.org/perldoc?Text::Trac Text::Trac]` via the `[http://search.cpan.org/perldoc?SVN::Notify::Filter::Trac SVN::Notify::Filter::Trac]` filter. All of the various features of that syntax are demonstrated here.
@@ -82,7 +82,7 @@ sub log_message {
 
 == Blockquotes ==
 
-As of `[http://search.cpan.org/perldoc?Text::Trac Text::Trac]` 0.08, there apears to be a bug in how it renders blockquotes. I can't quite figure out why it works for the attribution paragraph here, but not the actual quote paragraph. See the related [http://trac.edgewall.org/ticket/6887 Trac bug report] and [http://rt.cpan.org/Ticket/Display.html?id=33575 Text::Trac bug report].
+Unlike the official Trac format (see Ticket: #6887 for the details), `[http://search.cpan.org/perldoc?Text::Trac Text::Trac]` 0.09 nicely includes multiple indented paragraphs in a single block:
 
   Ask not what your country can do for you. Ask what you can do for your country.
   
@@ -90,11 +90,13 @@ As of `[http://search.cpan.org/perldoc?Text::Trac Text::Trac]` 0.08, there apear
 
 == Discussion Citations ==
 
-As of version 0.08 of `[http://search.cpan.org/perldoc?Text::Trac Text::Trac]`, citations aren't supported. See the [http://rt.cpan.org/Ticket/Display.html?id=33575 bug report] for details.
+As of version 0.09 of `[http://search.cpan.org/perldoc?Text::Trac Text::Trac]`, citations are supported. These are the style of citation that's supposed to look kind of like email:
 
->> Someone's original text
-> Someone else's reply text
-My reply text
+>>>> This is some deeply buried original text, in which the poster was going on and on, ad naseum. Make it stop!
+>>> This is the reply to the ad naseum comment. This poster, too, went on and on, saying nothing useful, as you might expect. It's usenet, after all!
+>> This is slightly more relevant, or a pile-on, as you might expect.
+> The last quoted bit from someone else attempting to add a bit of sanity to the discussion.
+This bit would be, of course, an application of [http://en.wikipedia.org/wiki/Godwin's_law Godwin's law]. ;-P
 
 == Tables ==
 

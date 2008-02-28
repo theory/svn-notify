@@ -3,7 +3,7 @@
 # $Id$
 
 use strict;
-use Test::More tests => 129;
+use Test::More tests => 130;
 use File::Spec::Functions;
 
 use_ok('SVN::Notify');
@@ -214,7 +214,7 @@ SKIP: {
 
 SKIP: {
     eval 'require Text::Trac';
-    skip 'Text::Trac did not load', 11 if $@;
+    skip 'Text::Trac did not load', 12 if $@;
 
     ok( $notifier = SVN::Notify->new(
         %args,
@@ -249,7 +249,8 @@ SKIP: {
             qr{<p>\s*Did this, that, and the «other»[.] And then I did some more[.] Some\nit was done on a second line[.] “Go figure”[.] <a class="changeset" href="http://trac[.]example[.]com/changeset/1234">r1234</a>\s*</p>}ms,
             'HTML output should have Track wiki conveted to HTML';
     }
-
+    like $email, qr{^#logmsg blockquote[.]citation}ms,
+        'CSS should be modified, too';
 }
 
 ##############################################################################

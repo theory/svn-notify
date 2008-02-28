@@ -12,6 +12,8 @@ Fake out Test::Pod::Coverage.
 
 =head3 log_message
 
+=head3 css
+
 =end comment
 
 =cut
@@ -26,6 +28,18 @@ sub log_message {
     $msg =~ s/^\n+//g;
     $msg =~ s/\n+$//g;
     return [ $trac->parse( $msg ) ];
+}
+
+sub css {
+    my ($notify, $css)= @_;
+    return $css unless $notify->content_type eq 'text/html';
+    push @$css, (
+        qq(#logmsg blockquote.citation { padding: 0; border: 0; border-left: solid 2px #b44; padding-left: .75em; background: transparent; }\n),
+        qq(#logmsg blockquote.citation .citation { border-color: #4b4; }\n),
+        qq(#logmsg blockquote.citation .citation .citation  { border-color: #44b; }\n),
+        qq(#logmsg blockquote.citation .citation .citation .citation { border-color: #c55; }\n),
+    );
+    return $css;
 }
 
 1;
