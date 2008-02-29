@@ -1,10 +1,11 @@
 Revision history for Perl extension SVN::Notify
 
-2.70
-
+2.70  2008-02-29T17:03:26
+      - See http://justatheory.com/computers/programming/perl/modules/svnnotify-2.70.html
+        for an announcement of this release.
       - Fixed issues with character encoding handling, starting from a patch
         submitted by Toshikazu Kinkoh, and with a lot of experimentation and
-        testing by Toshikasu, Martin Lindhe, and myself. Hopefully these
+        testing by Toshikazu, Martin Lindhe, and myself. Hopefully these
         changes will help solve the various encoding problems that continue to
         crop up:
         + Removed --io-layer, which, it seems, never actually worked.
@@ -18,48 +19,46 @@ Revision history for Perl extension SVN::Notify
           to the value of --svn-encoding.
         + The --language option is now used to set the C<$LANG> environment
           variable for the execution of `svnlook` as well as `sendmail`,
-          although not `svnlook diff`.
+          although not `svnlook diff`, which always runs under the "C" locale.
+        + Now only setting the $LANG environment variable for the execution of
+          `svnlook` and `sendmail` if it is not already set. This allows the
+          existing usages such as `LANG=ja_JP svnnotify ...` to keep working.
         + Fixed character encoding when sending messages via SMTP.
-      - Added a link to SVN::Notify's Subversion repository.
+      - Added extensive documentation on how to deal with character encodings
+        under "Character Encoding Support" in the SVN::Notify docs.
       - Added support for output filtering. This allows users to easily
-        modify content befor it's output. As an example and likely common
-        usage, see the new SVN::Notify::Filter::Trac module. There is also
-        extensive documentation on writing filters in the SVN::Notify POD.
-      - Split up the output of the HTML <head> section and the <body> section
-        into two methods in SVN::Notify::HTML in order to simplify filtering.
-      - The CSS output by SVN::Notify::HTML is now output inside the <body>
-        tags, rather than inside the <head> tags. This isn't valid, but will
-        hopefully it will allow messages to display better in Webmail clients
-        such as Gmail.
+        modify content before it's output.
       - Added SVN::Notify::Filter, which fully documents the interface for
         filtering (it's really easy!).
       - Added SVN::Notify::Filter:Trac, which parses log messages from the
         Trac wiki syntax to HTML. Useful for use with SVN::Notify::HTML
         and SVN::Notify::HTML::ColorDiff, and as a nice example of filtering.
+      - Split up the output of the HTML <head> section and the <body> section
+        into two methods in SVN::Notify::HTML in order to simplify filtering.
+      - The CSS output by SVN::Notify::HTML is now output inside the <body>
+        tags, rather than inside the <head> tags. This isn't valid, but will
+        hopefully it will allow messages to display better in Web mail clients
+        such as Gmail.
       - Eliminated locale warnings during tests.
-      - Tweaked the CSS emitted by SVN::Notify::HTML to support a lot of
-        formatting in the log message, since such formatting can come from
-        the use of SVN::Notify::Filter::Trac.
+      - Tweaked the CSS emitted by SVN::Notify::HTML to support a lot of HTML
+        in the log message, since such formatting can come from the use of
+        SVN::Notify::Filter::Trac and, potentially, other output filters.
       - Fixed issue running tests with a Perl other than /usr/bin/perl without
         running `./Build`. If you just did `./Build test`, it could fail with
-        a lot of errors.
-      - Now only setting the $LANG environment variable for the execution of
-        `svnlook` and `sendmail` if it is not already set. This allows the
-        existing usages such as `LANG=ja_JP svnnotify ...` to keep working.
+        a lot of errors, but no more.
       - Fixed use of the SMTP feature under Perl 5.6. Reported by CPAN testers
         David Cantrell and Slaven Rezic.
-      - Fixed the formatting of the log message when using the --wrap-log
-        option with SVN::Notify::HTML.
+      - Fixed the formatting and display of the log message when using the
+        --wrap-log option with SVN::Notify::HTML.
       - Eliminated a bogus empty paragraph when using the --wrap-log option
         with SVN::Notify::HTML.
       - Fixed the encoding of the subject line so that Unicode characters
         show up properly. Reported by Ian Anderson (Ticket # 24138).
-      - Added extensive documentation on how to deal with character encodings
-        under "Character Encoding Support" in the SVN::Notify docs.
       - Switched from using `crypt` to using a simple random string algorithm
         for generating email part boundaries, since `crypt` was choking on
         multibyte characters from message subjects. Reported by Toshikazu
         Kinkoh.
+      - Added a link to SVN::Notify's Subversion repository.
 
 2.67 2008-02-06T20:15:13
       - Fixed bug where a directory with a valid regular expression character
