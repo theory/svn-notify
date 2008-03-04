@@ -5,10 +5,14 @@
 use strict;
 use Test::More tests => 130;
 use File::Spec::Functions;
+use constant TEST_HTML => eval 'require HTML::Entities';
 
 use_ok('SVN::Notify');
-use_ok('SVN::Notify::HTML');
-use_ok('SVN::Notify::HTML::ColorDiff');
+SKIP: {
+    skip 'HTML::Entities did not load', 2 unless TEST_HTML;
+    use_ok('SVN::Notify::HTML');
+    use_ok('SVN::Notify::HTML::ColorDiff');
+}
 
 my $ext = $^O eq 'MSWin32' ? '.bat' : '';
 
@@ -125,37 +129,46 @@ $email = get_output();
 like $email, qr/In the beginning[.]{3}/, 'Start text should be present';
 like $email, qr/The end[.]/, 'End text should be present';
 
-##############################################################################
-# Start and End filters with SVN::Notify::HTML.
-##############################################################################
-
-ok( $notifier = SVN::Notify::HTML->new(
-    %args,
-    filters => [ 'StartEnd' ],
-), 'Construct HTML start and end filter notifier' );
-isa_ok($notifier, 'SVN::Notify');
-ok $notifier->prepare, 'Prepare log_message filter checking';
-ok $notifier->execute, 'Notify log_mesage filter checking';
-$email = get_output();
-like $email, qr/<div id="msg">\nIn the beginning[.]{3}/m,
-    'Start text should be present';
-like $email, qr{</html>\nThe end[.]}m, 'End text should be present';
 
 ##############################################################################
-# StartHTML.
+# HTML Testing.
 ##############################################################################
 
-ok( $notifier = SVN::Notify::HTML->new(
-    %args,
-    filters => [ 'StartHTML' ],
-), 'Construct new headers filter notifier' );
-isa_ok($notifier, 'SVN::Notify::HTML');
-isa_ok($notifier, 'SVN::Notify');
-ok $notifier->prepare, 'Prepare log_message filter checking';
-ok $notifier->execute, 'Notify log_mesage filter checking';
-$email = get_output();
-like $email, qr{<meta name="keywords" value="foo" />},
-    'New header should be present';
+SKIP: {
+    skip 'HTML::Entities did not load', 12 unless TEST_HTML;
+
+    ##########################################################################
+    # Start and End filters with SVN::Notify::HTML.
+    ##########################################################################
+
+    ok( $notifier = SVN::Notify::HTML->new(
+        %args,
+        filters => [ 'StartEnd' ],
+    ), 'Construct HTML start and end filter notifier' );
+    isa_ok($notifier, 'SVN::Notify');
+    ok $notifier->prepare, 'Prepare log_message filter checking';
+    ok $notifier->execute, 'Notify log_mesage filter checking';
+    $email = get_output();
+    like $email, qr/<div id="msg">\nIn the beginning[.]{3}/m,
+        'Start text should be present';
+    like $email, qr{</html>\nThe end[.]}m, 'End text should be present';
+
+    ##########################################################################
+    # StartHTML.
+    ##########################################################################
+
+    ok( $notifier = SVN::Notify::HTML->new(
+        %args,
+        filters => [ 'StartHTML' ],
+    ), 'Construct new headers filter notifier' );
+    isa_ok($notifier, 'SVN::Notify::HTML');
+    isa_ok($notifier, 'SVN::Notify');
+    ok $notifier->prepare, 'Prepare log_message filter checking';
+    ok $notifier->execute, 'Notify log_mesage filter checking';
+    $email = get_output();
+    like $email, qr{<meta name="keywords" value="foo" />},
+        'New header should be present';
+}
 
 ##############################################################################
 # File Lists filter.
@@ -213,6 +226,7 @@ SKIP: {
 ##############################################################################
 
 SKIP: {
+    skip 'HTML::Entities did not load', 12 unless TEST_HTML;
     eval 'require Text::Trac';
     skip 'Text::Trac did not load', 12 if $@;
 
@@ -254,108 +268,117 @@ SKIP: {
 }
 
 ##############################################################################
-# Try the metadata filter on SVN::Notify::HTML.
-##############################################################################
-ok( $notifier = SVN::Notify::HTML->new(
-    %args,
-    filters => [ 'CapMeta' ],
-), 'Construct new metadata filter notifier' );
-isa_ok($notifier, 'SVN::Notify::HTML');
-isa_ok($notifier, 'SVN::Notify');
-ok $notifier->prepare, 'Prepare log_message filter checking';
-ok $notifier->execute, 'Notify log_mesage filter checking';
-$email = get_output();
-like $email, qr{Content-Type: text/html; charset=UTF-8}, 'Should be HTML';
-like $email, qr/REVISION: 111/, 'Revision header should be uppercase';
-like $email, qr/AUTHOR:   theory/, 'Author header should be uppercase';
-
-##############################################################################
-# Try the file Lists filter with SVN::Notify::HTML.
+# More HTML testing.
 ##############################################################################
 
-ok( $notifier = SVN::Notify::HTML->new(
-    %args,
-    filters => [ 'StripTrunk' ],
-), 'Construct new file lists filter notifier' );
-isa_ok($notifier, 'SVN::Notify::HTML');
-isa_ok($notifier, 'SVN::Notify');
-ok $notifier->prepare, 'Prepare log_message filter checking';
-ok $notifier->execute, 'Notify log_mesage filter checking';
-$email = get_output();
-like $email, qr{Content-Type: text/html; charset=UTF-8}, 'Should be HTML';
-like $email, qr{^\s+Class-Meta/Changes}m, 'trunk/ should be stripped out';
+SKIP: {
+    skip 'HTML::Entities did not load', 43 unless TEST_HTML;
 
-##############################################################################
-# Try the diff filter with SVN::Notify::HTML.
-##############################################################################
+    ##########################################################################
+    # Try the metadata filter on SVN::Notify::HTML.
+    ##########################################################################
+    ok( $notifier = SVN::Notify::HTML->new(
+        %args,
+        filters => [ 'CapMeta' ],
+    ), 'Construct new metadata filter notifier' );
+    isa_ok($notifier, 'SVN::Notify::HTML');
+    isa_ok($notifier, 'SVN::Notify');
+    ok $notifier->prepare, 'Prepare log_message filter checking';
+    ok $notifier->execute, 'Notify log_mesage filter checking';
+    $email = get_output();
+    like $email, qr{Content-Type: text/html; charset=UTF-8}, 'Should be HTML';
+    like $email, qr/REVISION: 111/, 'Revision header should be uppercase';
+    like $email, qr/AUTHOR:   theory/, 'Author header should be uppercase';
 
-ok( $notifier = SVN::Notify::HTML->new(
-    %args,
-    with_diff => 1,
-    filters => [ 'StripTrunkDiff' ],
-), 'Construct new diff filter notifier' );
-isa_ok($notifier, 'SVN::Notify::HTML');
-isa_ok($notifier, 'SVN::Notify');
-ok $notifier->prepare, 'Prepare log_message filter checking';
-ok $notifier->execute, 'Notify log_mesage filter checking';
-$email = get_output();
-like $email, qr{^-{3}\s+Params-CallbackRequest/Changes}m, 'leading trunk should be stripped';
-like $email, qr{^[+]{3}\s+Params-CallbackRequest/Changes}m, 'leading trunk should be stripped';
+    ##########################################################################
+    # Try the file Lists filter with SVN::Notify::HTML.
+    ##########################################################################
 
-##############################################################################
-# Try the diff filter with SVN::Notify::HTML::ColorDiff.
-##############################################################################
+    ok( $notifier = SVN::Notify::HTML->new(
+        %args,
+        filters => [ 'StripTrunk' ],
+    ), 'Construct new file lists filter notifier' );
+    isa_ok($notifier, 'SVN::Notify::HTML');
+    isa_ok($notifier, 'SVN::Notify');
+    ok $notifier->prepare, 'Prepare log_message filter checking';
+    ok $notifier->execute, 'Notify log_mesage filter checking';
+    $email = get_output();
+    like $email, qr{Content-Type: text/html; charset=UTF-8}, 'Should be HTML';
+    like $email, qr{^\s+Class-Meta/Changes}m, 'trunk/ should be stripped out';
 
-ok( $notifier = SVN::Notify::HTML::ColorDiff->new(
-    %args,
-    with_diff => 1,
-    filters => [ 'StripTrunkDiff' ],
-), 'Construct new diff filter notifier' );
-isa_ok($notifier, 'SVN::Notify::HTML::ColorDiff');
-isa_ok($notifier, 'SVN::Notify::HTML');
-isa_ok($notifier, 'SVN::Notify');
-ok $notifier->prepare, 'Prepare log_message filter checking';
-ok $notifier->execute, 'Notify log_mesage filter checking';
-$email = get_output();
-like $email, qr{^-{3}\s+Params-CallbackRequest/Changes}m, 'leading trunk should be stripped';
-like $email, qr{^[+]{3}\s+Params-CallbackRequest/Changes}m, 'leading trunk should be stripped';
+    ##########################################################################
+    # Try the diff filter with SVN::Notify::HTML.
+    ##########################################################################
 
-##############################################################################
-# Try a CSS filter.
-##############################################################################
+    ok( $notifier = SVN::Notify::HTML->new(
+        %args,
+        with_diff => 1,
+        filters => [ 'StripTrunkDiff' ],
+    ), 'Construct new diff filter notifier' );
+    isa_ok($notifier, 'SVN::Notify::HTML');
+    isa_ok($notifier, 'SVN::Notify');
+    ok $notifier->prepare, 'Prepare log_message filter checking';
+    ok $notifier->execute, 'Notify log_mesage filter checking';
+    $email = get_output();
+    like $email, qr{^-{3}\s+Params-CallbackRequest/Changes}m, 'leading trunk should be stripped';
+    like $email, qr{^[+]{3}\s+Params-CallbackRequest/Changes}m, 'leading trunk should be stripped';
 
-ok( $notifier = SVN::Notify::HTML->new(
-    %args,
-    filters => [ 'CSS' ],
-), 'Construct CSS filter notifier' );
-isa_ok($notifier, 'SVN::Notify::HTML');
-isa_ok($notifier, 'SVN::Notify');
-ok $notifier->prepare, 'Prepare log_message filter checking';
-ok $notifier->execute, 'Notify log_mesage filter checking';
-$email = get_output();
-like $email, qr/^#patch { width: 90%; }/m, 'Should have modified the CSS';
+    ##########################################################################
+    # Try the diff filter with SVN::Notify::HTML::ColorDiff.
+    ##########################################################################
 
-##############################################################################
-# Try a CSS filter with ColofDiff.
-##############################################################################
+    ok( $notifier = SVN::Notify::HTML::ColorDiff->new(
+        %args,
+        with_diff => 1,
+        filters => [ 'StripTrunkDiff' ],
+    ), 'Construct new diff filter notifier' );
+    isa_ok($notifier, 'SVN::Notify::HTML::ColorDiff');
+    isa_ok($notifier, 'SVN::Notify::HTML');
+    isa_ok($notifier, 'SVN::Notify');
+    ok $notifier->prepare, 'Prepare log_message filter checking';
+    ok $notifier->execute, 'Notify log_mesage filter checking';
+    $email = get_output();
+    like $email, qr{^-{3}\s+Params-CallbackRequest/Changes}m, 'leading trunk should be stripped';
+    like $email, qr{^[+]{3}\s+Params-CallbackRequest/Changes}m, 'leading trunk should be stripped';
 
-ok( $notifier = SVN::Notify::HTML::ColorDiff->new(
-    %args,
-    filters => [ 'CSS' ],
-), 'Construct CSS filter notifier' );
-isa_ok($notifier, 'SVN::Notify::HTML::ColorDiff');
-isa_ok($notifier, 'SVN::Notify::HTML');
-isa_ok($notifier, 'SVN::Notify');
-ok $notifier->prepare, 'Prepare log_message filter checking';
-ok $notifier->execute, 'Notify log_mesage filter checking';
-$email = get_output();
-like $email, qr/^#patch .lines, .info {color:#999;background:#fff;}/m,
-    'Should have modified the CSS';
+    ##########################################################################
+    # Try a CSS filter.
+    ##########################################################################
+
+    ok( $notifier = SVN::Notify::HTML->new(
+        %args,
+        filters => [ 'CSS' ],
+    ), 'Construct CSS filter notifier' );
+    isa_ok($notifier, 'SVN::Notify::HTML');
+    isa_ok($notifier, 'SVN::Notify');
+    ok $notifier->prepare, 'Prepare log_message filter checking';
+    ok $notifier->execute, 'Notify log_mesage filter checking';
+    $email = get_output();
+    like $email, qr/^#patch { width: 90%; }/m, 'Should have modified the CSS';
+
+    ##########################################################################
+    # Try a CSS filter with ColofDiff.
+    ##########################################################################
+
+    ok( $notifier = SVN::Notify::HTML::ColorDiff->new(
+        %args,
+        filters => [ 'CSS' ],
+    ), 'Construct CSS filter notifier' );
+    isa_ok($notifier, 'SVN::Notify::HTML::ColorDiff');
+    isa_ok($notifier, 'SVN::Notify::HTML');
+    isa_ok($notifier, 'SVN::Notify');
+    ok $notifier->prepare, 'Prepare log_message filter checking';
+    ok $notifier->execute, 'Notify log_mesage filter checking';
+    $email = get_output();
+    like $email, qr/^#patch .lines, .info {color:#999;background:#fff;}/m,
+        'Should have modified the CSS';
+}
 
 ##############################################################################
 # This is mainly just to generate the Trac demo message.
 ##############################################################################
 SKIP: {
+    skip 'HTML::Entities did not load', 9 unless TEST_HTML;
     eval 'require Text::Trac';
     skip 'Text::Trac did not load', 9 if $@;
 
