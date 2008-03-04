@@ -3,6 +3,9 @@ Revision history for Perl extension SVN::Notify
 2.71
       - Fixed test failure in t/filter.t when HTML::Entities is not installed.
         Reported by Slaven Rezic and many other CPAN-Testers.
+      - Bumped version number for recommended module Text::Trac up to 0.10,
+        since that version fixes the last of the bugs I found with its HTML
+        output.
 
 2.70  2008-02-29T17:03:26
       - See http://justatheory.com/computers/programming/perl/modules/svnnotify-2.70.html

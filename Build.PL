@@ -54,7 +54,7 @@ my $build = $class->new(
         'Test::Pod'           => 1.20,
         'Test::Pod::Coverage' => 1.06,
         'File::Spec'          => 0,
-        'Text::Trac'          => '0.09',
+        'Text::Trac'          => '0.10',
     },
 );
 $build->create_build_script;
