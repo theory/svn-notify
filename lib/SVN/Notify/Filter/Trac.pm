@@ -6,6 +6,8 @@ use strict;
 use Text::Trac;
 use SVN::Notify;
 
+$SVN::Notify::Filter::Trac = '2.71';
+
 =begin comment
 
 Fake out Test::Pod::Coverage.
