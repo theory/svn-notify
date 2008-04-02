@@ -3,7 +3,7 @@
 # $Id$
 
 use strict;
-use Test::More tests => 237;
+use Test::More tests => 238;
 use File::Spec::Functions;
 
 use_ok('SVN::Notify');
@@ -78,6 +78,9 @@ is($notifier->date, '2004-04-20 01:33:35 -0700 (Tue, 20 Apr 2004)',
    "Check date accessor" );
 is($notifier->message_size, 103, "Check message_size accessor" );
 isa_ok($notifier->message, 'ARRAY', "Check message accessor" );
+my $msg = 'Did this, that, and the «other». And then I did some more. Some';
+Encode::_utf8_on( $msg ) if SVN::Notify::PERL58();
+is $notifier->message->[0], $msg, 'Check the message';
 isa_ok($notifier->files, 'HASH', "Check files accessor" );
 is($notifier->subject, "[111] $subj", "Check subject accessor" );
 is($notifier->header, undef, 'Check header accessor');
