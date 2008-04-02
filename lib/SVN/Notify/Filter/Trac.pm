@@ -71,7 +71,7 @@ Use the class in a custom script:
       revision   => $rev,
       to         => 'you@example.com',
       handler    => 'HTML::ColorDiff',
-      filter     => [ 'Trac' ],
+      filters    => [ 'Trac' ],
       trac_url   => 'http://trac.example.com/',
   );
   $notifier->prepare;
