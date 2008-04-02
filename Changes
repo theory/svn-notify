@@ -6,6 +6,13 @@ Revision history for Perl extension SVN::Notify
       - Bumped version number for recommended module Text::Trac up to 0.10,
         since that version fixes the last of the bugs I found with its HTML
         output.
+      - Adjusted the runnign of filters against log messages in
+        SVN::Notify::HTML so that any linkizing (--linkize), revision URL
+        parsing (--revision-url_, and ticket reference parsing (--ticket-map)
+        is run after the content has been filtered. In 2.70, none of those
+        things happened if the message was filtered, even though they did if a
+        log message was filtered by SVN::Notify (plain text).
+      - Added references to SVN::Notify::Filter::Markdown, now on CPAN.
 
 2.70  2008-02-29T17:03:26
       - See http://justatheory.com/computers/programming/perl/modules/svnnotify-2.70.html

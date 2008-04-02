@@ -130,9 +130,12 @@ First, see the L<"Synopsis"> for an example that converts Textile-formatted
 log messages to HTML, and L<"A Quick Example"> for a filter that converts a
 Markdown-formatted log message to HTML. If you format your log messages for
 Trac, just use the included
-L<SVN::Notify::Filter::Trac|SVN::Notify::Filter::Trac> filter.
+L<SVN::Notify::Filter::Trac|SVN::Notify::Filter::Trac> filter. There is
+also L<SVN::Notify::Filter::Markdown|SVN::Notify::Filter::Markdown> on CPAN,
+and maybe other filters as well.
 
-Otherwise, here are some examples to get you started writing your own filters:
+But if you can't find anything that does what you want, here are some examples
+to get you started writing your own filters:
 
 =over
 
@@ -213,9 +216,10 @@ able to do much.
 
 Log message filtering will probably be quite common, generally to reformat it
 (see, for example, the included
-L<SVN::Notify::Filter::Trac|SVN::Notify::Filter::Trac> filter). If the
-Markdown and Textile examples above are more than you need, here's a simple
-filter that reformats the log message so that paragraphs are wrapped.
+L<SVN::Notify::Filter::Trac|SVN::Notify::Filter::Trac> filter, as well as
+L<SVN::Notify::Filter::Markdown|SVN::Notify::Filter::Markdown> on CPAN). If
+the Markdown and Textile examples above are more than you need, here's a
+simple filter that reformats the log message so that paragraphs are wrapped.
 
   package SVN::Notify::Filter::WrapMessage;
   use Text::Wrap ();
