@@ -59,8 +59,8 @@ SVN::Notify::Filter::Trac - Filter SVN::Notify output in Trac format
 
 Use F<svnnotify> in F<post-commit>:
 
-  svnnotify --p "$1" --r "$2" --handler HTML --filter Trac \
-  --trac-url http://trac.example.com
+  svnnotify --p "$1" --r "$2" --to you@example.com --handler HTML \
+  --filter Trac --trac-url http://trac.example.com
 
 Use the class in a custom script:
 
