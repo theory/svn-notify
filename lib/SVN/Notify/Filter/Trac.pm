@@ -69,6 +69,7 @@ Use the class in a custom script:
   my $notifier = SVN::Notify->new(
       repos_path => $path,
       revision   => $rev,
+      to         => 'you@example.com',
       handler    => 'HTML::ColorDiff',
       filter     => [ 'Trac' ],
       trac_url   => 'http://trac.example.com/',
