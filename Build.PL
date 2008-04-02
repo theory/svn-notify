@@ -43,7 +43,7 @@ my $build = $class->new(
     },
     build_requires     => {
         'Test::More'    => '0.17',
-        'Module::Build' => '0.26',
+        'Module::Build' => '0.2701',
         'File::Spec'    => 0,
     },
     recommends => {
