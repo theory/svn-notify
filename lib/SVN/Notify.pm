@@ -498,11 +498,15 @@ differently.
 
   svnnotify --filter Trac -F My::Filter
 
-  SVN::Notify->new( %params, filters => ['Trac', 'My::Filter'] );
+  SVN::Notify->new( %params, filters => ['Markdown', 'My::Filter'] );
 
 Specify a more module to be loaded in the expectation that it defines output
 filters. For example, L<SVN::Notify::Filter::Trac|SVN::Notify::Filter::Trac>
 loads a filter that converts log messages from Trac's markup format to HTML.
+L<SVN::Notify::Filter::Markdown|SVN::Notify::Filter::Markdown>, available on
+CPAN, does the same for Markdown format. Check CPAN for other SVN::Notify
+filter modules.
+
 This command-line option can be specified more than once to load multiple
 filters. The C<filters> parameter to C<new()> should be an array reference of
 modules names. If a value contains "::", it is assumed to be a complete module
