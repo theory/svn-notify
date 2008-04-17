@@ -1,6 +1,6 @@
 Revision history for Perl extension SVN::Notify
 
-2.71
+2.71  2008-04-17T18:53:27
       - Fixed test failure in t/filter.t when HTML::Entities is not installed.
         Reported by David Cantrell via CPAN-Testers.
       - Bumped version number for recommended module Text::Trac up to 0.10,
@@ -8,14 +8,14 @@ Revision history for Perl extension SVN::Notify
         output.
       - Adjusted the runnign of filters against log messages in
         SVN::Notify::HTML so that any linkizing (--linkize), revision URL
-        parsing (--revision-url_, and ticket reference parsing (--ticket-map)
+        parsing (--revision-url), and ticket reference parsing (--ticket-map)
         is run after the content has been filtered. In 2.70, none of those
         things happened if the message was filtered, even though they did if a
         log message was filtered by SVN::Notify (plain text).
       - Added references to SVN::Notify::Filter::Markdown, now on CPAN.
       - Attributes registered by a filter were not being properly registered
         and processing the command-line arguments when the filter was loaded
-        by the `--filter` option to `svnnotify`. Thanks to Larry Shatzer, Jr.
+        by the --filter option to `svnnotify`. Thanks to Larry Shatzer, Jr.
         for the spot!
       - A character encoding test added in 2.70 still fails on Windows. No
         idea why. Seeking help from a Windows developer to help chase it down.
