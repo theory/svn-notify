@@ -904,6 +904,14 @@ sub get_options {
         eval "require " . __PACKAGE__ . "::$opts->{handler}" or die $@;
     }
 
+    # Load any filters.
+    if ($opts->{filters}) {
+        for my $pkg ( @{ $opts->{filters} } ) {
+            $pkg = "SVN::Notify::Filter::$pkg" if $pkg !~ /::/;
+            eval "require $pkg" or die $@;
+        }
+    }
+
     # Load any options for the subclass.
     return $opts unless %OPTS;
     Getopt::Long::GetOptions(
