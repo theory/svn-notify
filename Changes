@@ -1,5 +1,7 @@
 Revision history for Perl extension SVN::Notify
 
+2.72
+
 2.71  2008-04-17T18:53:27
       - Fixed test failure in t/filter.t when HTML::Entities is not installed.
         Reported by David Cantrell via CPAN-Testers.
