@@ -6,6 +6,13 @@ Revision history for Perl extension SVN::Notify
         Jr.
       - Fixed encoding issue on Windows. Patch to fix a stupid oversight
         graciously provided by David Golden.
+      - Added four new filter callbacks, "pre_prepare", "post_prepare",
+        "pre_execute", and "post_execute". These are called at the begining
+        and end of the execution of the prepare() and execute() methods.
+        Suggestion and initial patch from Larry Shatzer.
+      - Reorganized the table listing the types of filters in
+        SVN::Notify::Filter so that they are listed in the order in which they
+        execute.
 
 2.71  2008-04-17T18:53:27
       - Fixed test failure in t/filter.t when HTML::Entities is not installed.
