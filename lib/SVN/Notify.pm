@@ -3,9 +3,9 @@ package SVN::Notify;
 # $Id$
 
 use strict;
-require 5.006;
+require 5.006_000;
 use constant WIN32  => $^O eq 'MSWin32';
-use constant PERL58 => $] > 5.007;
+use constant PERL58 => $] > 5.007_000;
 require Encode if PERL58;
 $SVN::Notify::VERSION = '2.72';
 
@@ -2224,8 +2224,7 @@ sub _pipe {
             ? q{"}  . join(q{" "}, @_) . q{"|}
             : q{|"} . join(q{" "}, @_) . q{"};
         open PIPE, $cmd or die "Cannot fork: $!\n";
-        binmode PIPE, ":encoding($encode)"
-            if PERL58 && $encode && lc($encode) ne 'utf-8';
+        binmode PIPE, ":encoding($encode)" if PERL58 && $encode;
         return *PIPE;
     }
 
