@@ -3,7 +3,7 @@
 # $Id$
 
 use strict;
-use Test::More tests => 130;
+use Test::More tests => 135;
 use File::Spec::Functions;
 use constant TEST_HTML => eval 'require HTML::Entities';
 
@@ -406,6 +406,23 @@ SKIP: {
 }
 
 ##############################################################################
+# Try the special callback filters.
+##############################################################################
+ok( $notifier = SVN::Notify->new(
+    %args,
+    filters => [ 'Callback' ],
+), 'Construct new callback notifier' );
+isa_ok($notifier, 'SVN::Notify');
+ok $notifier->prepare, 'Prepare callback filter checking';
+ok $notifier->execute, 'Notify callback filter checking';
+{
+    use utf8;
+    is $notifier->subject,
+       'prep [111] Did this, that, and the «other». postp pree poste',
+        'The subject should have been modified';
+}
+
+##############################################################################
 # Functions.
 ##############################################################################
 
@@ -538,5 +555,25 @@ BEGIN {
         my ($notifier, $lines) = @_;
         push @$lines, qq{<meta name="keywords" value="foo" />\n};
         return $lines;
+    }
+
+    package SVN::Notify::Filter::Callback;
+    $INC{'SVN/Notify/Filter/Callback.pm'} = __FILE__;
+    sub pre_prepare {
+        my $notifier = shift;
+        $notifier->subject_prefix('prep ');
+        $notifier->subject( 'prep ');
+    }
+    sub post_prepare {
+        my $notifier = shift;
+        $notifier->subject( $notifier->subject . ' postp');
+    }
+    sub pre_execute {
+        my $notifier = shift;
+        $notifier->subject( $notifier->subject . ' pree');
+    }
+    sub post_execute {
+        my $notifier = shift;
+        $notifier->subject( $notifier->subject . ' poste');
     }
 }

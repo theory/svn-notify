@@ -82,30 +82,40 @@ change the output of SVN::Notify without the hassle of subclassing or sending
 patches to the maintainer.
 
 The names of the filter subroutines and the types of their content arguments
-and return values are as follows:
+and return values are as follows, in the order in which they execute:
 
-  Sub Name    | Second Argument
-  ------------+---------------------------------------------------------------
-  headers     | Array reference of individual email headers lines.
-  from        | String with sender address.
-  recipients  | Array reference of email addresses.
-  subject     | String with the subject line.
-  metadata    | Array reference of lines of the metadata part of the message.
-  log_message | Array reference of lines of log message.
-  file_lists  | Array reference of lines of file names. The first line will be
-              | the type of change for the list, the next a simple line of
-              | dashes, and each of the rest of the lines a file name.
-  diff        | A file handle reference to the diff.
-  start_body  | Array reference of lines at the start of the message body.
-  end_body    | Array reference of lines at the end of the message body.
-  css         | An array of lines of CSS. Used only by SVN::Notify::HTML.
-  start_html  | An array of lines starting an SVN::Notify::HTML document.
+  Sub Name     | Second Argument
+  -------------+---------------------------------------------------------------
+  pre_prepare  | undef
+  recipients   | Array reference of email addresses.
+  from         | String with sender address.
+  subject      | String with the subject line.
+  post_prepare | undef
+  pre_execute  | undef
+  headers      | Array reference of individual email headers lines.
+  start_html   | An array of lines starting an SVN::Notify::HTML document.
+  css          | An array of lines of CSS. Used only by SVN::Notify::HTML.
+  start_body   | Array reference of lines at the start of the message body.
+  metadata     | Array reference of lines of the metadata part of the message.
+  log_message  | Array reference of lines of log message.
+  file_lists   | Array reference of lines of file names. The first line will be
+               | the type of change for the list, the next a simple line of
+               | dashes, and each of the rest of the lines a file name.
+  diff         | A file handle reference to the diff.
+  end_body     | Array reference of lines at the end of the message body.
+  post_execute | undef
 
 Note that the data passed to the filters by SVN::Notify subclasses
 (L<SVN::Notify::HTML|SVN::Notify::HTML> and
 L<SVN::Notify::HTML::ColorDiff|SVN::Notify::HTML::ColorDiff>) may be in a
 slightly different format than documented here. Consult the documentation for
 the relevant methods in those classes for details.
+
+There are four special filter subroutines that are called at the beginning and
+at the end of the execution of the C<prepare()> and C<execute()> methods,
+named C<pre_prepare>, C<post_prepare>, C<pre_execute>, and C<post_execute>. No
+data is passed to them and their return values are ignored, but they are
+included to enable callbacks at the points at which they execute.
 
 The package name of the filter module can be anything you like; just pass it
 via the C<filter> parameter, e.g., C<< filter => [ 'My::Filter' ] >> (or

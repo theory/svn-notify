@@ -999,11 +999,14 @@ expressions match any of the affected directories).
 
 sub prepare {
     my $self = shift;
+    $self->run_filters('pre_prepare');
     $self->prepare_recipients;
     return $self unless @{ $self->{to} };
     $self->prepare_contents;
     $self->prepare_files;
     $self->prepare_subject;
+    $self->run_filters('post_prepare');
+    return $self;
 }
 
 ##############################################################################
@@ -1273,6 +1276,7 @@ any other actions in response to Subversion activity.
 sub execute {
     my $self = shift;
     $self->_dbpnt( "Sending message") if $self->{verbose};
+    $self->run_filters('pre_execute');
     return $self unless @{ $self->{to} };
 
     my $out = $self->{smtp} ? SVN::Notify::SMTP->get_handle($self) : do {
@@ -1290,6 +1294,7 @@ sub execute {
 
     close $out or warn "Child process exited: $?\n";
     $self->_dbpnt( 'Message sent' ) if $self->{verbose};
+    $self->run_filters('post_execute');
     return $self;
 }
 
