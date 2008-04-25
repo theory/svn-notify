@@ -98,9 +98,10 @@ and return values are as follows, in the order in which they execute:
   start_body   | Array reference of lines at the start of the message body.
   metadata     | Array reference of lines of the metadata part of the message.
   log_message  | Array reference of lines of log message.
-  file_lists   | Array reference of lines of file names. The first line will be
-               | the type of change for the list, the next a simple line of
+  file_lists   | Array reference of lines of file names. The first line will
+               | be the type of change for the list, the next a simple line of
                | dashes, and each of the rest of the lines a file name.
+
   diff         | A file handle reference to the diff.
   end_body     | Array reference of lines at the end of the message body.
   post_execute | undef
