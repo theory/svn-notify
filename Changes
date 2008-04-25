@@ -1,6 +1,8 @@
 Revision history for Perl extension SVN::Notify
 
 2.72
+      - Fixed misdocumentation of the short version of the --set-sender
+        option: it's -E, not -S. Reported by Larry Shatzer, Jr.
 
 2.71  2008-04-17T18:53:27
       - Fixed test failure in t/filter.t when HTML::Entities is not installed.
