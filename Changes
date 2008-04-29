@@ -1,5 +1,7 @@
 Revision history for Perl extension SVN::Notify
 
+2.73
+
 2.72  2008-04-29T17:17:29
       - Fixed misdocumentation of the short version of the --set-sender option
         in C<svnnotify --help>: it's -E, not -S. Reported by Larry Shatzer,
