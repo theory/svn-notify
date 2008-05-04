@@ -1,5 +1,7 @@
 Revision history for Perl extension SVN::Notify
 
+2.74
+
 2.73  2008-05-04T02:02:21
       - Fixed another lame-ass test failure under Perl 5.6.2. Reported by
         David Cantrell via cpan-testers.
