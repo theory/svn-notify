@@ -1,6 +1,8 @@
 Revision history for Perl extension SVN::Notify
 
 2.73
+      - Fixed another lame-ass test failure under Perl 5.6.2. Reported by
+        David Cantrell via cpan-testers.
 
 2.72  2008-04-29T17:17:29
       - Fixed misdocumentation of the short version of the --set-sender option
