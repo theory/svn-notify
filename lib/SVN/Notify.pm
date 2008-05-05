@@ -2466,7 +2466,7 @@ David E. Wheeler <david@kineticode.com>
 
 =head1 Copyright and License
 
-Copyright (c) 2004-2008 Kineticode, Inc. All Rights Reserved.
+Copyright (c) 2004-2008 Kineticode, Inc. Some Rights Reserved.
 
 This module is free software; you can redistribute it and/or modify it under
 the same terms as Perl itself.
