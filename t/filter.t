@@ -375,6 +375,30 @@ SKIP: {
 }
 
 ##############################################################################
+# Try the special callback filters.
+##############################################################################
+ok( $notifier = SVN::Notify->new(
+    %args,
+    filters => [ 'Callback' ],
+), 'Construct new callback notifier' );
+isa_ok($notifier, 'SVN::Notify');
+ok $notifier->prepare, 'Prepare callback filter checking';
+ok $notifier->execute, 'Notify callback filter checking';
+
+if (SVN::Notify::PERL58()) {
+    # Newer Perls should read this as utf8.
+    use utf8;
+    is $notifier->subject,
+        'prep [111] Did this, that, and the «other». postp pree poste',
+        'The subject should have been modified';
+} else {
+    # Perl 5.6 has to read this as bytes.
+    is $notifier->subject,
+        'prep [111] Did this, that, and the «other». postp pree poste',
+        'The subject should have been modified';
+}
+
+##############################################################################
 # This is mainly just to generate the Trac demo message.
 ##############################################################################
 SKIP: {
@@ -403,30 +427,6 @@ SKIP: {
     $email = get_output();
     unlike $email, qr/^To: tEst[@]ExAmplE[.]cOm/m,
         'The recipient should not be modified';
-}
-
-##############################################################################
-# Try the special callback filters.
-##############################################################################
-ok( $notifier = SVN::Notify->new(
-    %args,
-    filters => [ 'Callback' ],
-), 'Construct new callback notifier' );
-isa_ok($notifier, 'SVN::Notify');
-ok $notifier->prepare, 'Prepare callback filter checking';
-ok $notifier->execute, 'Notify callback filter checking';
-
-if (SVN::Notify::PERL58()) {
-    # Newer Perls should read this as utf8.
-    use utf8;
-    is $notifier->subject,
-        'prep [111] Did this, that, and the «other». postp pree poste',
-        'The subject should have been modified';
-} else {
-    # Perl 5.6 has to read this as bytes.
-    is $notifier->subject,
-        'prep [111] Did this, that, and the «other». postp pree poste',
-        'The subject should have been modified';
 }
 
 ##############################################################################

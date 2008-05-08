@@ -34,21 +34,21 @@ Trac supports three levels of headings:
 
 Lists can be nested, of course:
 
- * Item 1
-   * Item 1.1
-      * Item 1.1.1
-      * Item 1.1.2
-      * Item 1.1.3
-   * Item 1.2
- * Item 2
+ * We should make it really long so that we can start to see how long lines wrap, don't you think? I do.
+   * Something or other blah blah blah blah blah. Lorem ipsum dolor sit amet, consectetuer adipiscing elit.
+      * Sed diam nonummy nibh eusmod tincidunt ut laoreet dolore magna aliquam erat volputate. Ut wisi enim ad minim veniam, quis nostrud exerci tation.
+      * Ullamcorper suscipit lobortis nisl ut aliquip ex ea commodo consequat.
+      * Duis autem vel eum iriure dolor in hendrerit in vulputate velit esse molestie consequat, vel illum dolore eu feugiat nulla facilisis.
+   * At vero eros et accumsan et iusto odio dignissim qui blandit praesent luptatum zzril delenit augue duis dolore te feugait facilisi.
+ * Item 2 Minim vulputate, ut capio sit duis. Neque, feugait diam ut patria te jugis adsum foras dolor ne gilvus delenit quis.
 
- 1. Item 1
-   a. Item 1.a
-   a. Item 1.b
-      i. Item 1.b.i
-      i. Item 1.b.ii
- 1. Item 2
- 3. Item 3
+ 1. Modo ut eu euismod sit feugiat te iusto hendrerit. Tincidunt eros, iusto vel te multo torqueo vel ymo multo. Consequat, at patria quis olim, nulla, obruo, in bene, aptent foras dolore.
+   a. Secundum demoveo veniam nutus nulla exputo quis os te jumentum, veniam.
+   a. Sudo pecus, enim quis dignissim luctus inhibeo dignissim paulatim jugis, imputo qui. Patria gemino in consequat, luptatum ut hos saepius letatio mos esse.
+      i. Torqueo similis sudo, commodo saepius proprius facilisi ut vel multo probo quidne quadrum metuo.
+      i. Ut nullus delenit et, aptent enim nunc commodo, luctus nisl. 
+ 1. Loquor magna, feugiat plaga tamen gemino duis, cogo ulciscor si blandit. Neo vel appellatio damnum et proprius nulla.
+ 3. Gilvus eum, decet facilisi nostrud quadrum, odio pneum. 
 
 == Definition Lists ==
 
