@@ -4,7 +4,7 @@ Revision history for Perl extension SVN::Notify
       - Updated copyright.
       - Changed the list example in the Trac sample output to use Greeking so
         that the indentation of wrapping lines can be seen in the output.
-      - Fixed the CSS for lists in the log message so that bullets are
+      - Improved the CSS for lists in the log message so that bullets are
         properly hangling indents.
 
 2.73  2008-05-04T02:02:21
