@@ -38,15 +38,15 @@ Use the class in a custom script:
 =head1 Description
 
 This subclass of L<SVN::Notify|SVN::Notify> sends MIME multipart/alternative
-email messages for Subversion activitity. The messages contain both the
-standard SVN::Notify plain text change notification and one or more
-alternative formats of the message. The default alternative format is
-L<HTML|SVN::Notify::HTML>.
+email messages for Subversion activity. The messages contain both the standard
+SVN::Notify plain text change notification and one or more alternative formats
+of the message. The default alternative format is L<HTML|SVN::Notify::HTML>.
 
 Note that this means that many or all of the processing of a subversion commit
 will be executed multiple times, once for the plain text version and then
-again for each alternative version. This will therfore increase resource
-usage on your Subversion server (mainly processor time, but also possibly memory).
+again for each alternative version. This will therefore increase resource
+usage on your Subversion server (mainly processor time, but also possibly
+memory).
 
 It also means that the size of the outgoing message will increase for each
 alternative. If you're using C<--with-diff>, then those messages could be very

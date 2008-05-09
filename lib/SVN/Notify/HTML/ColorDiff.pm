@@ -258,14 +258,14 @@ __END__
 
 =item *
 
-Add inline bolding just on the text that changed between two lines, like this:
-L<http://www.badgers-in-foil.co.uk/projects/cvsspam/example.html>.
+Add inline emphasis just on the text that changed between two lines, like
+this: L<http://www.badgers-in-foil.co.uk/projects/cvsspam/example.html>.
 
 =item *
 
-Add links to ToDo stuff to the top of the email, as pulled in from the
-diff. This might be tricky, since the diff is currently output I<after> the
-message body. Maybe use absolute positioning CSS?
+Add links to To Do stuff to the top of the email, as pulled in from the diff.
+This might be tricky, since the diff is currently output I<after> the message
+body. Maybe use absolute positioning CSS?
 
 =back
 

@@ -205,14 +205,14 @@ certain messages (not a good idea, but what the hell?):
       return $headers;
   }
 
-=item * Uppercase metadata labels
+=item * Uppercase meta data labels
 
-Change the format of the commit metadata section of the message to uppercase
+Change the format of the commit meta data section of the message to uppercase
 all of the headers, so that "Revision: 111" becomes "REVISION: 111":
 
 Note that this example also makes use of the C<content_type()> method of
 SVN::Notify to determine whether or not to actually do the filtering. This
-prvents it from being applied to HTML messages, where it likely wouldn't be
+prevents it from being applied to HTML messages, where it likely wouldn't be
 able to do much.
 
   package SVN::Notify::Filter::UpLabels;
@@ -326,7 +326,7 @@ arguments mapping attribute names to L<Getopt::Long|Getopt::Long> rules.
 
 Note that this example also makes use of the C<content_type()> method of
 SVN::Notify to determine whether or not to actually do the filtering. This
-prvents it from inadvertently converting the log file to HTML in plain text
+prevents it from inadvertently converting the log file to HTML in plain text
 messages, such as those sent by default by SVN::Notify, or the plain text part
 sent by L<SVN::Notify::Alternative|SVN::Notify::Alternative>.
 
@@ -373,7 +373,7 @@ The class that makes this stuff all work.
 =item L<SVN::Notify::HTML|SVN::Notify::HTML>
 
 The SVN::Notify class that likely will be most often used when filtering
-messages. Check its documentation for variasions on filter handling from
+messages. Check its documentation for variations on filter handling from
 SVN::Notify.
 
 =item L<SVN::Notify::Filter::Trac|SVN::Notify::Filter::Trac>

@@ -72,7 +72,7 @@ passed to F<svnnotify> so that everything executes properly.
 =head2 Windows Usage
 
 To get SVN::Notify to work properly in a F<post-commit> script, you must set
-the following environment variables, as they will likley not be present inside
+the following environment variables, as they will likely not be present inside
 Apache:
 
 =over
@@ -114,7 +114,7 @@ my %filters;
   my $notifier = SVN::Notify->new(%params);
 
 Constructs and returns a new SVN::Notify object. This object is a handle on
-the whole process of collecting metadata and content for the commit email and
+the whole process of collecting meta data and content for the commit email and
 then sending it. As such, it takes a number of parameters to affect that
 process.
 
@@ -303,7 +303,7 @@ list. Defaults to "PLAIN".
 
 The character set typically used on the repository for log messages, file
 names, and file contents. Used to specify the character set in the email
-Content-Type headers and, when the C<language> paremeter is specified, the
+Content-Type headers and, when the C<language> parameter is specified, the
 C<$LANG> environment variable when launching C<sendmail>. See L</"Character
 Encoding Support"> for more information. Defaults to "UTF-8".
 
@@ -510,8 +510,8 @@ filter modules.
 This command-line option can be specified more than once to load multiple
 filters. The C<filters> parameter to C<new()> should be an array reference of
 modules names. If a value contains "::", it is assumed to be a complete module
-name. Otherwise, it is assumed to be in the SVN::Notify::Filter namespace. See
-L<SVN::Notify::Filter|SVN::Notify::Filter> for details on writing your own
+name. Otherwise, it is assumed to be in the SVN::Notify::Filter name space.
+See L<SVN::Notify::Filter|SVN::Notify::Filter> for details on writing your own
 output filters (it's really easy, I promise!).
 
 =item author_url
@@ -565,7 +565,7 @@ should be as specific as possible, preferably wrapped in "\b" to match word
 boundaries. If you're using L<SVN::Notify::HTML|SVN::Notify::HTML>, be sure to
 read its documentation for a different regular expression requirement!
 
-Optionally, the key value can be a placeholder for a regular expession used
+Optionally, the key value can be a placeholder for a regular expression used
 internally by SVN::Notify to match strings typically used for well-known
 ticketing systems. Those keys are:
 
@@ -1414,7 +1414,7 @@ body of the message. If the C<attach_diff> parameter was set to true, then a
 boundary string will be generated and the Content-Type set to
 "multipart/mixed" and stored as the C<boundary> attribute.
 
-Arter that, this method outputs the content type returned by
+After that, this method outputs the content type returned by
 C<content_type()>, the character set specified by the C<encoding> attribute,
 and a Content-Transfer-Encoding of "8bit". Subclasses can either rely on this
 functionality or override this method to provide their own content type
@@ -1583,7 +1583,7 @@ sub output_file_lists {
 
   $notifier->end_body($file_handle);
 
-Closes out the body of the email by outtputing the contents of the C<footer>
+Closes out the body of the email by outputting the contents of the C<footer>
 attribute, if any, and then a couple of newlines. Designed to be called when
 the body of the message is complete, and before any call to
 C<output_attached_diff()>.
@@ -1664,7 +1664,7 @@ sub end_message {
   $notifier->run_ticket_map( \&callback, @params );
 
 Loops over the ticket systems you have defined, calling the C<$callback>
-function for each one, pasing to it the regex, url and @params specified as
+function for each one, passing to it the regex, url and @params specified as
 its parameters.
 
 =cut
@@ -1906,7 +1906,7 @@ Gets or sets the value of the C<revision> attribute.
   $notifier = $notifier->to(@tos);
 
 Gets or sets the list of values stored in the C<to> attribute. In a scalar
-context, it returns only the first value in the list, for backards
+context, it returns only the first value in the list, for backwards
 compatibility with older versions of SVN::Notify. In list context, it of
 course returns the entire list. Pass in one or more values to set all of the
 values for the C<to> attribute.
@@ -2005,7 +2005,7 @@ Gets or sets the value of the C<language> attribute.
 
 Gets or sets the value of the C<env_lang> attribute, which is set to C<<
 $notify->language . '.' . $notify->encoding >> when C<language> is set, and
-otherwise is C<undef>. This attribute is used to set the C<$LANG> enviornment
+otherwise is C<undef>. This attribute is used to set the C<$LANG> environment
 variable, if it is not already set by the environment, before executing
 C<sendmail>.
 
@@ -2135,12 +2135,12 @@ Deprecated. Pleas use C<revision_url()>, instead.
 
 Gets or sets the value of the C<verbose> attribute.
 
-=head3 bondary
+=head3 boundary
 
-  my $bondary = $notifier->bondary;
-  $notifier = $notifier->bondary($bondary);
+  my $boundary = $notifier->boundary;
+  $notifier = $notifier->boundary($boundary);
 
-Gets or sets the value of the C<bondary> attribute. This string is normally
+Gets or sets the value of the C<boundary> attribute. This string is normally
 set by a call to C<output_headers()>, but may be set ahead of time.
 
 =head3 user
@@ -2333,7 +2333,8 @@ __END__
 SVN::Notify has comprehensive support for character encodings, but since it
 cannot always know what encodings your system supports or in which your data
 is stored in Subversion, it needs your help. In plain English, here's what you
-need to know to make non-ASCII characters look right in SVN::Notify's mesages:
+need to know to make non-ASCII characters look right in SVN::Notify's
+messages:
 
 =over
 
@@ -2396,7 +2397,7 @@ same encodings as you use in your source code and log messages, though that's
 not always the case.
 
 And finally, because the names and spellings that OS vendors use for locales
-can vary widely, SVN::Notify will occaisionally get the name of the encoding
+can vary widely, SVN::Notify will occasionally get the name of the encoding
 wrong, in which case you'll see warnings such as this:
 
   svnlook: warning: cannot set LC_CTYPE locale
