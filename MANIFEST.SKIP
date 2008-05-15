@@ -7,3 +7,4 @@
 ^SVN-Notify
 \.svn
 output\.txt
+pod-spelling.t$

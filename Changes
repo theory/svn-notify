@@ -1,6 +1,8 @@
 Revision history for Perl extension SVN::Notify
 
 2.75
+      - Removed the spelling test from the distribution, since it can
+        fail on systems without a spell program or using a different locale.
 
 2.74  2008-05-15T03:29:11
       - Updated copyright.

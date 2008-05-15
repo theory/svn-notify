@@ -43,7 +43,6 @@ t/html.t
 t/htmlcolordiff.t
 t/options.t
 t/pod-coverage.t
-t/pod-spelling.t
 t/pod.t
 t/script.t
 t/smtp.t
