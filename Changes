@@ -1,6 +1,6 @@
 Revision history for Perl extension SVN::Notify
 
-2.75
+2.75  2008-05-18T03:38:11
       - Removed the spelling test from the distribution, since it can
         fail on systems without a spell program or using a different locale.
       - All string command-line options are now decoded from whatever encoding
