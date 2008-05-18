@@ -67,7 +67,9 @@ repository's F<post-commit> script. This script lives in the F<hooks>
 directory at the root of the repository directory; consult the documentation
 in F<post-commit.tmpl> for details. Make sure that you specify the complete
 path to F<svnnotify>, as well as to F<svnlook> and F<sendmail> in the options
-passed to F<svnnotify> so that everything executes properly.
+passed to F<svnnotify> so that everything executes properly. And if you
+specify any string options, be sure that they are in the encoding specified by
+the C<--encoding> option, or UTF-8 if you have not specified C<--encoding>.
 
 =head2 Windows Usage
 
@@ -121,8 +123,10 @@ process.
 Each of these parameters has a corresponding command-line option that can be
 passed to F<svnnotify>. The options have the same names as these parameters,
 but any underscores you see here should be replaced with dashes when passed to
-F<svnnotify>. Each also has a corresponding single-character option. All of
-these are documented here.
+F<svnnotify>. Most also have a corresponding single-character option. On Perl
+5.8 and higher, If you pass parameters to C<new()>, they B<must> be L<decoded
+into Perl's internal form|Encode/"PERL ENCODING API"> if they have any
+non-ASCII characters.
 
 Supported parameters:
 
@@ -834,15 +838,22 @@ Parses the command-line options in C<@ARGV> to a hash reference suitable for
 passing as the parameters to C<new()>. See L<"new"> for a complete list of the
 supported parameters and their corresponding command-line options.
 
-This method use Getopt::Long to parse C<@ARGV>. It then looks for a C<handler>
-option and, if it finds one, loads the appropriate subclass and parsed any
-options it requires from C<@ARGV>. Subclasses should use
-C<register_attributes()> to register any attributes and options they require.
+This method use Getopt::Long to parse C<@ARGV>. It then looks for any
+C<handler> and C<filter> options and, if it finds any, loads the appropriate
+classes and parses any options they requires from C<@ARGV>. Subclasses and
+filter classes should use C<register_attributes()> to register any attributes
+and options they require.
+
+After that, on Perl 5.8 and later, it decodes all of the string option from
+the encoding specified by the C<encoding> option or UTF-8. This allows options
+to be passed to SVN::Notify in that encoding and end up being displayed
+properly in the resulting notification message.
 
 =cut
 
 sub get_options {
-    my ($class, $opts) = @_;
+    my $class = shift;
+    my $opts = {};
     require Getopt::Long;
 
     # Enable bundling and, at the same time, case-sensitive matching of
@@ -912,12 +923,50 @@ sub get_options {
         }
     }
 
-    # Load any options for the subclass.
-    return $opts unless %OPTS;
-    Getopt::Long::GetOptions(
-        map { delete $OPTS{$_} => \$opts->{$_} } keys %OPTS
-    ) or return;
+    my @to_decode;
+    if (%OPTS) {
+        # Get a list of string options we'll need to decode.
+        @to_decode = map { $OPTS{$_} } grep { /=s$/ } keys %OPTS
+            if PERL58;
 
+        # Load any other options.
+        Getopt::Long::GetOptions(
+            map { delete $OPTS{$_} => \$opts->{$_} } keys %OPTS
+        );
+    }
+
+    if (PERL58) {
+        # Decode all string options.
+        my $encoding = $opts->{encoding} || 'UTF-8';
+        for my $opt ( qw(
+            repos_path
+            revision
+            from
+            user_domain
+            svnlook
+            sendmail
+            smtp
+            diff_switches
+            reply_to
+            subject_prefix
+            handler
+            author_url
+            ticket_regex
+            header
+            footer
+            smtp_user
+            smtp_pass
+            smtp_authtype
+            revision_url
+            ticket_url
+        ), @to_decode ) {
+            $opts->{$opt} = Encode::decode( $encoding, $opts->{$opt} )
+                if $opts->{$opt};
+        }
+    }
+
+    # Clear the extra options specifications and return.
+    %OPTS = ();
     return $opts;
 }
 

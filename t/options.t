@@ -15,6 +15,8 @@ my %testopts = (
     '--to'             => 'test@example.com',
     '--strip-cx-regex' => '^trunk',
     '--add-header'     => 'foo=bar',
+    '--header'         => '«header»',
+    '--footer'         => '«footer»',
 );
 
 my %params = (
@@ -51,14 +53,13 @@ my %params = (
     help            => undef,
     man             => undef,
     version         => undef,
-    header          => undef,
-    footer          => undef,
 );
 
 while (my ($k, $v) = each %testopts) {
     $k =~ s/^--//;
     $k =~ s/-/_/g;
     $params{$k} = $v;
+    Encode::_utf8_on( $params{$k} ) if SVN::Notify::PERL58();
 }
 $params{to} = [ $params{to} ];
 delete $params{add_header};

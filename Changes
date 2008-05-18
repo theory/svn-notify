@@ -3,6 +3,13 @@ Revision history for Perl extension SVN::Notify
 2.75
       - Removed the spelling test from the distribution, since it can
         fail on systems without a spell program or using a different locale.
+      - All string command-line options are now decoded from whatever encoding
+        is specified by the C<--encoding> option, defaulting to UTF-8. All
+        string options are thus properly decoded, excepting those that define
+        encodings and languages (which should alwyas be ASCII) and those that
+        are specified as hashes (if someone runs into that bug, let me know).
+        This fix includes all string options specified by subclasses and
+        filters. Reported by Matthew Romaine (Bug #35884).
 
 2.74  2008-05-15T03:29:11
       - Updated copyright.
