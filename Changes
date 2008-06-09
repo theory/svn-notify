@@ -1,6 +1,8 @@
 Revision history for Perl extension SVN::Notify
 
 2.76
+      - svnnotify will now throw an exception for any invalid options
+        passed to it. Suggested by Ben Tilly.
 
 2.75  2008-05-18T03:38:11
       - Removed the spelling test from the distribution, since it can

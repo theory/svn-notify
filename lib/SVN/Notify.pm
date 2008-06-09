@@ -923,6 +923,8 @@ sub get_options {
         }
     }
 
+    # Disallow pass-through so that any invalid options will now fail.
+    Getopt::Long::Configure (qw(no_pass_through));
     my @to_decode;
     if (%OPTS) {
         # Get a list of string options we'll need to decode.
@@ -933,6 +935,10 @@ sub get_options {
         Getopt::Long::GetOptions(
             map { delete $OPTS{$_} => \$opts->{$_} } keys %OPTS
         );
+    } else {
+        # Call GetOptions() again so that invalid options will be properly
+        # caught.
+        Getopt::Long::GetOptions();
     }
 
     if (PERL58) {
