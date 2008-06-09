@@ -3,6 +3,10 @@ Revision history for Perl extension SVN::Notify
 2.76
       - svnnotify will now throw an exception for any invalid options
         passed to it. Suggested by Ben Tilly.
+      - SVN::Notify->get_options() is now aware of SVN::Notify::Alternative,
+        and when it is used, will load the alternatives so that they can
+        properly register their command-line options and have them processed.
+        Reported by Ben Tilly.
 
 2.75  2008-05-18T03:38:11
       - Removed the spelling test from the distribution, since it can

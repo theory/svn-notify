@@ -911,8 +911,17 @@ sub get_options {
     ) or return;
 
     # Load a subclass if one has been specified.
-    if ($opts->{handler}) {
-        eval "require " . __PACKAGE__ . "::$opts->{handler}" or die $@;
+    if (my $hand = $opts->{handler}) {
+        eval "require " . __PACKAGE__ . "::$hand" or die $@;
+        if ($hand eq 'Alternative') {
+            # Load the alternative subclasses.
+            Getopt::Long::GetOptions(
+                map { delete $OPTS{$_} => \$opts->{$_} } keys %OPTS
+            );
+            for my $alt (@{ $opts->{alternatives} || ['HTML']}) {
+                eval "require " . __PACKAGE__ . "::$alt" or die $@;
+            }
+        }
     }
 
     # Load any filters.
