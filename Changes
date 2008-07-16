@@ -7,6 +7,10 @@ Revision history for Perl extension SVN::Notify
         and when it is used, will load the alternatives so that they can
         properly register their command-line options and have them processed.
         Reported by Ben Tilly.
+      - The error thrown when there is no 'to', to_regex_map', or
+        'to_email_app' attributes now waits until after the "pre_prepare"
+        filter has been run, so that filters have a chance to set one or more
+        of those values. Reported by Jeffrey Borlik.
 
 2.75  2008-05-18T03:38:11
       - Removed the spelling test from the distribution, since it can

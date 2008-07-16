@@ -719,9 +719,6 @@ sub new {
       unless $params{repos_path};
     die qq{Missing required "revision" parameter}
       unless $params{revision};
-    die qq{Missing required "to", "to_regex_map", or "to_email_map" parameter}
-        unless @{ $params{to} } || $params{to_regex_map}
-        || $params{to_email_map};
 
     # Set up default values.
     $params{svnlook}        ||= $ENV{SVNLOOK}  || $class->find_exe('svnlook');
@@ -1064,6 +1061,9 @@ expressions match any of the affected directories).
 sub prepare {
     my $self = shift;
     $self->run_filters('pre_prepare');
+    die qq{Missing required "to", "to_regex_map", or "to_email_map" attribute}
+        unless @{ $self->{to} } || $self->{to_regex_map}
+        || $self->{to_email_map};
     $self->prepare_recipients;
     return $self unless @{ $self->{to} };
     $self->prepare_contents;

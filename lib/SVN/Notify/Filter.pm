@@ -116,7 +116,10 @@ There are four special filter subroutines that are called at the beginning and
 at the end of the execution of the C<prepare()> and C<execute()> methods,
 named C<pre_prepare>, C<post_prepare>, C<pre_execute>, and C<post_execute>. No
 data is passed to them and their return values are ignored, but they are
-included to enable callbacks at the points at which they execute.
+included to enable callbacks at the points at which they execute. If, for
+example, you wanted to set the value of the C<to> attribute before SVN::Notify
+checks to make sure that there are recipients to whom to send an email, you'd
+want to do so in a C<pre_prepare> filter.
 
 The package name of the filter module can be anything you like; just pass it
 via the C<filter> parameter, e.g., C<< filter => [ 'My::Filter' ] >> (or
