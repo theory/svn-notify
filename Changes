@@ -13,6 +13,7 @@ Revision history for Perl extension SVN::Notify
         of those values. Reported by Jeffrey Borlik.
       - Removed redundant option validation from `svnnotify`. Reported by
         Jeffrey Borlik.
+      - Fixed the output triggered by the '--help' and '--man' options.
 
 2.75  2008-05-18T03:38:11
       - Removed the spelling test from the distribution, since it can

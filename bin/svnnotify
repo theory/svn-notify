@@ -14,9 +14,18 @@ if (delete $opts->{version}) {
     print 'svnnotify ', SVN::Notify->VERSION, $/;
     exit;
 }
-require Pod::Usage && Pod::Usage::pod2usage(1) if delete $opts->{help};
-require Pod::Usage && Pod::Usage::pod2usage(-exitstatus => 0, -verbose => 2)
-  if delete $opts->{man};
+
+require Pod::Usage && Pod::Usage::pod2usage(
+    '-verbose'  => 99,
+    '-sections' => '(?i:(Usage|Options))',
+    '-exitval'  => 0,
+) if delete $opts->{help};
+
+require Pod::Usage && Pod::Usage::pod2usage(
+    '-verbose'  => 99,
+    '-sections' => '.+',
+    '-exitval'  => 0,
+) if delete $opts->{man};
 
 # What class are we using?
 my $class = 'SVN::Notify';
@@ -34,15 +43,7 @@ __END__
 
 svnnotify - Subversion activity notification
 
-=head1 Synopsis
-
-=begin comment
-
-Fake-out Pod::Usage
-
-=head1 SYNOPSIS
-
-=end comment
+=head1 Usage
 
   svnnotify --repos-path "$1" --revision "$2" [options]
 
