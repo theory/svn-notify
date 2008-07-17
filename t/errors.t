@@ -20,5 +20,5 @@ eval {
 };
 ok $err = $@, 'Caught exception';
 like $err,
-    qr/Missing required "to", "to_regex_map", or "to_email_map" attribute/,
+    qr/Missing required "to", "to_regex_map", or "to_email_map" parameter/,
     'Matches missing to or to_regex_map';

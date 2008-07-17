@@ -14,6 +14,8 @@ Revision history for Perl extension SVN::Notify
       - Removed redundant option validation from `svnnotify`. Reported by
         Jeffrey Borlik.
       - Fixed the output triggered by the '--help' and '--man' options.
+      - Adjusted missing parameter exceptions to call Pod::Usage::pod2usage()
+        when things are run by svnnotify.
 
 2.75  2008-05-18T03:38:11
       - Removed the spelling test from the distribution, since it can

@@ -715,9 +715,9 @@ sub new {
     # Check for required parameters.
     $class->_dbpnt( "Checking required parameters to new()")
       if $params{verbose};
-    die qq{Missing required "repos_path" parameter}
+    _usage( qq{Missing required "repos_path" parameter} )
       unless $params{repos_path};
-    die qq{Missing required "revision" parameter}
+    _usage( qq{Missing required "revision" parameter} )
       unless $params{revision};
 
     # Set up default values.
@@ -731,7 +731,7 @@ sub new {
     $params{sendmail}       ||= $ENV{SENDMAIL} || $class->find_exe('sendmail')
         unless $params{smtp};
 
-    die qq{Cannot find sendmail and no "smtp" parameter specified}
+    _usage( qq{Cannot find sendmail and no "smtp" parameter specified} )
         unless $params{sendmail} || $params{smtp};
 
     # Set up the environment locale.
@@ -1061,9 +1061,9 @@ expressions match any of the affected directories).
 sub prepare {
     my $self = shift;
     $self->run_filters('pre_prepare');
-    die qq{Missing required "to", "to_regex_map", or "to_email_map" attribute}
-        unless @{ $self->{to} } || $self->{to_regex_map}
-        || $self->{to_email_map};
+    _usage(
+        qq{Missing required "to", "to_regex_map", or "to_email_map" parameter}
+    ) unless @{$self->{to}} || $self->{to_regex_map} || $self->{to_email_map};
     $self->prepare_recipients;
     return $self unless @{ $self->{to} };
     $self->prepare_contents;
@@ -2331,6 +2331,30 @@ sub _read_pipe {
 ##############################################################################
 
 sub _dbpnt { print ref(shift), ': ', join ' ', @_; }
+
+##############################################################################
+# This function is used to exit the program with an error if a parameter is
+# missing.
+##############################################################################
+
+sub _usage {
+    my ($msg) = @_;
+
+    # Just die if the API is used.
+    die $msg if $0 !~ /\bsvnnotify(?:[.]bat)?$/;
+
+    # Otherwise, tell 'em how to use it.
+    $msg =~ s/_/-/g;
+    $msg =~ s/(\s+")/$1--/g;
+    $msg =~ s/\bparameter\b/option/g;
+    require Pod::Usage;
+    Pod::Usage::pod2usage(
+        '-message'  => $msg,
+        '-verbose'  => 99,
+        '-sections' => '(?i:(Usage|Options))',
+        '-exitval'  => 1,
+    );
+}
 
 package SVN::Notify::SMTP;
 
