@@ -1,5 +1,7 @@
 Revision history for Perl extension SVN::Notify
 
+2.77
+
 2.76  2008-07-17T19:55:09
       - svnnotify will now throw an exception for any invalid options
         passed to it. Suggested by Ben Tilly.
