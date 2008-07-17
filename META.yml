@@ -7,6 +7,8 @@ abstract: Subversion activity notification
 license: perl
 resources:
   license: http://dev.perl.org/licenses/
+configure_requires:
+  Module::Build: 0.2701
 requires:
   Getopt::Long: 2.34
   perl: 5.006
@@ -41,7 +43,7 @@ provides:
     version: 2.76
   SVN::Notify::SMTP:
     file: lib/SVN/Notify.pm
-generated_by: Module::Build version 0.2808
+generated_by: Module::Build version 0.280802
 meta-spec:
   url: http://module-build.sourceforge.net/META-spec-v1.2.html
   version: 1.2
