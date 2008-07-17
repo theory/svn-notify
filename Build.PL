@@ -47,7 +47,7 @@ my $build = $class->new(
         'File::Spec'    => 0,
     },
     recommends => {
-        'Pod::Usage'          => '1.35',
+        'Pod::Usage'          => '1.33',
         'HTML::Entities'      => 0,
         'Net::SMTP'           => 0,
         'Net::SMTP_auth'      => 0,
