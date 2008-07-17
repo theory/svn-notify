@@ -11,6 +11,8 @@ Revision history for Perl extension SVN::Notify
         'to_email_app' attributes now waits until after the "pre_prepare"
         filter has been run, so that filters have a chance to set one or more
         of those values. Reported by Jeffrey Borlik.
+      - Removed redundant option validation from `svnnotify`. Reported by
+        Jeffrey Borlik.
 
 2.75  2008-05-18T03:38:11
       - Removed the spelling test from the distribution, since it can

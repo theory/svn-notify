@@ -18,14 +18,6 @@ require Pod::Usage && Pod::Usage::pod2usage(1) if delete $opts->{help};
 require Pod::Usage && Pod::Usage::pod2usage(-exitstatus => 0, -verbose => 2)
   if delete $opts->{man};
 
-# Handle required options.
-die qq{Missing required "--repos-path" parameter\n}
-  unless $opts->{repos_path};
-die qq{Missing required "--revision" parameter\n}
-  unless $opts->{revision};
-die qq{Missing required "--to" or "--to_regex_map" parameter\n}
-  unless $opts->{to} || $opts->{to_regex_map};
-
 # What class are we using?
 my $class = 'SVN::Notify';
 $class .= '::' . delete $opts->{handler} if $opts->{handler};
