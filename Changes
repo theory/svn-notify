@@ -1,5 +1,7 @@
 Revision history for Perl extension SVN::Notify
 
+2.78
+
 2.77  2008-07-18T21:24:44
       - Fixed a typo in a Getopt::Long specification string that reveals
         itself only with Getopt::Long 2.3702 (which is a development release).
