@@ -903,7 +903,7 @@ sub get_options {
             shift; push @{ $opts->{add_headers}{+shift} }, shift
         },
         'revision-url|U|svnweb-url|S|viewcvs-url=s' => \$opts->{revision_url},
-        'rt-url|T|bugzilla-url|B|jira-url|J|gnats-url|G||ticket-url=s'
+        'rt-url|T|bugzilla-url|B|jira-url|J|gnats-url|G|ticket-url=s'
             => \$opts->{ticket_url},
     ) or return;
 
