@@ -1022,9 +1022,13 @@ sub find_exe {
     my ($class, $exe) = @_;
     $exe .= '.exe' if WIN32;
     require File::Spec;
+    require Config;
     for my $path (
-        File::Spec->path, qw(/usr/local/bin /usr/bin /usr/sbin),
-        'C:\\program files\\subversion\\bin'
+        File::Spec->path,
+        qw(/usr/local/bin /usr/bin /usr/sbin),
+        'C:\\program files\\subversion\\bin',
+        $Config::Config{installbin},
+        $Config::Config{installscript},
     ) {
         my $file = File::Spec->catfile($path, $exe);
         return $file if -f $file && -x _;
