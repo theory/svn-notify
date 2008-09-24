@@ -9,6 +9,9 @@ Revision history for Perl extension SVN::Notify
       - Documented --to-email-map in `svnnotify`. It was already documented in
         SVN::Notify, but I'd forgoten to include it in the command-line
         script. Reported by Grégory Joseph (Bug #22620).
+      - Fixed a bug in the test suite where an unexpected exception was thrown
+        on platforms where `sendmail` was not available. Reported by David
+        Golden via CPAN-Testers.
 
 2.77  2008-07-18T21:24:44
       - Fixed a typo in a Getopt::Long specification string that reveals
