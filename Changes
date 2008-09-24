@@ -1,7 +1,6 @@
 Revision history for Perl extension SVN::Notify
 
-2.78
-
+2.78   2008-09-24T04:41:27
       - When searching for an executable to run, SVN::Notify now also looks in
         the "installbin" and "installscript" directories, as specified by the
         Config module. Patch from John Peacock to improve the finding of apps

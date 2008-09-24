@@ -1,6 +1,6 @@
 ---
 name: SVN-Notify
-version: 2.77
+version: 2.78
 author:
   - 'David E. Wheeler <david@kineticode.com>'
 abstract: Subversion activity notification
@@ -28,22 +28,22 @@ recommends:
 provides:
   SVN::Notify:
     file: lib/SVN/Notify.pm
-    version: 2.77
+    version: 2.78
   SVN::Notify::Alternative:
     file: lib/SVN/Notify/Alternative.pm
     version: 1.0
   SVN::Notify::Filter::Trac:
     file: lib/SVN/Notify/Filter/Trac.pm
-    version: 2.77
+    version: 2.78
   SVN::Notify::HTML:
     file: lib/SVN/Notify/HTML.pm
-    version: 2.77
+    version: 2.78
   SVN::Notify::HTML::ColorDiff:
     file: lib/SVN/Notify/HTML/ColorDiff.pm
-    version: 2.77
+    version: 2.78
   SVN::Notify::SMTP:
     file: lib/SVN/Notify.pm
-generated_by: Module::Build version 0.280802
+generated_by: Module::Build version 0.280804
 meta-spec:
   url: http://module-build.sourceforge.net/META-spec-v1.2.html
   version: 1.2
