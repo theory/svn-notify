@@ -437,7 +437,8 @@ $email = get_output();
 like( $email,
       qr{<p>Hey, we could add one for a Subversion Revision # 606, too!</p>
 
-<p>And finally, we have RT-Ticket: 123 for Jesse and RT # 445 for Ask\.</p>},
+<p>And finally, we have RT-Ticket: 123 for Jesse and RT # 445 for Ask\.
+And we even have Mantis-161: foo bar baz for Dirk Olmes\.</p>},
       'The log message should be in paragraph tags'
 );
 
