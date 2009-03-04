@@ -3,7 +3,7 @@
 # $Id$
 
 use strict;
-use Test::More tests => 238;
+use Test::More tests => 239;
 use File::Spec::Functions;
 
 use_ok('SVN::Notify');
@@ -451,6 +451,7 @@ ok( $notifier = SVN::Notify->new(
     gnats_url    => 'http://gnats.example.com/gnatsweb.pl?cmd=view&pr=%s',
     ticket_url   => 'http://ticket.example.com/id=%s',
     ticket_regex => '\[?\s*Custom\s*#\s*(\d+)\s*\]?',
+    ticket_map   => { '\b[Mm]antis-(\d+)\b' => 'http://server/mantisbt/view.php?id=%s' },
 ),
     "Construct new URL notifier" );
 isa_ok($notifier, 'SVN::Notify');
@@ -461,6 +462,7 @@ is_deeply( $notifier->ticket_map, {
     jira     => 'http://jira.atlassian.com/secure/ViewIssue.jspa?key=%s',
     gnats    => 'http://gnats.example.com/gnatsweb.pl?cmd=view&pr=%s',
     '\[?\s*Custom\s*#\s*(\d+)\s*\]?' => 'http://ticket.example.com/id=%s',
+    '\b[Mm]antis-(\d+)\b' => 'http://server/mantisbt/view.php?id=%s',
 }, 'Check ticket_map accessor' );
 
 ok( $notifier->prepare, "Prepare URL" );
@@ -497,6 +499,9 @@ like($email,
 like($email,
      qr{    http://ticket\.example\.com/id=4321\n},
      "Check for custom ticket URL");
+like($email,
+     qr{    http://server/mantisbt/view\.php\?id=161\n},
+     "Check for Mantis ticket URL");
 
 ##############################################################################
 # Try leaving out the first line from the subject and removing part of the
