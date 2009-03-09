@@ -1595,7 +1595,7 @@ sub output_log_message {
             my ($regex, $url) = @_;
             while ($msg =~ /$regex/ig) {
                 unless ($has_header) {
-                    print $out "\nTicket Links:\n:-----------\n";
+                    print $out "\nTicket Links:\n------------\n";
                     $has_header = 1;
                 }
                 printf $out "    $url\n",  $2 || $1;
