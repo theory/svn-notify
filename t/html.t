@@ -282,7 +282,7 @@ ok( $notifier->execute, "Notify HTML file" );
 
 # Check the output.
 $email = get_output();
-like( $email, qr{Subject: \[222\] Hrm hrm\.\n},
+like( $email, qr{Subject: \[222\] Hrm hrm\. Let's try a few links\.\n},
       "Check subject header for HTML file" );
 like( $email, qr/From: theory\n/, 'Check HTML file From');
 like( $email, qr/To: test\@example\.com\n/, 'Check HTML file To');

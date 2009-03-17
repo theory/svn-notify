@@ -3,7 +3,7 @@
 # $Id$
 
 use strict;
-use Test::More tests => 239;
+use Test::More tests => 244;
 use File::Spec::Functions;
 
 use_ok('SVN::Notify');
@@ -334,8 +334,22 @@ ok( $notifier->execute, "Notify subject_cx file" );
 
 # Check the output.
 $email = get_output();
-like( $email, qr{Subject: \[222\] trunk/App-Info/META.yml: Hrm hrm\.\n},
+like( $email, qr{Subject: \[222\] trunk/App-Info/META.yml: Hrm hrm\. Let's try a few links\.\n},
       "Check subject header for file CX" );
+
+##############################################################################
+# Make sure sub is at least 10 chars long.
+##############################################################################
+ok( $notifier = SVN::Notify->new(%args, revision => '222'),
+    "Construct new subject length notifier" );
+isa_ok($notifier, 'SVN::Notify');
+ok( $notifier->prepare, 'Prepare subject length' );
+ok( $notifier->execute, 'Notify subject length' );
+
+# Check the output.
+$email = get_output();
+like( $email, qr{Subject: \[222\] Hrm hrm\. Let's try a few links\.\n},
+      "Check subject header for subject length" );
 
 ##############################################################################
 # Try max_sub_length.

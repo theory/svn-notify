@@ -3,6 +3,12 @@ Revision history for Perl extension SVN::Notify
 2.79
       - Removed a superfluous colon from the dashed line under "Ticket Links"
         in the plain-text rendition of the message. Repored by Dirk Olmes.
+      - Fixed a bug in the subject handling code where it could truncate a
+        subject to very few characters if it has a dot (.) near the beginning.
+        Now it skips 10 characters before looking for a dot at which to
+        truncate text for the subject. Reported by Martijn van Beers, who
+        noticed a comment in the source indicating that it should have been
+        this way all along.
 
 2.78   2008-09-24T04:41:27
       - When searching for an executable to run, SVN::Notify now also looks in
