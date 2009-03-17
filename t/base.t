@@ -318,9 +318,7 @@ ok( $notifier->execute, "Notify subject_cx" );
 
 # Check the output.
 $email = get_output();
-my $split_subj = $qsubj;
-($split_subj = $qsubj) =~ s/that\\,/that\\,\n / if SVN::Notify::PERL58();
-like( $email, qr{Subject: \[111\] trunk/Class-Meta: $split_subj\n},
+like( $email, qr{Subject: \[111\] trunk: $qsubj\n},
       "Check subject header for CX" );
 
 ##############################################################################
@@ -331,7 +329,6 @@ ok( $notifier = SVN::Notify->new(%args, revision => '222', subject_cx => 1),
 isa_ok($notifier, 'SVN::Notify');
 ok( $notifier->prepare, "Prepare subject_cx file" );
 ok( $notifier->execute, "Notify subject_cx file" );
-
 # Check the output.
 $email = get_output();
 like( $email, qr{Subject: \[222\] trunk/App-Info/META.yml: Hrm hrm\. Let's try a few links\.\n},
@@ -533,12 +530,12 @@ is_deeply( [ $notifier->strip_cx_regex ], ['^trunk/'],
            'Check the strip_cx_regex accessor' );
 ok( $notifier->prepare, "Prepare subject checking" );
 ok( $notifier->execute, "Notify subject checking" );
-is( $notifier->subject, '[111] Class-Meta',
+is( $notifier->subject, '[111] trunk',
     "Check subject for stripped cx and no log message line");
 
 # Check the output.
 $email = get_output();
-like( $email, qr{Subject: \[111\] Class-Meta\n},
+like( $email, qr{Subject: \[111\] trunk\n},
       "Check subject header for stripped cx and no log message line" );
 
 ##############################################################################
@@ -554,12 +551,12 @@ ok( $notifier = SVN::Notify->new(
 isa_ok($notifier, 'SVN::Notify');
 ok( $notifier->prepare, "Prepare subject checking" );
 ok( $notifier->execute, "Notify subject checking" );
-is( $notifier->subject, '[111] Class',
+is( $notifier->subject, '[111] trunk',
     "Check subject for stripped cx and no log message line");
 
 # Check the output.
 $email = get_output();
-like( $email, qr{Subject: \[111\] Class\n},
+like( $email, qr{Subject: \[111\] trunk\n},
       "Check subject header for stripped cx and no log message line" );
 
 ##############################################################################

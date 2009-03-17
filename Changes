@@ -9,6 +9,10 @@ Revision history for Perl extension SVN::Notify
         truncate text for the subject. Reported by Martijn van Beers, who
         noticed a comment in the source indicating that it should have been
         this way all along.
+      - Fixed a test so that `svn dirs-changed` returns all of the modified
+        directories for a given test. This has no effect on the SVN::Notify
+        code, but it means that the test behavior is more correct. Rerpoted by
+        Martijn van Beers.
 
 2.78   2008-09-24T04:41:27
       - When searching for an executable to run, SVN::Notify now also looks in
