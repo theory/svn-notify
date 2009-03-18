@@ -13,6 +13,9 @@ Revision history for Perl extension SVN::Notify
         directories for a given test. This has no effect on the SVN::Notify
         code, but it means that the test behavior is more correct. Rerpoted by
         Martijn van Beers.
+      - Fixed a bug in SVN::Notify::SMTP where `printf` wasn't working
+        properly, resulting in plain text email bodies with a number instead of
+        a ticket link. Thanks to Dirk Olmes for the report and the debugging.
 
 2.78   2008-09-24T04:41:27
       - When searching for an executable to run, SVN::Notify now also looks in

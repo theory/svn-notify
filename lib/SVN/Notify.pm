@@ -2408,7 +2408,11 @@ sub PRINT {
     return $self->{smtp}->datasend(@_);
 }
 
-sub PRINTF { shift->PRINT( sprintf @_ ) }
+sub PRINTF {
+    my $self = shift;
+    $self->PRINT( sprintf(@_) );
+}
+
 sub CLOSE  {
     my $self = shift;
     $self->{smtp}->dataend;
