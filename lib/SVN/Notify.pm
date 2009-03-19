@@ -1582,7 +1582,7 @@ sub output_log_message {
 
     # Make Revision links.
     if (my $url = $self->{revision_url}) {
-        if (my @matches = $msg =~ /\b(?:rev(?:ision)?\s*#?\s*(\d+))\b/ig) {
+        if (my @matches = $msg =~ /\b(?:(?:rev(?:ision)?\s*#?\s*|r)(\d+))\b/ig) {
             print $out "\nRevision Links:\n--------------\n";
             printf $out "    $url\n", $_ for @matches;
         }
@@ -2410,7 +2410,7 @@ sub PRINT {
 
 sub PRINTF {
     my $self = shift;
-    $self->PRINT( sprintf(@_) );
+    $self->PRINT( sprintf(shift, @_) );
 }
 
 sub CLOSE  {

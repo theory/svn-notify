@@ -3,7 +3,7 @@
 # $Id$
 
 use strict;
-use Test::More tests => 36;
+use Test::More tests => 38;
 use File::Spec::Functions;
 
 use_ok 'SVN::Notify' or die;
@@ -19,6 +19,7 @@ my %args = (
     smtp       => 'smtp.example.com',
     repos_path => 'tmp',
     revision   => '111',
+    revision_url => 'http://foo.com/?cs=%s',
     to         => ['test@example.com', 'try@example.com'],
 );
 
@@ -61,7 +62,7 @@ like $smtp->{datasend}, qr{Content-Transfer-Encoding: 8bit\n},
 
 # Make sure we have headers for each of the four kinds of changes.
 for my $header ('Log Message', 'Modified Paths', 'Added Paths',
-                'Removed Paths', 'Property Changed') {
+                'Removed Paths', 'Property Changed', 'Revision Links') {
     like $smtp->{datasend}, qr/^$header/m, $header;
 }
 
@@ -75,6 +76,10 @@ like $smtp->{datasend}, qr/Date:     2004-04-20 01:33:35 -0700 \(Tue, 20 Apr 200
 like $smtp->{datasend},
     qr/Did this, that, and the «other»\. And then I did some more\. Some\nit was done on a second line\./,
     'Check for log message, which should be UTF-8, but not utf8.';
+
+# Make sure that the revision URL is there:
+like $smtp->{datasend}, qr{^    http://foo[.]com/[?]cs=1234}m,
+    'We should have a revision URL';
 
 ##############################################################################
 # Test authentication and Debug.
