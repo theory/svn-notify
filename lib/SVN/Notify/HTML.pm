@@ -380,7 +380,7 @@ sub output_log_message {
     # Make Revision links.
     if (my $url = $self->revision_url) {
         $url = encode_entities($url, '<>&"');
-        $msg =~ s|\b(rev(?:ision)?\s*#?\s*(\d+))\b|sprintf qq{<a href="$url">$1</a>}, $2|ige;
+        $msg =~ s{\b((?:rev(?:ision)?\s*#?\s*|r)(\d+))\b}{sprintf qq{<a href="$url">$1</a>}, $2}ige;
     }
 
     # Make ticketing system links.
