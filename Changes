@@ -1,5 +1,7 @@
 Revision history for Perl extension SVN::Notify
 
+2.80
+
 2.79  2009-04-03T00:36:29
       - Removed a superfluous colon from the dashed line under "Ticket Links"
         in the plain-text rendition of the message. Repored by Dirk Olmes.
