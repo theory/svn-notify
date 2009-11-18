@@ -49,3 +49,6 @@ euc
 jp
 subclassable
 metadata
+Kineticode
+login
+username
