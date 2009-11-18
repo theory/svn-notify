@@ -400,7 +400,7 @@ like( $email,
       qr{<a href="http://bugzilla\.mozilla\.org/show_bug\.cgi\?id=709">Bug # 709</a>},
       "Check for Bugzilla URL" );
 like( $email,
-      qr{<a href="http://jira\.atlassian\.com/secure/ViewIssue\.jspa\?key=TST-1608">TST-1608</a>},
+      qr{<a href="http://jira\.atlassian\.com/secure/ViewIssue\.jspa\?key=PRJ1234-111">PRJ1234-111</a>},
       "Check for Jira URL" );
 like( $email,
       qr{<a href="http://gnats\.example\.com/gnatsweb\.pl\?cmd=view&amp;pr=12345">PR 12345</a>},
@@ -490,7 +490,7 @@ like( $email,
 
 # Check for JIRA URLs.
 like( $email,
-      qr{<a href="http://jira\.atlassian\.com/secure/ViewIssue\.jspa\?key=TST-1234">TST-1234</a>\.},
+      qr{<a href="http://jira\.atlassian\.com/secure/ViewIssue\.jspa\?key=TST1234-111">TST1234-111</a>\.},
       "Check for Jira URL" );
 unlike( $email,
       qr{<a href="http://jira\.atlassian\.com/secure/ViewIssue\.jspa\?key=JRA-\n4321">JRA-\n4321-1234</a>},

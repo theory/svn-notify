@@ -555,7 +555,7 @@ Deprecated. Use C<revision_url> instead.
 
   svnnotify --ticket-map '\[?#\s*(\d+)\s*\]?=http://example.com/ticket?id=%s' \
             --ticket-map 'rt=http://rt.cpan.org/NoAuth/Bugs.html?id=%s' \
-            --ticket-map '\b([A-Z]+-\d+)\b=http://jira/browse/%s'
+            --ticket-map '\b([A-Z0-9]+-\d+)\b=http://jira/browse/%s'
 
 Specifies a mapping between a regular expression and a URL. The regular
 expression should return a single match to be interpolated into the URL, which
@@ -667,7 +667,7 @@ C<prepare_subject()>.
 our %_ticket_regexen = (
     rt       => '\b((?:rt|(?:rt-)?ticket:?)\s*#?\s*(\d+))\b',
     bugzilla => '\b(bug\s*#?\s*(\d+))\b',
-    jira     => '\b([A-Z]+-\d+)\b',
+    jira     => '\b([A-Z0-9]+-\d+)\b',
     gnats    => '\b(PR\s*(\d+))\b',
 );
 

@@ -502,7 +502,7 @@ like( $email,
       qr{   http://bugzilla\.mozilla\.org/show_bug\.cgi\?id=709\n},
       "Check for Bugzilla URL" );
 like( $email,
-      qr{    http://jira\.atlassian\.com/secure/ViewIssue\.jspa\?key=TST-1608\n},
+      qr{    http://jira\.atlassian\.com/secure/ViewIssue\.jspa\?key=PRJ1234-111\n},
       "Check for Jira URL" );
 like($email,
      qr{    http://gnats\.example\.com/gnatsweb\.pl\?cmd=view&pr=12345\n},

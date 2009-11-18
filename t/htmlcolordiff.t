@@ -545,7 +545,7 @@ like( $email,
 
 # Check for JIRA URLs.
 like( $email,
-      qr{<a href="http://jira\.atlassian\.com/secure/ViewIssue\.jspa\?key=TST-1234">TST-1234</a>\.},
+      qr{<a href="http://jira\.atlassian\.com/secure/ViewIssue\.jspa\?key=TST1234-111">TST1234-111</a>\.},
       "Check for Jira URL" );
 unlike( $email,
       qr{<a href="http://jira\.atlassian\.com/secure/ViewIssue\.jspa\?key=JRA-\n4321">JRA-\n4321-1234</a>},
