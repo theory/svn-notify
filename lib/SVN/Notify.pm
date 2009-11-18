@@ -16,17 +16,6 @@ if (PERL58) {
     binmode STDERR, ':utf8';
 }
 
-=begin comment
-
-Fake-out Module::Build. Delete if it ever changes to support =head1 headers
-other than all uppercase.
-
-=head1 NAME
-
-SVN::Notify - Subversion activity notification
-
-=end comment
-
 =head1 Name
 
 SVN::Notify - Subversion activity notification
@@ -2549,15 +2538,6 @@ Patches against SVN::Notify are welcome. Please send bug reports to
 <bug-svn-notify@rt.cpan.org>.
 
 =head1 Author
-
-=begin comment
-
-Fake-out Module::Build. Delete if it ever changes to support =head1 headers
-other than all uppercase.
-
-=head1 AUTHOR
-
-=end comment
 
 David E. Wheeler <david@kineticode.com>
 

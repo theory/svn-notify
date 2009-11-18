@@ -1,30 +1,19 @@
 ---
-name: SVN-Notify
-version: 2.80
+abstract: 'Subversion activity notification'
 author:
   - 'David E. Wheeler <david@kineticode.com>'
-abstract: Subversion activity notification
-license: perl
-resources:
-  license: http://dev.perl.org/licenses/
-configure_requires:
-  Module::Build: 0.2701
-requires:
-  Getopt::Long: 2.34
-  perl: 5.006
 build_requires:
   File::Spec: 0
   Module::Build: 0.2701
   Test::More: 0.17
-recommends:
-  File::Spec: 0
-  HTML::Entities: 0
-  Net::SMTP: 0
-  Net::SMTP_auth: 0
-  Pod::Usage: 1.33
-  Test::Pod: 1.2
-  Test::Pod::Coverage: 1.06
-  Text::Trac: 0.10
+configure_requires:
+  Module::Build: 0.2701
+generated_by: 'Module::Build version 0.3507'
+license: perl
+meta-spec:
+  url: http://module-build.sourceforge.net/META-spec-v1.4.html
+  version: 1.4
+name: SVN-Notify
 provides:
   SVN::Notify:
     file: lib/SVN/Notify.pm
@@ -43,7 +32,18 @@ provides:
     version: 2.80
   SVN::Notify::SMTP:
     file: lib/SVN/Notify.pm
-generated_by: Module::Build version 0.32
-meta-spec:
-  url: http://module-build.sourceforge.net/META-spec-v1.2.html
-  version: 1.2
+recommends:
+  File::Spec: 0
+  HTML::Entities: 0
+  Net::SMTP: 0
+  Net::SMTP_auth: 0
+  Pod::Usage: 1.33
+  Test::Pod: 1.2
+  Test::Pod::Coverage: 1.06
+  Text::Trac: 0.10
+requires:
+  Getopt::Long: 2.34
+  perl: 5.006
+resources:
+  license: http://dev.perl.org/licenses/
+version: 2.80
