@@ -3,6 +3,7 @@ Revision history for Perl extension SVN::Notify
 2.80
       - Fixed the regular expression for detecting JIRA keys. Thanks to David
         Ferguson for the report (RT#51620).
+      - Fixed test failure on Perl 5.11.2.
 
 2.79  2009-04-03T00:36:29
       - Removed a superfluous colon from the dashed line under "Ticket Links"
