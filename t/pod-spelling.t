@@ -52,3 +52,5 @@ metadata
 Kineticode
 login
 username
+HOWTO
+TortoiseSVN
