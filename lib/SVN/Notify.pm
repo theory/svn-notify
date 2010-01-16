@@ -76,10 +76,11 @@ Apache:
 
 =back
 
-See L<http://svn.haxx.se/users/archive-2006-05/0593.shtml> for more detailed
+See L<Windows Subversion + Apache + TortoiseSVN + SVN::Notify
+HOWTO|http://svn.haxx.se/users/archive-2006-05/0593.shtml> for more detailed
 information on getting SVN::Notify running on Windows. If you have issues with
-asynchronous execution, try using F<HookStart.exe>
-(L<http://www.koders.com/csharp/fidE2724F44EF2D47F1C0FE76C538006435FA20051D.aspx>)
+asynchronous execution, try using
+L<F<HookStart.exe>|http://www.koders.com/csharp/fidE2724F44EF2D47F1C0FE76C538006435FA20051D.aspx>
 to run F<svnnotify>.
 
 =cut
@@ -2510,32 +2511,32 @@ your OS defaults to a UTF-8 locale, things should just work.
 
 =item L<SVN::Notify::HTML|SVN::Notify::HTML>
 
+HTML notification.
+
 =item L<SVN::Notify::HTML::ColorDiff|SVN::Notify::HTML::ColorDiff>
 
-Subclasses SVN::Notify.
+HTML notification with colorized diff.
 
 =item L<SVN::Notify::Filter|SVN::Notify::Filter>
 
 How to write output filters for SVN::Notify.
 
-=item L<https://sourceforge.net/docs/E09#svn_notify>
+=item L<SourceForge Hook Scripts|http://sourceforge.net/apps/trac/sourceforge/wiki/Subversion%20hook%20scripts>
 
 SourceForge.net support for SVN::Notify.
 
-=item L<http://svn.haxx.se/users/archive-2006-05/0593.shtml>
+=item L<Windows Subversion + Apache + TortoiseSVN + SVN::Notify HOWTO|http://svn.haxx.se/users/archive-2006-05/0593.shtml>
 
-Tutorial for installing Apache, Subversion, and SVN::Notify on Windows.
+Essential for Windows Subversion users.
 
 =back
 
 =head1 Support
 
-This module is stored in an open repository at the following address:
-
-L<https://svn.kineticode.com/SVN-Notify/trunk/>
+This module is stored in an L<open repository|https://svn.kineticode.com/SVN-Notify/trunk/>.
 
 Patches against SVN::Notify are welcome. Please send bug reports to
-<bug-svn-notify@rt.cpan.org>.
+<bug-svn-notify@rt.cpan.org|mailto:bug-svn-notify@rt.cpan.org>.
 
 =head1 Author
 

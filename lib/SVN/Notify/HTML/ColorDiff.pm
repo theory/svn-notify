@@ -248,7 +248,7 @@ __END__
 
 =item L<SVN::Notify::HTML|SVN::Notify::HTML>
 
-=item CVSspam: L<http://www.badgers-in-foil.co.uk/projects/cvsspam/>
+=item L<CVSspam|http://www.badgers-in-foil.co.uk/projects/cvsspam/>
 
 =back
 
