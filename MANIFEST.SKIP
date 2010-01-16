@@ -8,3 +8,4 @@
 \.svn
 output\.txt
 pod-spelling.t$
+^MYMETA.yml$

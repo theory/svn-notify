@@ -1,6 +1,6 @@
 Revision history for Perl extension SVN::Notify
 
-2.80
+2.80  2010-01-16T04:40:00
       - Fixed the regular expression for detecting JIRA keys. Thanks to David
         Ferguson for the report (RT#51620).
       - Fixed test failure on Perl 5.11.2.

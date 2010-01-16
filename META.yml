@@ -8,7 +8,7 @@ build_requires:
   Test::More: 0.17
 configure_requires:
   Module::Build: 0.2701
-generated_by: 'Module::Build version 0.3507'
+generated_by: 'Module::Build version 0.3601'
 license: perl
 meta-spec:
   url: http://module-build.sourceforge.net/META-spec-v1.4.html
@@ -38,7 +38,7 @@ recommends:
   Net::SMTP: 0
   Net::SMTP_auth: 0
   Pod::Usage: 1.33
-  Test::Pod: 1.2
+  Test::Pod: 1.41
   Test::Pod::Coverage: 1.06
   Text::Trac: 0.10
 requires:
