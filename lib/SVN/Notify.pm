@@ -7,7 +7,7 @@ require 5.006_000;
 use constant WIN32  => $^O eq 'MSWin32';
 use constant PERL58 => $] > 5.007_000;
 require Encode if PERL58;
-$SVN::Notify::VERSION = '2.80';
+$SVN::Notify::VERSION = '2.81';
 
 # Make sure any output (such as from _dbpnt()) triggers no Perl warnings.
 if (PERL58) {
