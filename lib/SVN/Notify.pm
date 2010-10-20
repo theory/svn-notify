@@ -2295,7 +2295,7 @@ sub _pipe {
     die "Cannot fork: $!\n" unless defined $pid;
 
     if ($pid) {
-        # Parent process. Set the encoing layer and return the file handle.
+        # Parent process. Set the encoding layer and return the file handle.
         binmode PIPE, ":encoding($encode)" if PERL58 && $encode;
         return *PIPE;
     } else {
