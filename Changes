@@ -1,6 +1,7 @@
 Revision history for Perl extension SVN::Notify
 
 2.81
+      - Removed deprecated use of `qw(...)` as parentheses.
 
 2.80  2010-01-16T04:40:00
       - Fixed the regular expression for detecting JIRA keys. Thanks to David

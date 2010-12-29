@@ -727,7 +727,7 @@ sub new {
     # Set up the environment locale.
     if ( $params{language} && !$ENV{LANG} ) {
         ( my $lang_country = $params{language} ) =~ s/-/_/g;
-        for my $p qw(encoding svn_encoding) {
+        for my $p (qw(encoding svn_encoding)) {
             my $encoding = $params{$p};
             $encoding =~ s/-//g if uc($encoding) ne 'UTF-8';
             (my $label = $p ) =~ s/(_?)encoding/$1/;
