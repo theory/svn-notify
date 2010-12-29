@@ -12,7 +12,7 @@ my $class = Module::Build->subclass(
                  # Copy the test scripts and then set the shebang line and make
                  # sure that they're executable.
                  my @scripts;
-                 my $to_dir = $self->localize_file_path("t/bin");
+                 my $to_dir = $self->localize_file_path("t/scripts");
                  for my $base (qw(testsvnlook testsendmail)) {
                      my $script = "$to_dir/$base";
                      push @scripts, $self->localize_file_path($script);
