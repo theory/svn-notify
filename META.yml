@@ -8,7 +8,8 @@ build_requires:
   Test::More: 0.17
 configure_requires:
   Module::Build: 0.2701
-generated_by: 'Module::Build version 0.3601'
+dynamic_config: 1
+generated_by: 'Module::Build version 0.3703, CPAN::Meta::Converter version 2.110440'
 license: perl
 meta-spec:
   url: http://module-build.sourceforge.net/META-spec-v1.4.html
@@ -17,21 +18,22 @@ name: SVN-Notify
 provides:
   SVN::Notify:
     file: lib/SVN/Notify.pm
-    version: 2.80
+    version: 2.81
   SVN::Notify::Alternative:
     file: lib/SVN/Notify/Alternative.pm
     version: 1.0
   SVN::Notify::Filter::Trac:
     file: lib/SVN/Notify/Filter/Trac.pm
-    version: 2.80
+    version: 2.81
   SVN::Notify::HTML:
     file: lib/SVN/Notify/HTML.pm
-    version: 2.80
+    version: 2.81
   SVN::Notify::HTML::ColorDiff:
     file: lib/SVN/Notify/HTML/ColorDiff.pm
-    version: 2.80
+    version: 2.81
   SVN::Notify::SMTP:
     file: lib/SVN/Notify.pm
+    version: 0
 recommends:
   File::Spec: 0
   HTML::Entities: 0
@@ -46,4 +48,4 @@ requires:
   perl: 5.006
 resources:
   license: http://dev.perl.org/licenses/
-version: 2.80
+version: 2.81

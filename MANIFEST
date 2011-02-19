@@ -46,3 +46,4 @@ t/pod-coverage.t
 t/pod.t
 t/script.t
 t/smtp.t
+META.json
