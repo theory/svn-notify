@@ -24,7 +24,7 @@ my %args = (
 my $subj = "Did this, that, and the «other».";
 my $qsubj;
 if (SVN::Notify::PERL58()) {
-    Encode::_utf8_on( $subj );
+    $subj = Encode::decode_utf8( $subj );
     $qsubj = quotemeta Encode::encode( 'MIME-Q', $subj );
 } else {
     $qsubj = quotemeta $subj;
@@ -304,7 +304,13 @@ ok( $notifier->execute, "Notify subject_prefix" );
 
 # Check the output.
 $email = get_output();
-like( $email, qr/Subject: \[Commit r111\] $qsubj\n/,
+if (SVN::Notify::PERL58()) {
+    $qsubj = quotemeta Encode::encode( 'MIME-Q', "[Commit r111] $subj" );
+} else {
+    $qsubj = quotemeta "[Commit r111] $subj";
+}
+
+like( $email, qr/Subject: $qsubj\n/,
       "Check subject header for prefix with %d" );
 
 ##############################################################################
@@ -318,7 +324,12 @@ ok( $notifier->execute, "Notify subject_cx" );
 
 # Check the output.
 $email = get_output();
-like( $email, qr{Subject: \[111\] trunk: $qsubj\n},
+if (SVN::Notify::PERL58()) {
+    $qsubj = quotemeta Encode::encode( 'MIME-Q', "[111] trunk: $subj" );
+} else {
+    $qsubj = quotemeta "[111] trunk: $subj";
+}
+like( $email, qr{Subject: $qsubj\n},
       "Check subject header for CX" );
 
 ##############################################################################
