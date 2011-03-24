@@ -6,7 +6,6 @@ my $class = Module::Build->subclass(
     class => 'My::Builder',
     code => q{
              sub ACTION_code {
-                 use File::Spec::Functions;
                  my $self = shift;
                  $self->SUPER::ACTION_code(@_);
                  # Copy the test scripts and then set the shebang line and make
@@ -34,7 +33,7 @@ my $build = $class->new(
     module_name        => 'SVN::Notify',
     license            => 'perl',
     create_makefile_pl => 'passthrough',
-    add_to_cleanup     => ['t/data/output.txt'],
+    add_to_cleanup     => [qw(t/data/output.txt t/scripts)],
     script_files       => ['bin/svnnotify'],
     configure_requires => { 'Module::Build' => '0.2701' },
     requires           => {
