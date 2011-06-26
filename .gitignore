@@ -1,0 +1,10 @@
+/_build
+/blib
+/SVN-Notify-*
+/MANIFEST
+/MANIFEST.bak
+/*META.*
+/Build
+/Makefile*
+/pm_to_blib
+/t/scripts
