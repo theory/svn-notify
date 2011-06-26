@@ -1,6 +1,9 @@
 Revision history for Perl extension SVN::Notify
 
 2.82
+      - Moved the repository to
+        [GitHub](https://github.com/theory/svn-notify/). Yes, I'm aware of the
+        irony.
 
 2.81  2011-02-19T03:09:43
       - Removed deprecated use of `qw(...)` as parentheses.
