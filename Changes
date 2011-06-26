@@ -1,6 +1,6 @@
 Revision history for Perl extension SVN::Notify
 
-2.82
+2.82  2011-06-26T05:12:04
       - Moved the repository to
         [GitHub](https://github.com/theory/svn-notify/). Yes, I'm aware of the
         irony.
