@@ -2533,10 +2533,13 @@ Essential for Windows Subversion users.
 
 =head1 Support
 
-This module is stored in an L<open repository|https://svn.kineticode.com/SVN-Notify/trunk/>.
+This module is stored in an open L<GitHub
+repository|http://github.com/theory/svn-notify/>. Yes, I'm aware of the irony.
+Nevertheless, feel free to fork and contribute!
 
-Patches against SVN::Notify are welcome. Please send bug reports to
-<bug-svn-notify@rt.cpan.org|mailto:bug-svn-notify@rt.cpan.org>.
+Please file bug reports via L<GitHub
+Issues|http://github.com/theory/svn-notify/issues/> or by sending mail to
+L<bug-SVN-Notify@rt.cpan.org|mailto:bug-SVN-Notify@rt.cpan.org>.
 
 =head1 Author
 

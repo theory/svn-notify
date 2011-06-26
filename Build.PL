@@ -55,6 +55,13 @@ my $build = $class->new(
         'File::Spec'          => 0,
         'Text::Trac'          => '0.10',
     },
+    meta_merge => {
+        resources => {
+            homepage   => 'http://search.cpan.org/dist/SVN-Notify/',
+            bugtracker => 'http://github.com/theory/svn-notify/issues/',
+            repository => 'http://github.com/theory/svn-notify/',
+        }
+    },
 );
 $build->create_build_script;
 
