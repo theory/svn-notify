@@ -184,11 +184,12 @@ __END__
 
 Jukka Zitting <jz@yukatan.fi>
 
-David E. Wheeler <david@kineticode.com>
+David E. Wheeler <david@justatheory.com>
 
 =head1 Copyright and License
 
-Copyright (c) 2005-2009 Jukka Zitting and Kineticode, Inc. Some Rights Reserved.
+Copyright (c) 2005 Jukka Zitting and 2005-2011 David E. Wheeler. Some Rights
+Reserved.
 
 This module is free software; you can redistribute it and/or modify it under
 the same terms as Perl itself.
