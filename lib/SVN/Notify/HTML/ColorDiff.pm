@@ -1,7 +1,5 @@
 package SVN::Notify::HTML::ColorDiff;
 
-# $Id$
-
 use strict;
 use HTML::Entities;
 use SVN::Notify::HTML ();

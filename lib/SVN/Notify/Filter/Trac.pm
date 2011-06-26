@@ -1,7 +1,5 @@
 package SVN::Notify::Filter::Trac;
 
-# $Id$
-
 use strict;
 use Text::Trac;
 use SVN::Notify;

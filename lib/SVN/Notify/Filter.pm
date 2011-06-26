@@ -1,5 +1,3 @@
-# $Id$
-
 =head1 Name
 
 SVN::Notify::Filter - Create output filters for SVN::Notify

@@ -1,7 +1,5 @@
 #!perl -w
 
-# $Id: pod-spelling.t 3707 2008-05-02 20:04:48Z david $
-
 use strict;
 use Test::More;
 eval 'use Test::Spelling';

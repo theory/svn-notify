@@ -1,7 +1,5 @@
 package SVN::Notify::HTML;
 
-# $Id$
-
 use strict;
 use HTML::Entities;
 use SVN::Notify ();

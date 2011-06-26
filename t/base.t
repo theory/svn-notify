@@ -1,7 +1,5 @@
 #!perl -w
 
-# $Id$
-
 use strict;
 use Test::More tests => 244;
 use File::Spec::Functions;

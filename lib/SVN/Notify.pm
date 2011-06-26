@@ -1,7 +1,5 @@
 package SVN::Notify;
 
-# $Id$
-
 use strict;
 require 5.006_000;
 use constant WIN32  => $^O eq 'MSWin32';
