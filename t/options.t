@@ -22,6 +22,7 @@ my %params = (
     smtp            => undef,
     smtp_user       => undef,
     smtp_pass       => undef,
+    smtp_port       => undef,
     smtp_authtype   => undef,
     to_regex_map    => undef,
     to_email_map    => undef,

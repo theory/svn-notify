@@ -67,6 +67,7 @@ svnnotify - Subversion activity notification
      --smtp ADDRESS            Address for an SMTP server.
      --smtp-user USERNAME      Username for authenticating to a SMTP server.
      --smtp-pass PASSWORD      Password for authenticating to a SMTP server.
+     --smtp-port PORT          Port to connect to on the SMTP server.
      --smtp-authtype AUTHTYPE  Type of SMTP authentication.
   -c --encoding ENCODING       The character encoding for reading and writing
                                data.

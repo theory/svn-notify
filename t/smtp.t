@@ -80,9 +80,10 @@ like $smtp->{datasend}, qr{^    http://foo[.]com/[?]cs=1234}m,
     'We should have a revision URL';
 
 ##############################################################################
-# Test authentication and Debug.
+# Test port, authentication, and Debug.
 $args{smtp_user}     = 'theory';
 $args{smtp_pass}     = 'w00t!';
+$args{smtp_port}     = 1234;
 $args{smtp_authtype} = 'NTLM';
 $args{verbose}       = 2;
 $smtp = {};
@@ -104,7 +105,7 @@ do {
     ok $notifier->execute, 'Execute notifier';
 };
 
-is_deeply $smtp->{new}, ['smtp.example.com', Debug => 1],
+is_deeply $smtp->{new}, ['smtp.example.com', Port => 1234, Debug => 1],
     'The SMTP object should be instantiated with SMTP address and Debug on';
 is $smtp->{mail}, 'theory', 'Mail should be initiated by user "theory"';
 is_deeply $smtp->{to}, $args{to}, 'Mail should be from the right addresses';

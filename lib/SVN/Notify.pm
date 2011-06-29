@@ -279,6 +279,13 @@ message, and will of course authenticate to the SMTP server.
 
 The password for SMTP authentication. Use in parallel with C<smtp_user>.
 
+=item smtp_port
+
+  svnnotify --smtp-port 465
+
+The port for an SMTP server through which to send the notification email. The
+default port is 25.
+
 =item smtp_authtype
 
   svnnotify --smtp-authtype authtype
@@ -859,6 +866,7 @@ sub get_options {
         'sendmail|s=s'        => \$opts->{sendmail},
         'set-sender|E'        => \$opts->{set_sender},
         'smtp=s'              => \$opts->{smtp},
+        'smtp-port=i'         => \$opts->{smtp_port},
         'encoding|charset|c=s'=> \$opts->{encoding},
         'diff-encoding=s'     => \$opts->{diff_encoding},
         'svn-encoding=s'      => \$opts->{svn_encoding},
@@ -946,6 +954,7 @@ sub get_options {
             svnlook
             sendmail
             smtp
+            smtp_port
             diff_switches
             reply_to
             subject_prefix
@@ -2366,6 +2375,7 @@ sub get_handle {
 
     my $smtp = $smtp_class->new(
         $notifier->{smtp},
+        ( $notifier->{smtp_port} ? ( Port => $notifier->{smtp_port} ) : ()),
         ( $notifier->{verbose} > 1 ? ( Debug => 1 ) : ())
     ) or die "Unable to create $smtp_class object: $!";
 
