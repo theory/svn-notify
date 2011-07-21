@@ -1131,7 +1131,7 @@ sub prepare_recipients {
     my $fh = $self->_pipe(
         $self->{svn_encoding},
         '-|', $self->{svnlook},
-        'dirs-changed',
+        'changed',
         $self->{repos_path},
         '-r', $self->{revision},
     );
@@ -1139,6 +1139,7 @@ sub prepare_recipients {
     # Read in a list of the directories changed.
     my ($cx, %seen);
     while (<$fh>) {
+        s/^.\s*//;
         s/[\n\r\/\\]+$//;
         for (my $i = 0; $i < @$regexen; $i += 2) {
             my ($email, $rx) = @{$regexen}[$i, $i + 1];
