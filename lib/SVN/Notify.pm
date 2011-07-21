@@ -157,9 +157,9 @@ unless either C<to_regex_map> or C<to_email_map> is specified.
 This parameter specifies a hash reference of email addresses to regular
 expression strings. SVN::Notify will compile the regular expression strings
 into regular expression objects, and then send notification messages if and
-only if the name of one or more of the directories affected by a commit
-matches the regular expression. This is a good way to have a notification
-email sent to a particular mail address (or comma-delimited list of addresses)
+only if the name of one or more of the files affected by a commit matches
+the regular expression. This is a good way to have a notification email
+sent to a particular mail address (or comma-delimited list of addresses)
 only for certain parts of the subversion tree. This parameter is required
 unless C<to> or C<to_email_map> is specified.
 
@@ -1152,14 +1152,14 @@ sub prepare_recipients {
         '-r', $self->{revision},
     );
 
-    # Read in a list of the directories changed.
+    # Read in a list of the files changed.
     my ($cx, %seen);
     while (<$fh>) {
         s/^.\s*//;
         s/[\n\r\/\\]+$//;
         for (my $i = 0; $i < @$regexen; $i += 2) {
             my ($email, $rx) = @{$regexen}[$i, $i + 1];
-            # If the directory matches the regex, save the email.
+            # If the file matches the regex, save the email.
             if (/$rx/) {
                 $self->_dbpnt( qq{"$_" matched $rx}) if $self->{verbose} > 2;
                 push @$tos, $email unless $seen{$email}++;
