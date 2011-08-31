@@ -3,6 +3,14 @@ Revision history for Perl extension SVN::Notify
 2.83
       - Added the `smtp_port` parameter and accompanying `--smtp-port` option.
         Patch from Gustavo Leite de Mendonça Chaves.
+      - Switched from Net::SMTP and Net::SMTP_auth to Net::SMTP::TLS, which
+        handles TLS and non TLS and auth and non-auth in any combintation.
+        Based on patches from Dawood Sangameshwari and Marino Miculan (RT #
+        40188).
+      - Added `--smtp-tls` option to enable TLS. Based on patch from Marino
+        Miculan.
+      - Deprecated `--smtp-authtype`, which is now a no-op. Net::SMTP::TLS
+        determins the auth type to use by asking the SMTP server.
 
 2.82  2011-06-26T05:12:04
       - Moved the repository to

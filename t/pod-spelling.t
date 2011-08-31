@@ -52,3 +52,6 @@ login
 username
 HOWTO
 TortoiseSVN
+GitHub
+TLS
+auth

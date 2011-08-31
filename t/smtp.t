@@ -1,7 +1,7 @@
 #!perl -w
 
 use strict;
-use Test::More tests => 38;
+use Test::More tests => 37;
 use File::Spec::Functions;
 
 use_ok 'SVN::Notify' or die;
@@ -41,8 +41,11 @@ do {
     local $^W;
     ok $notifier->execute, 'Execute notifier';
 };
-is_deeply $smtp->{new}, ['smtp.example.com'],
-    'The SMTP object should have been instantiated with the SMTP address';
+is_deeply $smtp->{new}, [
+    'smtp.example.com',
+    'Hello' => Sys::Hostname::hostname(),
+    NoTLS => 1,
+], 'The SMTP::TLS object should have been instantiated with the SMTP address';
 is $smtp->{mail}, 'theory', 'Mail should be initiated by user "theory"';
 is_deeply $smtp->{to}, $args{to}, 'Mail should be from the right addresses';
 ok $smtp->{data}, 'data() should have been called';
@@ -105,18 +108,24 @@ do {
     ok $notifier->execute, 'Execute notifier';
 };
 
-is_deeply $smtp->{new}, ['smtp.example.com', Port => 1234, Debug => 1],
-    'The SMTP object should be instantiated with SMTP address and Debug on';
+is_deeply $smtp->{new}, [
+    'smtp.example.com',
+    Hello => Sys::Hostname::hostname(),
+    Port  => 1234,
+    NoTLS => 1,
+    User  => 'theory',
+    Password => 'w00t!',
+    Debug => 1,
+], 'The SMTP::TLSx object should be instantiated with SMTP address and Debug on';
 is $smtp->{mail}, 'theory', 'Mail should be initiated by user "theory"';
 is_deeply $smtp->{to}, $args{to}, 'Mail should be from the right addresses';
 ok $smtp->{data}, 'data() should have been called';
 ok $smtp->{dataend}, 'dataend() should have been called';
 ok $smtp->{quit}, 'quit() should have been called';
-is $smtp->{auth}, 'NTLM,theory,w00t!', 'auth() should have been called';
 
 # This class mocks Net::SMTP for testing purposes.
-package Net::SMTP;
-BEGIN { $INC{'Net/SMTP.pm'} = __FILE__; }
+package Net::SMTP::TLS;
+BEGIN { $INC{'Net/SMTP/TLS.pm'} = __FILE__; }
 
 sub new {
     my $class = shift;
@@ -134,8 +143,3 @@ sub tied_fh {
     $smtp->{tied_fh} = 1;
     return \local *STDOUT;
 }
-
-package Net::SMTP_auth;
-use base 'Net::SMTP';
-BEGIN { $INC{'Net/SMTP_auth.pm'} = __FILE__; }
-sub auth { shift; $smtp->{auth} = join ',', @_ }
