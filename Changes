@@ -1,5 +1,7 @@
 Revision history for Perl extension SVN::Notify
 
+2.84
+
 2.83  2011-10-29T00:19:07Z
       - Added the `smtp_port` parameter and accompanying `--smtp-port` option.
         Patch from Gustavo Leite de Mendonça Chaves.

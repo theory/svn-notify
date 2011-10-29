@@ -1,4 +1,4 @@
-SVN/Notify version 2.83
+SVN/Notify version 2.84
 =======================
 
 This class may be used for sending email messages for
