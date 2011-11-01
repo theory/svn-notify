@@ -12,7 +12,7 @@ Revision history for Perl extension SVN::Notify
       - Added `--smtp-tls` option to enable TLS. Based on patch from Marino
         Miculan.
       - Deprecated `--smtp-authtype`, which is now a no-op. Net::SMTP::TLS
-        determins the auth type to use by asking the SMTP server.
+        determines the auth type to use by asking the SMTP server.
 
 2.82  2011-06-26T05:12:04
       - Moved the repository to
