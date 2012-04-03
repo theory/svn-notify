@@ -1,6 +1,8 @@
 Revision history for Perl extension SVN::Notify
 
 2.84
+      - Added `--smtp-tls` to the output of `man svnnotify`.
+      - Removed `--smtp-authtype` from the output of `man svnnotify`.
 
 2.83  2011-10-29T00:19:07Z
       - Added the `smtp_port` parameter and accompanying `--smtp-port` option.
