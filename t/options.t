@@ -36,6 +36,7 @@ my %params = (
     with_diff       => undef,
     attach_diff     => undef,
     diff_switches   => undef,
+    diff_content_type => undef,
     reply_to        => undef,
     subject_prefix  => undef,
     subject_cx      => undef,

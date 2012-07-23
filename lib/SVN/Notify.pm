@@ -728,6 +728,7 @@ sub new {
     $params{encoding}       ||= $params{charset} || 'UTF-8';
     $params{svn_encoding}   ||= $params{encoding};
     $params{diff_encoding}  ||= $params{svn_encoding};
+    $params{diff_content_type} ||= $params{diff_content_type} || 'text/plain';
     $params{sendmail}       ||= $ENV{SENDMAIL} || $class->find_exe('sendmail')
         unless $params{smtp};
 
@@ -880,6 +881,7 @@ sub get_options {
         'with-diff|d'         => \$opts->{with_diff},
         'attach-diff|a'       => \$opts->{attach_diff},
         'diff-switches|w=s'   => \$opts->{diff_switches},
+        'diff-content-type=s' => \$opts->{diff_content_type},
         'reply-to|R=s'        => \$opts->{reply_to},
         'subject-prefix|P=s'  => \$opts->{subject_prefix},
         'subject-cx|C'        => \$opts->{subject_cx},
@@ -1704,7 +1706,7 @@ sub output_attached_diff {
     print $out "\n--$self->{boundary}\n",
       "Content-Disposition: attachment; filename=",
       "r$self->{revision}-$self->{user}.diff\n",
-      "Content-Type: text/plain; charset=$self->{encoding}\n",
+      "Content-Type: $self->{diff_content_type}; charset=$self->{encoding}\n",
       ($self->{language} ? "Content-Language: $self->{language}\n" : ()),
       "Content-Transfer-Encoding: 8bit\n\n";
     $self->_dump_diff($out, $diff);
