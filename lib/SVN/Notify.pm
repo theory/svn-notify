@@ -386,6 +386,14 @@ C<--no-diff-added>. And who knows, maybe someday it will support the same
 options as C<svn diff>, such as C<--diff-cmd> and C<--extensions>. Only
 relevant when used with C<with_diff> or C<attach_diff>.
 
+=item diff_content_type
+
+  svnnotify --diff-content-type 'text/x-diff'
+
+Sets the Content-Type header for attached diffs.  The default, if this parameter
+is not passed, is 'text/plain'.  This parameter has no effect if '--attach-diff'
+is not specified.
+
 =item reply_to
 
   svnnotify --reply-to devlist@example.com
