@@ -730,14 +730,14 @@ sub new {
       unless $params{revision};
 
     # Set up default values.
-    $params{svnlook}        ||= $ENV{SVNLOOK}  || $class->find_exe('svnlook');
-    $params{with_diff}      ||= $params{attach_diff};
-    $params{verbose}        ||= 0;
-    $params{encoding}       ||= $params{charset} || 'UTF-8';
-    $params{svn_encoding}   ||= $params{encoding};
-    $params{diff_encoding}  ||= $params{svn_encoding};
+    $params{svnlook}           ||= $ENV{SVNLOOK}  || $class->find_exe('svnlook');
+    $params{with_diff}         ||= $params{attach_diff};
+    $params{verbose}           ||= 0;
+    $params{encoding}          ||= $params{charset} || 'UTF-8';
+    $params{svn_encoding}      ||= $params{encoding};
+    $params{diff_encoding}     ||= $params{svn_encoding};
     $params{diff_content_type} ||= $params{diff_content_type} || 'text/plain';
-    $params{sendmail}       ||= $ENV{SENDMAIL} || $class->find_exe('sendmail')
+    $params{sendmail}          ||= $ENV{SENDMAIL} || $class->find_exe('sendmail')
         unless $params{smtp};
 
     _usage( qq{Cannot find sendmail and no "smtp" parameter specified} )
