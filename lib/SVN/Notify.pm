@@ -386,6 +386,14 @@ C<--no-diff-added>. And who knows, maybe someday it will support the same
 options as C<svn diff>, such as C<--diff-cmd> and C<--extensions>. Only
 relevant when used with C<with_diff> or C<attach_diff>.
 
+=item diff_content_type
+
+  svnnotify --diff-content-type 'text/x-diff'
+
+Sets the Content-Type header for attached diffs.  The default, if this parameter
+is not passed, is 'text/plain'.  This parameter has no effect if '--attach-diff'
+is not specified.
+
 =item reply_to
 
   svnnotify --reply-to devlist@example.com
@@ -722,13 +730,14 @@ sub new {
       unless $params{revision};
 
     # Set up default values.
-    $params{svnlook}        ||= $ENV{SVNLOOK}  || $class->find_exe('svnlook');
-    $params{with_diff}      ||= $params{attach_diff};
-    $params{verbose}        ||= 0;
-    $params{encoding}       ||= $params{charset} || 'UTF-8';
-    $params{svn_encoding}   ||= $params{encoding};
-    $params{diff_encoding}  ||= $params{svn_encoding};
-    $params{sendmail}       ||= $ENV{SENDMAIL} || $class->find_exe('sendmail')
+    $params{svnlook}           ||= $ENV{SVNLOOK}  || $class->find_exe('svnlook');
+    $params{with_diff}         ||= $params{attach_diff};
+    $params{verbose}           ||= 0;
+    $params{encoding}          ||= $params{charset} || 'UTF-8';
+    $params{svn_encoding}      ||= $params{encoding};
+    $params{diff_encoding}     ||= $params{svn_encoding};
+    $params{diff_content_type} ||= $params{diff_content_type} || 'text/plain';
+    $params{sendmail}          ||= $ENV{SENDMAIL} || $class->find_exe('sendmail')
         unless $params{smtp};
 
     _usage( qq{Cannot find sendmail and no "smtp" parameter specified} )
@@ -880,6 +889,7 @@ sub get_options {
         'with-diff|d'         => \$opts->{with_diff},
         'attach-diff|a'       => \$opts->{attach_diff},
         'diff-switches|w=s'   => \$opts->{diff_switches},
+        'diff-content-type=s' => \$opts->{diff_content_type},
         'reply-to|R=s'        => \$opts->{reply_to},
         'subject-prefix|P=s'  => \$opts->{subject_prefix},
         'subject-cx|C'        => \$opts->{subject_cx},
@@ -1704,7 +1714,7 @@ sub output_attached_diff {
     print $out "\n--$self->{boundary}\n",
       "Content-Disposition: attachment; filename=",
       "r$self->{revision}-$self->{user}.diff\n",
-      "Content-Type: text/plain; charset=$self->{encoding}\n",
+      "Content-Type: $self->{diff_content_type}; charset=$self->{encoding}\n",
       ($self->{language} ? "Content-Language: $self->{language}\n" : ()),
       "Content-Transfer-Encoding: 8bit\n\n";
     $self->_dump_diff($out, $diff);

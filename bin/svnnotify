@@ -79,6 +79,7 @@ svnnotify - Subversion activity notification
   -d --with-diff               Include the diff in the message.
   -a --attach-diff             Attach the diff to the message.
   -w --diff-switches SWITCHES  Switches to pass to C<svnlook diff>.
+     --diff-content-type TYPE  Sets the Content-Type for diff attachments.
   -R --reply-to ADDRESS        Address for use in the Reply-To header.
      --add-header NAME=VALUE   Add an extra header to the email.
   -P --subject-prefix PREFIX   String to prepend to the subject.
