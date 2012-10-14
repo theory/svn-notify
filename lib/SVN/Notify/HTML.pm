@@ -556,49 +556,6 @@ Gets or sets the value of the C<css_url> attribute.
 
 ##############################################################################
 
-sub _css {
-    return [
-        q(#msg dl.meta { border: 1px #006 solid; background: #369; ),
-            qq(padding: 6px; color: #fff; }\n),
-        qq(#msg dl.meta dt { float: left; width: 6em; font-weight: bold; }\n),
-        qq(#msg dt:after { content:':';}\n),
-        q(#msg dl, #msg dt, #msg ul, #msg li, #header, #footer, #logmsg { font-family: ),
-            qq(verdana,arial,helvetica,sans-serif; font-size: 10pt;  }\n),
-        qq(#msg dl a { font-weight: bold}\n),
-        qq(#msg dl a:link    { color:#fc3; }\n),
-        qq(#msg dl a:active  { color:#ff0; }\n),
-        qq(#msg dl a:visited { color:#cc6; }\n),
-        q(h3 { font-family: verdana,arial,helvetica,sans-serif; ),
-            qq(font-size: 10pt; font-weight: bold; }\n),
-        q(#msg pre { white-space: pre-line; overflow: auto; background: #ffc; ),
-            qq(border: 1px #fa0 solid; padding: 6px; }\n),
-        qq(#logmsg { background: #ffc; border: 1px #fa0 solid; padding: 1em 1em 0 1em; }\n),
-        qq(#logmsg p, #logmsg pre, #logmsg blockquote { margin: 0 0 1em 0; }\n),
-        qq(#logmsg p, #logmsg li, #logmsg dt, #logmsg dd { line-height: 14pt; }\n),
-        qq(#logmsg h1, #logmsg h2, #logmsg h3, #logmsg h4, #logmsg h5, #logmsg h6 { margin: .5em 0; }\n),
-        qq(#logmsg h1:first-child, #logmsg h2:first-child, #logmsg h3:first-child, #logmsg h4:first-child, #logmsg h5:first-child, #logmsg h6:first-child { margin-top: 0; }\n),
-        qq{#logmsg ul, #logmsg ol { padding: 0; list-style-position: inside; margin: 0 0 0 1em; }\n},
-        qq{#logmsg ul { text-indent: -1em; padding-left: 1em; }},
-        qq{#logmsg ol { text-indent: -1.5em; padding-left: 1.5em; }\n},
-        qq(#logmsg > ul, #logmsg > ol { margin: 0 0 1em 0; }\n),
-        qq(#logmsg pre { background: #eee; padding: 1em; }\n),
-        qq(#logmsg blockquote { border: 1px solid #fa0; border-left-width: 10px; padding: 1em 1em 0 1em; background: white;}\n),
-        qq(#logmsg dl { margin: 0; }\n),
-        qq(#logmsg dt { font-weight: bold; }\n),
-        qq(#logmsg dd { margin: 0; padding: 0 0 0.5em 0; }\n),
-        qq(#logmsg dd:before { content:'\\00bb';}\n),
-        qq(#logmsg table { border-spacing: 0px; border-collapse: collapse; border-top: 4px solid #fa0; border-bottom: 1px solid #fa0; background: #fff; }\n),
-        qq(#logmsg table th { text-align: left; font-weight: normal; padding: 0.2em 0.5em; border-top: 1px dotted #fa0; }\n),
-        qq(#logmsg table td { text-align: right; border-top: 1px dotted #fa0; padding: 0.2em 0.5em; }\n),
-        qq(#logmsg table thead th { text-align: center; border-bottom: 1px solid #fa0; }\n),
-        qq(#logmsg table th.Corner { text-align: left; }\n),
-        qq(#logmsg hr { border: none 0; border-top: 2px dashed #fa0; height: 1px; }\n),
-        q(#header, #footer { color: #fff; background: #636; ),
-        qq(border: 1px #300 solid; padding: 6px; }\n),
-        qq(#patch { width: 100%; }\n),
-    ];
-}
-
 1;
 __END__
 
