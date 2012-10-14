@@ -93,16 +93,16 @@ for my $header ('Log Message', 'Modified Paths', 'Added Paths',
 }
 
 # Check that we have the commit metatdata.
-like( $email, qr|<dt>Revision</dt> <dd><a href="http://foo[.]com/111">111</a></dd>\n|, 'Check Revision');
-like( $email, qr|<dt>Author</dt> <dd>theory</dd>\n|, 'Check Author');
+like( $email, qr|<dt style="float: left; width: 6em; font-weight: bold;font-family: verdana,arial,helvetica,sans-serif; font-size: 10pt;">Revision:</dt> <dd><a href="http://foo[.]com/111">111</a></dd>\n|, 'Check Revision');
+like( $email, qr|<dt style="float: left; width: 6em; font-weight: bold;font-family: verdana,arial,helvetica,sans-serif; font-size: 10pt;">Author:</dt> <dd>theory</dd>\n|, 'Check Author');
 like( $email,
-      qr|<dt>Date</dt> <dd>2004-04-20 01:33:35 -0700 \(Tue, 20 Apr 2004\)</dd>\n|,
+      qr|<dt style="float: left; width: 6em; font-weight: bold;font-family: verdana,arial,helvetica,sans-serif; font-size: 10pt;">Date:</dt> <dd>2004-04-20 01:33:35 -0700 \(Tue, 20 Apr 2004\)</dd>\n|,
       'Check Date');
 
 # Check that the log message is there.
 UTF8: {
     use utf8;
-    like( $email, qr{<pre>Did this, that, and the «other»\. And then I did some more\. Some\nit was done on a second line\. “Go figure”\. <a href="http://foo[.]com/1234">r1234</a></pre>}, 'Check for HTML log message' );
+    like( $email, qr{<pre style="overflow: auto; background: #ffc; border: 1px #fa0 solid; padding: 6px;">Did this, that, and the «other»\. And then I did some more\. Some\nit was done on a second line\. “Go figure”\. <a href="http://foo[.]com/1234">r1234</a></pre>}, 'Check for HTML log message' );
 }
 
 # Make sure that Class/Meta.pm is listed twice, once for modification and once
@@ -307,7 +307,7 @@ ok( $notifier->execute, "Notify HTML viewcvs_url" );
 # Check the output.
 $email = get_output();
 like( $email,
-      qr|<dt>Revision</dt>\s+<dd><a href="http://svn\.example\.com/\?rev=111\&amp;view=rev">111</a></dd>\n|,
+      qr|<dt style="float: left; width: 6em; font-weight: bold;font-family: verdana,arial,helvetica,sans-serif; font-size: 10pt;">Revision:</dt>\s+<dd><a style="color: white;font-weight: bold;" href="http://svn\.example\.com/\?rev=111\&amp;view=rev">111</a></dd>\n|,
       'Check for HTML URL');
 
 ##############################################################################
@@ -386,25 +386,25 @@ like($email,
 
 # Check for application URLs.
 like( $email,
-      qr|<dt>Revision</dt>\s+<dd><a href="http://viewsvn\.bricolage\.cc/\?rev=222\&amp;view=rev">222</a></dd>\n|,
+      qr|<dt style="float: left; width: 6em; font-weight: bold;font-family: verdana,arial,helvetica,sans-serif; font-size: 10pt;">Revision:</dt>\s+<dd><a style="color: white;font-weight: bold;" href="http://viewsvn\.bricolage\.cc/\?rev=222\&amp;view=rev">222</a></dd>\n|,
       'Check for main ViewCVS URL');
 like($email,
      qr{<a href="http://rt\.cpan\.org/NoAuth/Bugs\.html\?id=4321">Ticket # 4321</a>},
      "Check for RT URL");
 like($email,
-     qr{<a href="http://viewsvn\.bricolage\.cc/\?rev=606&amp;view=rev">Revision # 606</a>},
+     qr{<a style="color: white;font-weight: bold;" href="http://viewsvn\.bricolage\.cc/\?rev=606&amp;view=rev">Revision # 606</a>},
      "Check for log mesage ViewCVS URL");
 like( $email,
-      qr{<a href="http://bugzilla\.mozilla\.org/show_bug\.cgi\?id=709">Bug # 709</a>},
+      qr{<a style="color: white;font-weight: bold;" href="http://bugzilla\.mozilla\.org/show_bug\.cgi\?id=709">Bug # 709</a>},
       "Check for Bugzilla URL" );
 like( $email,
-      qr{<a href="http://jira\.atlassian\.com/secure/ViewIssue\.jspa\?key=PRJ1234-111">PRJ1234-111</a>},
+      qr{<a style="color: white;font-weight: bold;" href="http://jira\.atlassian\.com/secure/ViewIssue\.jspa\?key=PRJ1234-111">PRJ1234-111</a>},
       "Check for Jira URL" );
 like( $email,
-      qr{<a href="http://gnats\.example\.com/gnatsweb\.pl\?cmd=view&amp;pr=12345">PR 12345</a>},
+      qr{<a style="color: white;font-weight: bold;" href="http://gnats\.example\.com/gnatsweb\.pl\?cmd=view&amp;pr=12345">PR 12345</a>},
       "Check for GNATS URL" );
 like( $email,
-      qr{<a href="http://ticket\.example\.com/id=4321">Custom # 4321</a>},
+      qr{<a style="color: white;font-weight: bold;" href="http://ticket\.example\.com/id=4321">Custom # 4321</a>},
       "Check for custom ticket URL" );
 
 ##############################################################################
@@ -460,7 +460,7 @@ like($email,
 
 # Check for ViewCVS URLs.
 like( $email,
-      qr|<dt>Revision</dt>\s+<dd><a href="http://viewsvn\.bricolage\.cc/\?rev=444\&amp;view=rev">444</a></dd>\n|,
+      qr|<dt style="float: left; width: 6em; font-weight: bold;font-family: verdana,arial,helvetica,sans-serif; font-size: 10pt;">Revision:</dt>\s+<dd><a style="color: white;font-weight: bold;" href="http://viewsvn\.bricolage\.cc/\?rev=444\&amp;view=rev">444</a></dd>\n|,
       'Check for main ViewCVS URL');
 like($email,
      qr{<a href="http://viewsvn\.bricolage\.cc/\?rev=6000&amp;view=rev">Revision 6000</a>\.},
@@ -523,7 +523,7 @@ like($email, qr/link\.\n\nWe/, "Check for multiple lines" );
 
 # Check for SVNWeb URLs.
 like( $email,
-      qr|<dt>Revision</dt>\s+<dd><a href="http://svn\.example\.com/index\.cgi/revision/\?rev=444">444</a></dd>\n|,
+      qr|<dt style="float: left; width: 6em; font-weight: bold;font-family: verdana,arial,helvetica,sans-serif; font-size: 10pt;">Revision:</dt>\s+<dd><a style="color: white;font-weight: bold;" href="http://svn\.example\.com/index\.cgi/revision/\?rev=444">444</a></dd>\n|,
       'Check for main SVNWeb URL');
 like($email,
      qr{<a href="http://svn\.example\.com/index\.cgi/revision/\?rev=6000">Revision 6000</a>\.},
@@ -553,7 +553,7 @@ $email = get_output();
 
 # Check for Author URL.
 like( $email,
-      qr|<dt>Author</dt>\s+<dd><a href="http://svn\.example\.com/~theory/">theory</a></dd>\n|,
+      qr|<dt style="float: left; width: 6em; font-weight: bold;font-family: verdana,arial,helvetica,sans-serif; font-size: 10pt;">Author:</dt>\s+<dd><a href="http://svn\.example\.com/~theory/">theory</a></dd>\n|,
       'Check for Author URL');
 
 ##############################################################################
@@ -578,7 +578,7 @@ like $email, qr{<div id="header">This is the &amp;header</div>\n<dl class="meta"
       'Check for the header';
 
 like $email,
-    qr{<div id="footer">This is the &amp;footer</div>\s+</div>\s+</body>},
+    qr{<div id="footer" style="color: #fff; background: #636; border: 1px #300 solid; padding: 6px;font-family: verdana,arial,helvetica,sans-serif; font-size: 10pt; ">This is the &amp;footer</div>\s+</div>\s+</body>},
     'Check for the footer';
 
 ##############################################################################
@@ -603,7 +603,7 @@ like $email, qr{<div id="header"><p>&laquo;Welcome!&raquo;</p></div>\n<dl class=
       'Check for the header';
 
 like $email,
-    qr{<div id="footer"><p>Copyright &reg; 2006</p></div>\s+</div>\s+</body>},
+    qr{<div id="footer" style="color: #fff; background: #636; border: 1px #300 solid; padding: 6px;font-family: verdana,arial,helvetica,sans-serif; font-size: 10pt; "><p>Copyright &reg; 2006</p></div>\s+</div>\s+</body>},
     'Check for the footer';
 
 ##############################################################################

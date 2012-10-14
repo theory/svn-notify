@@ -79,16 +79,16 @@ for my $header ('Log Message', 'Modified Paths', 'Added Paths',
 }
 
 # Check that we have the commit metatdata.
-like( $email, qr|<dt>Revision</dt> <dd>111</dd>\n|, 'Check Revision');
-like( $email, qr|<dt>Author</dt> <dd>theory</dd>\n|, 'Check Author');
+like( $email, qr|<dt style="float: left; width: 6em; font-weight: bold;font-family: verdana,arial,helvetica,sans-serif; font-size: 10pt;">Revision:</dt> <dd>111</dd>\n|, 'Check Revision');
+like( $email, qr|<dt style="float: left; width: 6em; font-weight: bold;font-family: verdana,arial,helvetica,sans-serif; font-size: 10pt;">Author:</dt> <dd>theory</dd>\n|, 'Check Author');
 like( $email,
-      qr|<dt>Date</dt> <dd>2004-04-20 01:33:35 -0700 \(Tue, 20 Apr 2004\)</dd>\n|,
+      qr|<dt style="float: left; width: 6em; font-weight: bold;font-family: verdana,arial,helvetica,sans-serif; font-size: 10pt;">Date:</dt> <dd>2004-04-20 01:33:35 -0700 \(Tue, 20 Apr 2004\)</dd>\n|,
       'Check Date');
 
 # Check that the log message is there.
 UTF8: {
     use utf8;
-    like( $email, qr{<pre>Did this, that, and the «other»\. And then I did some more\. Some\nit was done on a second line\. “Go figure”\. r1234</pre>}, 'Check for HTML log message' );
+    like( $email, qr{<pre style="overflow: auto; background: #ffc; border: 1px #fa0 solid; padding: 6px;">Did this, that, and the «other»\. And then I did some more\. Some\nit was done on a second line\. “Go figure”\. r1234</pre>}, 'Check for HTML log message' );
 }
 
 # Make sure that Class/Meta.pm is listed twice, once for modification and once
@@ -158,11 +158,11 @@ like( $email, qr{<div class="modfile" style="border:1px solid #ccc;margin:10px 0
       "Check for diff file header" );
 like( $email, qr{<a id="trunkParamsCallbackRequestlibParamsCallbackpm"></a>\n},
       "Check for added file div ID");
-like( $email, qr{<div class="addfile"><h4>Added: trunk/Params-CallbackRequest/lib/Params/Callback.pm \(600 => 601\)</h4>},
+like( $email, qr{<div class="addfile" style="border:1px solid #ccc;margin:10px 0;"><h4 style="font-family: verdana,arial,helvetica,sans-serif;font-size:10pt;padding:8px;background:#369;color:#fff;margin:0;">Added: trunk/Params-CallbackRequest/lib/Params/Callback.pm \(600 => 601\)</h4>},
       "Check for added diff file header" );
-like( $email, qr{<ins>\+    \{ isa        =&gt; \$ap_req_class,\n</ins>},
+like( $email, qr{<ins style="background-color:#dfd;text-decoration:none;display:block;padding:0 10px;">\+    \{ isa        =&gt; \$ap_req_class,\n</ins>},
       'Check for an insert element.');
-like( $email, qr{<del>-    \{ isa        =&gt; ('|&#39;)Apache\1,\n</del>},
+like( $email, qr{<del style="background-color:#fdd;text-decoration:none;display:block;padding:0 10px;">-    \{ isa        =&gt; ('|&#39;)Apache\1,\n</del>},
       'Check for a del element');
 
 # Make sure that it's not attached.
@@ -202,7 +202,7 @@ ok( $notifier->execute, 'HTML diff_switches notify' );
 $email = get_output();
 
 like $email,
-    qr{<div class="addfile"><h4>Added:\s+trunk/Params-CallbackRequest/lib/Params/Callback\.pm</h4></div>\n</div>\s+</body>},
+    qr{<div class="addfile" style="border:1px solid #ccc;margin:10px 0;"><h4 style="font-family: verdana,arial,helvetica,sans-serif;font-size:10pt;padding:8px;background:#369;color:#fff;margin:0;">Added:\s+trunk/Params-CallbackRequest/lib/Params/Callback\.pm</h4></div>\n</div>\s+</body>},
     'Check for added diff file header without body';
 
 ##############################################################################
@@ -284,7 +284,7 @@ ok( $notifier->execute, "Notify HTML viewcvs_url" );
 # Check the output.
 $email = get_output();
 like( $email,
-      qr|<dt>Revision</dt>\s+<dd><a href="http://svn\.example\.com/\?rev=111\&amp;view=rev">111</a></dd>\n|,
+      qr|<dt style="float: left; width: 6em; font-weight: bold;font-family: verdana,arial,helvetica,sans-serif; font-size: 10pt;">Revision:</dt>\s+<dd><a style="color: white;font-weight: bold;" href="http://svn\.example\.com/\?rev=111\&amp;view=rev">111</a></dd>\n|,
       'Check for HTML URL');
 
 ##############################################################################
@@ -302,7 +302,7 @@ ok( $notifier->execute, "Notify HTML svnweb_url" );
 # Check the output.
 $email = get_output();
 like( $email,
-      qr|<dt>Revision</dt>\s+<dd><a href="http://svn\.example\.com/\?rev=111\&amp;view=rev">111</a></dd>\n|,
+      qr|<dt style="float: left; width: 6em; font-weight: bold;font-family: verdana,arial,helvetica,sans-serif; font-size: 10pt;">Revision:</dt>\s+<dd><a style="color: white;font-weight: bold;" href="http://svn\.example\.com/\?rev=111\&amp;view=rev">111</a></dd>\n|,
       'Check for HTML URL');
 
 ##############################################################################
@@ -354,7 +354,7 @@ like( $email, qr{<div class="modfile" style="border:1px solid #ccc;margin:10px 0
 # Check for propset file.
 like( $email, qr{<a id="trunkactivitymailbinactivitymail"></a>\n},
       "Check for modified file div ID");
-like( $email, qr{<div class="propset"><h4>Property changes: trunk/activitymail/t/activitymail\.t</h4>},
+like( $email, qr{<div class="propset" style="border:1px solid #ccc;margin:10px 0;"><h4 style="font-family: verdana,arial,helvetica,sans-serif;font-size:10pt;padding:8px;background:#369;color:#fff;margin:0;">Property changes: trunk/activitymail/t/activitymail\.t</h4>},
       "Check for modified file header" );
 
 ##############################################################################
@@ -378,7 +378,7 @@ like($email, qr/link\.\n\nWe/, "Check for multiple lines" );
 
 # Check for SVNWeb URLs.
 like( $email,
-      qr|<dt>Revision</dt>\s+<dd><a href="http://svn\.example\.com/index\.cgi/revision/\?rev=444">444</a></dd>\n|,
+      qr|<dt style="float: left; width: 6em; font-weight: bold;font-family: verdana,arial,helvetica,sans-serif; font-size: 10pt;">Revision:</dt>\s+<dd><a style="color: white;font-weight: bold;" href="http://svn\.example\.com/index\.cgi/revision/\?rev=444">444</a></dd>\n|,
       'Check for main SVNWeb URL');
 like($email,
      qr{<a href="http://svn\.example\.com/index\.cgi/revision/\?rev=6000">Revision 6000</a>\.},
@@ -433,9 +433,9 @@ ok $notifier->execute, 'Notify HTML header and footer checking';
 $email = get_output();
 $email = get_output();
 like( $email,
-      qr{<p>Hey, we could add one for a Subversion Revision # 606, too!</p>
+      qr{<p style="margin: 0 0 1em 0;line-height: 14pt;">Hey, we could add one for a Subversion Revision # 606, too!</p>
 
-<p>And finally, we have RT-Ticket: 123 for Jesse and RT # 445 for Ask\.
+<p style="margin: 0 0 1em 0;line-height: 14pt;">And finally, we have RT-Ticket: 123 for Jesse and RT # 445 for Ask\.
 And we even have Mantis-161: foo bar baz for Dirk Olmes\.</p>},
       'The log message should be in paragraph tags'
 );
@@ -469,7 +469,7 @@ ok( $notifier->execute, "Notify complex example" );
 
 $email = get_output();
 # Make sure multiple lines are paragraphs!
-like($email, qr{link\.</p>\n\n<p>We}, "Check for multiple paragraphs" );
+like($email, qr{link\.</p>\n\n<p style="margin: 0 0 1em 0;line-height: 14pt;">We}, "Check for multiple paragraphs" );
 
 # Make sure we have good unicode characters.
 UTF8: {
@@ -479,12 +479,12 @@ UTF8: {
 
 # Make sure that binary files in the diff are set up properly.
 like($email,
-     qr{<div class="binary"><h4>Deleted: trunk/SVN-Notify/t/data/bin/sendmail\.exe</h4>},
+     qr{<div class="binary" style="border:1px solid #ccc;margin:10px 0;"><h4 style="font-family: verdana,arial,helvetica,sans-serif;font-size:10pt;padding:8px;background:#369;color:#fff;margin:0;">Deleted: trunk/SVN-Notify/t/data/bin/sendmail\.exe</h4>},
      "Check for binary file div");
 
 # Make sure that copied files in the diff are set up properly.
 like($email,
-     qr{<div class="copfile"><h4>Copied: trunk/TestSimple/doc/pod/Test/Builder\.pod \(1634 => 1646\)</h4>},
+     qr{<div class="copfile" style="border:1px solid #ccc;margin:10px 0;"><h4 style="font-family: verdana,arial,helvetica,sans-serif;font-size:10pt;padding:8px;background:#369;color:#fff;margin:0;">Copied: trunk/TestSimple/doc/pod/Test/Builder\.pod \(1634 => 1646\)</h4>},
      "Check for copied file div");
 
 # Check linkize results.
@@ -515,7 +515,7 @@ like($email,
 
 # Check for ViewCVS URLs.
 like( $email,
-      qr|<dt>Revision</dt>\s+<dd><a href="http://viewsvn\.bricolage\.cc/\?rev=444\&amp;view=rev">444</a></dd>\n|,
+      qr|<dt style="float: left; width: 6em; font-weight: bold;font-family: verdana,arial,helvetica,sans-serif; font-size: 10pt;">Revision:</dt>\s+<dd><a style="color: white;font-weight: bold;" href="http://viewsvn\.bricolage\.cc/\?rev=444\&amp;view=rev">444</a></dd>\n|,
       'Check for main ViewCVS URL');
 like($email,
      qr{<a href="http://viewsvn\.bricolage\.cc/\?rev=6000&amp;view=rev">Revision 6000</a>\.},
@@ -524,7 +524,7 @@ like($email,
      qr{<a href="http://viewsvn\.bricolage\.cc/\?rev=6001&amp;view=rev">rev\n6001</a>\.},
      "Check for split line log mesage ViewCVS URL");
 unlike($email,
-       qr{<a href="http://viewsvn\.bricolage\.cc/\?rev=200&amp;view=rev">rev 200</a>,},
+       qr{<a style="color: white;font-weight: bold;" href="http://viewsvn\.bricolage\.cc/\?rev=200&amp;view=rev">rev 200</a>,},
        "Check for no grev 200 ViewCVS URL");
 
 # Check for Bugzilla URLs.
@@ -557,7 +557,7 @@ like( $email,
       qr{<a href="http://ticket\.example\.com/id=54321">Custom # 54321</a>},
       "Check for custom ticket URL" );
 
-unlike $email, qr{<p></p>}, 'There should be no empty paragraphs';
+unlike $email, qr{<p style="margin: 0 0 1em 0;line-height: 14pt;"></p>}, 'There should be no empty paragraphs';
 
 ##############################################################################
 # Functions.
