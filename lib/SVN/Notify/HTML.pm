@@ -213,8 +213,7 @@ sub start_html {
 =head3 start_body
 
 This method starts the body of the HTML notification message. It first calls
-C<start_html()>, and then outputs the C<< <style> >> tag, calling
-C<output_css()> between them. It then outputs an opening C<< <div> >> tag.
+C<start_html()>. It then outputs an opening C<< <div> >> tag.
 
 If the C<header> attribute is set, C<start_body()> outputs it between
 C<< <div> >> tags with the ID "header". Furthermore, if the header happens to
@@ -232,9 +231,6 @@ Filters|SVN::Notify/"Writing Output Filters"> for details on filters.
 sub start_body {
     my ($self, $out) = @_;
     $self->start_html($out);
-    print $out qq{<style type="text/css"><!--\n};
-    $self->output_css( $out );
-    print $out qq{--></style>\n};
 
     my @html = ( (qq{<div id="msg" style="color:black;">\n}) );
     if (my $header = $self->header) {
@@ -249,30 +245,6 @@ sub start_body {
     return $self;
 }
 
-##############################################################################
-
-=head3 output_css
-
-  $notifier->output_css($file_handle);
-
-This method starts outputs the CSS for the HTML message. It is called by
-C<start_body()>, and which wraps the output of C<output_css()> in the
-appropriate C<< <style> >> tags.
-
-An output filter named "css" may be added to modify the output of CSS. The
-filter subroutine name should be C<css> and expect an array reference of lines
-of CSS. See L<Writing Output Filters|SVN::Notify/"Writing Output Filters"> for
-details on filters.
-
-=cut
-
-sub output_css {
-    my ($self, $out) = @_;
-    # We use _css() so that ColorDiff can override it and the filters then
-    # applied only one to all of the CSS.
-    print $out @{ $self->run_filters( css => $self->_css ) };
-    return $self;
-}
 
 ##############################################################################
 
