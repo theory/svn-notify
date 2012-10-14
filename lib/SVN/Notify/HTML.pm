@@ -200,7 +200,7 @@ sub start_html {
                   qq{" />\n}
               ) : ()
         ),
-        '<title>', encode_entities($self->subject, '<>&"'),
+        '<title>', encode_entities($self->subject),
         qq{</title>\n</head>\n<body>\n\n}
     );
 
@@ -333,7 +333,7 @@ sub output_log_message {
         ?  join(
             "\n",
             @{ $self->run_filters( log_message => [ @{ $self->message } ] ) }
-        ) :  encode_entities( join( "\n", @{ $self->message } ), '<>&"');
+        ) :  encode_entities( join( "\n", @{ $self->message } ));
 
     # Turn URLs and email addresses into links.
     if ($self->linkize) {
