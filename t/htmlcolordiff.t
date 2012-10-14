@@ -70,7 +70,7 @@ like( $email, qr/<\/style>/, "Check for </style> tag" );
 like( $email,
       qr/#patch ins {background:#dfd;text-decoration:none;display:block;padding:0 10px;}/,
       'Check for style' );
-like( $email, qr/<div id="msg">/, "Check for msg div" );
+like( $email, qr/<div id="msg" style="color:black;">/, "Check for msg div" );
 
 # Make sure we have headers for each of the four kinds of changes.
 for my $header ('Log Message', 'Modified Paths', 'Added Paths',
@@ -154,7 +154,7 @@ is( scalar @{[$email =~ m{Content-Transfer-Encoding: 8bit\n}g]}, 1,
 like( $email, qr/<div id="patch">/, "Check for patch div" );
 like( $email, qr{<a id="trunkParamsCallbackRequestChanges"></a>\n},
       "Check for file div ID");
-like( $email, qr{<div class="modfile"><h4>Modified: trunk/Params-CallbackRequest/Changes \(600 => 601\)</h4>},
+like( $email, qr{<div class="modfile" style="border:1px solid #ccc;margin:10px 0;"><h4 style="font-family: verdana,arial,helvetica,sans-serif;font-size:10pt;padding:8px;background:#369;color:#fff;margin:0;">Modified: trunk/Params-CallbackRequest/Changes \(600 => 601\)</h4>},
       "Check for diff file header" );
 like( $email, qr{<a id="trunkParamsCallbackRequestlibParamsCallbackpm"></a>\n},
       "Check for added file div ID");
@@ -348,7 +348,7 @@ like( $email, qr{Content-Transfer-Encoding: 8bit\n},
 # Check for a header for the modified file.
 like( $email, qr{<a id="trunkactivitymailbinactivitymail"></a>\n},
       "Check for modified file div ID");
-like( $email, qr{<div class="modfile"><h4>Modified: trunk/activitymail/bin/activitymail \(681 => 682\)</h4>},
+like( $email, qr{<div class="modfile" style="border:1px solid #ccc;margin:10px 0;"><h4 style="font-family: verdana,arial,helvetica,sans-serif;font-size:10pt;padding:8px;background:#369;color:#fff;margin:0;">Modified: trunk/activitymail/bin/activitymail \(681 => 682\)</h4>},
       "Check for modified file header" );
 
 # Check for propset file.

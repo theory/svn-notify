@@ -84,7 +84,7 @@ like( $email, qr/<\/style>/, "Check for </style> tag" );
 like( $email,
       qr/#msg dl.meta { border: 1px #006 solid; background: #369; padding: 6px; color: #fff; }/,
       "Check for style" );
-like( $email, qr/<div id="msg">/, "Check for msg div" );
+like( $email, qr/<div id="msg" style="color:black;">/, "Check for msg div" );
 
 # Make sure we have headers for each of the four kinds of changes.
 for my $header ('Log Message', 'Modified Paths', 'Added Paths',

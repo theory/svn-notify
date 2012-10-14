@@ -147,7 +147,7 @@ SKIP: {
     ok $notifier->prepare, 'Prepare log_message filter checking';
     ok $notifier->execute, 'Notify log_mesage filter checking';
     $email = get_output();
-    like $email, qr/<div id="msg">\nIn the beginning[.]{3}/m,
+    like $email, qr/<div id="msg" style="color:black;">\nIn the beginning[.]{3}/m,
         'Start text should be present';
     like $email, qr{</html>\nThe end[.]}m, 'End text should be present';
 

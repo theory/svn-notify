@@ -137,7 +137,7 @@ like $email, qr{^Modified: trunk/Params-CallbackRequest/Changes}m,
     'The diff should be embedded in the HTML mesage';
 
 like $email,
-    qr{^<div class="modfile"><h4>Modified: trunk/Params-CallbackRequest/Changes}m,
+    qr{^<div class="modfile" style="border:1px solid #ccc;margin:10px 0;"><h4 style="font-family: verdana,arial,helvetica,sans-serif;font-size:10pt;padding:8px;background:#369;color:#fff;margin:0;">Modified: trunk/Params-CallbackRequest/Changes}m,
     'The diff should be embedded in the HTML message';
 
 ##############################################################################
@@ -174,11 +174,11 @@ like $email, qr{^Modified: trunk/Params-CallbackRequest/Changes}m,
     'The diff should be embedded in the HTML mesage';
 
 like $email,
-    qr{^<div class="modfile"><h4>Modified: trunk/Params-CallbackRequest/Changes}m,
+    qr{^<div class="modfile" style="border:1px solid #ccc;margin:10px 0;"><h4 style="font-family: verdana,arial,helvetica,sans-serif;font-size:10pt;padding:8px;background:#369;color:#fff;margin:0;">Modified: trunk/Params-CallbackRequest/Changes}m,
     'The diff should be embedded in the HTML message';
 
 like $email,
-    qr{^<div class="modfile"><h4>Modified: trunk/Params-CallbackRequest/Changes}m,
+    qr{^<div class="modfile" style="border:1px solid #ccc;margin:10px 0;"><h4 style="font-family: verdana,arial,helvetica,sans-serif;font-size:10pt;padding:8px;background:#369;color:#fff;margin:0;">Modified: trunk/Params-CallbackRequest/Changes}m,
     'The diff should be embedded in the HTML::ColorDiff message';
 
 ##############################################################################
