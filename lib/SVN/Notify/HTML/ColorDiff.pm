@@ -104,7 +104,7 @@ sub output_diff {
         next unless $line;
         if ( $max && ( $length += length $line ) >= $max ) {
             print $out "</$in_span>" if $in_span;
-            print $out qq{<span class="lines">\@\@ Diff output truncated at $max characters. \@\@\n</span>};
+            print $out ( qq{<span class="lines" style="display:block;padding:0 10px;color:#888;background:#fff;">\@\@ Diff output truncated at $max characters. \@\@\n</span>} );
             $in_span = '';
             last;
         } else {
@@ -121,8 +121,8 @@ sub output_diff {
                 if (<$diff> !~ /^=/) {
                     # Looks like they used --no-diff-added or --no-diff-deleted.
                     ($in_span, $in_div) = '';
-                    print $out qq{<a id="$id"></a>\n<div class="$class">},
-                        qq{<h4>$action: $file</h4></div>\n};
+                    print $out ( ( qq{<a id="$id"></a>\n<div class="$class" style="border:1px solid #ccc;margin:10px 0;">},
+                          qq{<h4 style="font-family: verdana,arial,helvetica,sans-serif;font-size:10pt;padding:8px;background:#369;color:#fff;margin:0;">$action: $file</h4></div>\n}) );
                     next;
                 }
 
@@ -132,9 +132,13 @@ sub output_diff {
 
                 if ($before =~ /^\(Binary files differ\)/) {
                     # Just output the whole file div.
-                    print $out qq{<a id="$id"></a>\n<div class="binary"><h4>},
-                      qq{$action: $file</h4>\n<pre class="diff"><span>\n},
-                      qq{<span class="cx">$before\n</span></span></pre></div>\n};
+                    print $out (
+						( qq{<a id="$id"></a>\n<div class="binary" style="border:1px solid #ccc;margin:10px 0;"><h4 style="font-family: verdana,arial,helvetica,sans-serif;font-size:10pt;padding:8px;background:#369;color:#fff;margin:0;">},
+						  qq{$action: $file</h4>\n},
+						  qq{<pre class="diff" style="color:black;padding:0;line-height:1.2em;margin:0;width:100%;background:#eee;padding: 0 0 10px 0;overflow:auto;font-family:'Andale Mono','Courier New',monospace;font-size:9pt;">},
+						  qq{<span style="display:block;padding:0 10px;">\n},
+						  qq{<span style="display:block;padding:0 10px;">$before\n</span></span></pre></div>\n})
+                        )  ;
                     ($in_span, $in_div) = '';
                     next;
                 }
@@ -145,9 +149,11 @@ sub output_diff {
                 my ($rev2) = $after =~ /\(rev (\d+)\)$/;
 
                 # Output the headers.
-                print $out qq{<a id="$id"></a>\n<div class="$class"><h4>$action: $file},
-                  " ($rev1 => $rev2)</h4>\n";
-                print $out qq{<pre class="diff"><span>\n<span class="info">};
+                print $out ( ( qq{<a id="$id"></a>\n<div class="$class" style="border:1px solid #ccc;margin:10px 0;">},
+                          qq{<h4 style="font-family: verdana,arial,helvetica,sans-serif;font-size:10pt;padding:8px;background:#369;color:#fff;margin:0;">$action: $file},
+						  " ($rev1 => $rev2)</h4>\n") );
+                print $out ( ( qq{<pre class="diff" style="color:black;padding:0;line-height:1.2em;margin:0;width:100%;background:#eee;padding: 0 0 10px 0;overflow:auto;font-family:'Andale Mono','Courier New',monospace;font-size:9pt;">},
+                          qq{<span style="display:block;padding:0 10px;">\n<span class="info" style="display:block;padding:0 10px;color:#888;background:#fff;">}) )  ;
                 $in_div = 1;
                 print $out encode_entities($_, '<>&"'), "\n" for ($before, $after);
                 print $out "</span>";
@@ -162,14 +168,17 @@ sub output_diff {
                 # Output the headers.
                 print $out "</$in_span>" if $in_span;
                 print $out "</span></pre></div>\n" if $in_div;
-                print $out qq{<a id="$id"></a>\n<div class="propset">},
-                  qq{<h4>Property changes: $file</h4>\n<pre class="diff"><span>\n};
+                print $out ( ( qq{<a id="$id"></a>\n<div class="propset" style="border:1px solid #ccc;margin:10px 0;">},
+					  qq{<h4 style="font-family: verdana,arial,helvetica,sans-serif;font-size:10pt;padding:8px;background:#369;color:#fff;margin:0;">},
+					  qq{Property changes: $file</h4>\n},
+					  qq{<pre class="diff" style="color:black;padding:0;line-height:1.2em;margin:0;width:100%;background:#eee;padding: 0 0 10px 0;overflow:auto;font-family:'Andale Mono','Courier New',monospace;font-size:9pt;">},
+					  qq{<span style="display:block;padding:0 10px;">\n}) );
                 $in_div = 1;
                 $in_span = '';
             } elsif ($line =~ /^\@\@/) {
                 print $out "</$in_span>" if $in_span;
                 print $out (
-                    qq{<span class="lines">},
+                    ( qq{<span class="lines" style="display:block;padding:0 10px;color:#888;background:#fff;">} ),
                     encode_entities($line, '<>&"'),
                     "\n</span>",
                 );
@@ -179,9 +188,10 @@ sub output_diff {
                 if ($in_span eq $type) {
                     print $out encode_entities($line, '<>&"'), "\n";
                 } else {
+                    my $clr = $type eq 'ins' ? '#dfd' : '#fdd';
                     print $out "</$in_span>" if $in_span;
                     print $out (
-                        qq{<$type>},
+                        ( qq{<$type style="background-color:$clr;text-decoration:none;display:block;padding:0 10px;">} ),
                         encode_entities($line, '<>&"'),
                         "\n",
                     );
@@ -193,7 +203,7 @@ sub output_diff {
                 } else {
                     print $out "</$in_span>" if $in_span;
                     print $out (
-                        qq{<span class="cx">},
+                        ( qq{<span class="cx" style="display:block;padding:0 10px;">} ),
                         encode_entities($line, '<>&"'),
                         "\n",
                     );

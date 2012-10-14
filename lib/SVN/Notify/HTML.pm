@@ -236,10 +236,10 @@ sub start_body {
     $self->output_css( $out );
     print $out qq{--></style>\n};
 
-    my @html = ( qq{<div id="msg">\n} );
+    my @html = ( (qq{<div id="msg" style="color:black;">\n}) );
     if (my $header = $self->header) {
         push @html, (
-            '<div id="header">',
+            ( '<div id="header" style="color: #fff; background: #636; border: 1px #300 solid; padding: 6px;font-family: verdana,arial,helvetica,sans-serif; font-size: 10pt; ">'),
             ( $header =~ /^</  ? $header : encode_entities($header, '<>&"') ),
             "</div>\n",
         );
@@ -298,24 +298,26 @@ sub output_metadata {
         return $self->SUPER::output_metadata($out);
     }
 
-    print $out qq{<dl class="meta">\n<dt>Revision</dt> <dd>};
-
+    print $out ( (
+        qq{<dl class="meta" style="border: 1px #006 solid; background: #369; padding: 6px; color: #fff; font-family: verdana,arial,helvetica,sans-serif; font-size: 10pt;">\n},
+        qq{<dt style="float: left; width: 6em; font-weight: bold;font-family: verdana,arial,helvetica,sans-serif; font-size: 10pt;">Revision:</dt> <dd>}
+    ));
     my $rev = $self->revision;
     if (my $url = $self->revision_url) {
         $url = encode_entities($url, '<>&"');
         # Make the revision number a URL.
-        printf $out qq{<a href="$url">$rev</a>}, $rev;
+        printf $out ( qq{<a style="color: white;font-weight: bold;" href="$url">$rev</a>} ), $rev;
     } else {
         # Just output the revision number.
         print $out $rev;
     }
 
     # Output the committer and a URL, if there is one.
-    print $out "</dd>\n<dt>Author</dt> <dd>";
+    print $out ( qq{</dd>\n<dt style="float: left; width: 6em; font-weight: bold;font-family: verdana,arial,helvetica,sans-serif; font-size: 10pt;">Author:</dt> <dd>} );
     my $user = encode_entities($self->user, '<>&"');
     if (my $url = $self->author_url) {
         $url = encode_entities($url, '<>&"');
-        printf $out qq{<a href="$url">$user</a>}, $user;
+        printf $out ( qq{<a style="color: white;font-weight: bold" href="$url">$user</a>} ), $user;
     } else {
         # Just output the username
         print $out $user;
@@ -323,7 +325,7 @@ sub output_metadata {
 
     print $out (
         "</dd>\n",
-        '<dt>Date</dt> <dd>',
+        ( qq{<dt style="float: left; width: 6em; font-weight: bold;font-family: verdana,arial,helvetica,sans-serif; font-size: 10pt;">Date:</dt> <dd>} ),
         encode_entities($self->date, '<>&"'), "</dd>\n",
         "</dl>\n\n"
     );
@@ -392,15 +394,15 @@ sub output_log_message {
 
     print $out "<h3>Log Message</h3>\n";
     if ($filters || $self->wrap_log) {
-        $msg = '<p>' . join( "</p>\n\n<p>", split /\n\s*\n/, $msg ) . '</p>'
-            if !$filters && $self->wrap_log;
-        print $out (
-            qq{<div id="logmsg">\n},
-            $msg,
-            qq{</div>\n\n},
-        )
+        $msg = ( '<p style="margin: 0 0 1em 0;line-height: 14pt;">' . join( "</p>\n\n<p style=\"margin: 0 0 1em 0;line-height: 14pt;\">", split /\n\s*\n/, $msg ) . '</p>' )
+        if !$filters && $self->wrap_log;
+			print $out (
+				( qq{<div id="logmsg" style="background: #ffc; border: 1px #fa0 solid; padding: 0 1em 0 1em; font-family: verdana,arial,helvetica,sans-serif; font-size: 10pt;">\n} ),
+				$msg,
+				qq{</div>\n\n},
+			)
     } else {
-        print $out "<pre>$msg</pre>\n\n";
+        print $out ( qq{<pre style="overflow: auto; background: #ffc; border: 1px #fa0 solid; padding: 6px;">$msg</pre>\n\n} );
     }
     return $self;
 }
@@ -488,7 +490,7 @@ sub end_body {
     my @html;
     if (my $footer = $self->footer) {
         push @html, (
-            '<div id="footer">',
+            ( '<div id="footer" style="color: #fff; background: #636; border: 1px #300 solid; padding: 6px;font-family: verdana,arial,helvetica,sans-serif; font-size: 10pt; ">' ),
             ( $footer =~ /^</  ? $footer : encode_entities($footer, '<>&"') ),
             "</div>\n",
         );

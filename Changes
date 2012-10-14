@@ -2,6 +2,10 @@ Revision history for Perl extension SVN::Notify
 
 2.85
       - Fixed a typo, thanks to gregor herrmann of the Debian project.
+      - ColorDiff now outputs inline css by default, adding compatibily with
+        many web mail clients like gmail. Added by Fabrizio Giustina,
+        original patch by "teguheko" submitted through 
+        https://rt.cpan.org/Public/Bug/Display.html?id=52121
 
 2.84  2013-08-13T14:25:21Z
       - Added `--smtp-tls` to the output of `man svnnotify`.

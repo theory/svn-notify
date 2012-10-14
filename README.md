@@ -1,6 +1,8 @@
 SVN/Notify version 2.85
 =======================
 
+    patched with inline css support
+
 This class may be used for sending email messages for
 [Subversion](http://subversion.tigris.org/) repository activity. There are a
 number of different modes supported, and SVN::Notify is fully subclassable, to
