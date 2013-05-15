@@ -55,3 +55,4 @@ TortoiseSVN
 GitHub
 TLS
 auth
+SMTP
