@@ -596,7 +596,7 @@ sub _css {
         qq(#msg dl a:visited { color:#cc6; }\n),
         q(h3 { font-family: verdana,arial,helvetica,sans-serif; ),
             qq(font-size: 10pt; font-weight: bold; }\n),
-        q(#msg pre { overflow: auto; background: #ffc; ),
+        q(#msg pre { white-space: pre-line; overflow: auto; background: #ffc; ),
             qq(border: 1px #fa0 solid; padding: 6px; }\n),
         qq(#logmsg { background: #ffc; border: 1px #fa0 solid; padding: 1em 1em 0 1em; }\n),
         qq(#logmsg p, #logmsg pre, #logmsg blockquote { margin: 0 0 1em 0; }\n),
