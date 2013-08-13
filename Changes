@@ -1,6 +1,6 @@
 Revision history for Perl extension SVN::Notify
 
-2.84
+2.84  2013-08-13T14:25:21Z
       - Added `--smtp-tls` to the output of `man svnnotify`.
       - Removed `--smtp-authtype` from the output of `man svnnotify`.
       - Added `--diff-content-type` option. Defaults to "text/plain" for
