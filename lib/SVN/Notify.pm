@@ -1324,7 +1324,9 @@ sub prepare_subject {
     # Add the first sentence/line from the log message.
     unless ($self->{no_first_line}) {
         # Truncate to first period after a minimum of 10 characters.
-        my $i = index substr($self->{message}[0], 10), '. ';
+        my $min = length $self->{message}[0];
+        $min = 10 if $min > 10;
+        my $i = index substr($self->{message}[0], $min), '. ';
         $self->{subject} .= $i > 0
             ? substr($self->{message}[0], 0, $i + 11)
             : $self->{message}[0];
