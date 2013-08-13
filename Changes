@@ -7,6 +7,10 @@ Revision history for Perl extension SVN::Notify
         backward compatibility. Patch by Daniel P. Wright.
       - Renamed `Filter.pm` to `Filter.pod`, since it's just documentation.
       - Removed the pod tests from the distribution.
+      - Changed the CSS for message `<pre>` blocks to use `white-space:
+        pre-line`, so that long lines will be wrapped, but newlines are still
+        respected as usual. Thanks to Dave Abrahams for the patch (and the
+        persistence).
 
 2.83  2011-10-29T00:19:07Z
       - Added the `smtp_port` parameter and accompanying `--smtp-port` option.
