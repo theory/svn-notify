@@ -11,6 +11,9 @@ Revision history for Perl extension SVN::Notify
         pre-line`, so that long lines will be wrapped, but newlines are still
         respected as usual. Thanks to Dave Abrahams for the patch (and the
         persistence).
+      - Changed C<to_regex_map> to allow it to match any path in the
+        repository, including files, rather than just directories. Patch from
+        mscherer.
 
 2.83  2011-10-29T00:19:07Z
       - Added the `smtp_port` parameter and accompanying `--smtp-port` option.
