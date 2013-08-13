@@ -1462,16 +1462,19 @@ sub output_headers {
     $self->_dbpnt( "Outputting headers") if $self->{verbose} > 2;
 
     # Q-Encoding (RFC 2047)
-    my $subj = PERL58
-        ? Encode::encode( 'MIME-Q', $self->{subject} )
-        : $self->{subject};
+    my ($subj, $from, $to) = PERL58 ? map {
+        Encode::encode( 'MIME-Q', $_ );
+    } $self->{subject}, $self->{from}, join ', ', @{ $self->{to} } : (
+        $self->{subject}, $self->{from}, join ', ', @{ $self->{to} }
+    );
+
     my @headers = (
         "MIME-Version: 1.0\n",
         "X-Mailer: SVN::Notify " . $self->VERSION
             . ": http://search.cpan.org/dist/SVN-Notify/\n",
-        "From: $self->{from}\n",
-        "Errors-To: $self->{from}\n",
-        "To: " . join ( ', ', @{ $self->{to} } ) . "\n",
+        "From: $from\n",
+        "Errors-To: $from\n",
+        "To: $to\n",
         "Subject: $subj\n"
     );
 

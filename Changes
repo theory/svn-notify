@@ -16,6 +16,8 @@ Revision history for Perl extension SVN::Notify
         mscherer.
       - Fixed error when the first line of the commit message is less than 10
         characters long (issue #2).
+      - Fixed the "From" and "To" headers so that they are properly encoded as
+        MIME headers (issue #6).
 
 2.83  2011-10-29T00:19:07Z
       - Added the `smtp_port` parameter and accompanying `--smtp-port` option.
