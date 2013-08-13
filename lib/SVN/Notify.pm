@@ -157,11 +157,11 @@ unless either C<to_regex_map> or C<to_email_map> is specified.
 This parameter specifies a hash reference of email addresses to regular
 expression strings. SVN::Notify will compile the regular expression strings
 into regular expression objects, and then send notification messages if and
-only if the name of one or more of the files affected by a commit matches
-the regular expression. This is a good way to have a notification email
-sent to a particular mail address (or comma-delimited list of addresses)
-only for certain parts of the subversion tree. This parameter is required
-unless C<to> or C<to_email_map> is specified.
+only if the name of one or more of the paths affected by a commit matches the
+regular expression. This is a good way to have a notification email sent to a
+particular mail address (or comma-delimited list of addresses) only for
+certain parts of the subversion tree. This parameter is required unless C<to>
+or C<to_email_map> is specified.
 
 The command-line options, C<--to-regex_map> and C<-x>, can be specified any
 number of times, once for each entry in the hash to be passed to C<new()>. The
