@@ -18,6 +18,9 @@ Revision history for Perl extension SVN::Notify
         characters long (issue #2).
       - Fixed the "From" and "To" headers so that they are properly encoded as
         MIME headers (issue #6).
+      - Removed the Makefile.PL, which was just passing through to
+        Module::Build. That pattern is now deprecated, and Module::Build is
+        required for configuration.
 
 2.83  2011-10-29T00:19:07Z
       - Added the `smtp_port` parameter and accompanying `--smtp-port` option.
