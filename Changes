@@ -1,6 +1,7 @@
 Revision history for Perl extension SVN::Notify
 
 2.85
+      - Fixed a typo, thanks to gregor herrmann of the Debian project.
 
 2.84  2013-08-13T14:25:21Z
       - Added `--smtp-tls` to the output of `man svnnotify`.

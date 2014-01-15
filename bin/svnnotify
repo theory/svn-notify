@@ -56,7 +56,7 @@ svnnotify - Subversion activity notification
                                directories affected by the commit. Required
                                unless --to or --to-email-map.
      --to-email-map REGEX=TO   The inverse of --to-regex-map: Map a regular
-                               expresion to an email address. Required unless
+                               expression to an email address. Required unless
                                --to or --to-regex-map.
   -f --from ADDRESS            Email address to use in the From header.
   -D --user-domain DOMAIN      Domain name to append to the username to
