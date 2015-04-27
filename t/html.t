@@ -82,7 +82,7 @@ like( $email, qr|<meta http-equiv="content-type" content="text/html; charset=utf
       'There should be a meta http-equiv tag');
 like( $email, qr/<\/style>/, "Check for </style> tag" );
 like( $email,
-      qr/#msg dl.meta { border: 1px #006 solid; background: #369; padding: 6px; color: #fff; }/,
+      qr/#msg dl.meta \{ border: 1px #006 solid; background: #369; padding: 6px; color: #fff; \}/,
       "Check for style" );
 like( $email, qr/<div id="msg">/, "Check for msg div" );
 

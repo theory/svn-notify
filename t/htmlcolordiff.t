@@ -68,7 +68,7 @@ for my $tag (qw(html head body dl)) {
 like( $email, qr|<style type="text/css">|, "Check for <style> tag" );
 like( $email, qr/<\/style>/, "Check for </style> tag" );
 like( $email,
-      qr/#patch ins {background:#dfd;text-decoration:none;display:block;padding:0 10px;}/,
+      qr/#patch ins \{background:#dfd;text-decoration:none;display:block;padding:0 10px;\}/,
       'Check for style' );
 like( $email, qr/<div id="msg">/, "Check for msg div" );
 

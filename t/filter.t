@@ -352,7 +352,7 @@ SKIP: {
     ok $notifier->prepare, 'Prepare log_message filter checking';
     ok $notifier->execute, 'Notify log_mesage filter checking';
     $email = get_output();
-    like $email, qr/^#patch { width: 90%; }/m, 'Should have modified the CSS';
+    like $email, qr/^#patch \{ width: 90%; \}/m, 'Should have modified the CSS';
 
     ##########################################################################
     # Try a CSS filter with ColofDiff.
@@ -368,7 +368,7 @@ SKIP: {
     ok $notifier->prepare, 'Prepare log_message filter checking';
     ok $notifier->execute, 'Notify log_mesage filter checking';
     $email = get_output();
-    like $email, qr/^#patch .lines, .info {color:#999;background:#fff;}/m,
+    like $email, qr/^#patch .lines, .info \{color:#999;background:#fff;\}/m,
         'Should have modified the CSS';
 }
 
