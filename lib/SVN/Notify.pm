@@ -1467,20 +1467,25 @@ sub output_headers {
         : $self->{subject};
 
     # Q-Encode the phrase part of recipient headers.
-    require Email::Address;
-    my $norm = sub {
-        return join ', ' => map {
-            my ($addr) = Email::Address->parse($_);
-            if ($addr) {
-                if (my $phrase = $addr->phrase) {
-                    $addr->phrase(Encode::encode( 'MIME-Q', $phrase ));
-                }
+    my $norm;
+    if (PERL58) {
+        require Email::Address;
+        $norm = sub {
+            return join ', ' => map {
+                my ($addr) = Email::Address->parse($_);
+                if ($addr) {
+                    if (my $phrase = $addr->phrase) {
+                        $addr->phrase(Encode::encode( 'MIME-Q', $phrase ));
+                    }
                 $addr->format;
-            } else {
-                $_;
-            }
-        } @_;
-    };
+                } else {
+                    $_;
+                }
+            } @_;
+        };
+    } else {
+        join ', ' => @_;
+    }
     my $from = $norm->($self->{from});
     my $to = $norm->(@{ $self->{to} });
 
