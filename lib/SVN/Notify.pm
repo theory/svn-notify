@@ -5,7 +5,7 @@ require 5.006_000;
 use constant WIN32  => $^O eq 'MSWin32';
 use constant PERL58 => $] > 5.007_000;
 require Encode if PERL58;
-$SVN::Notify::VERSION = '2.85';
+$SVN::Notify::VERSION = '2.86';
 
 # Make sure any output (such as from _dbpnt()) triggers no Perl warnings.
 if (PERL58) {
@@ -2403,7 +2403,7 @@ sub _usage {
 
 package SVN::Notify::SMTP;
 
-$SVN::Notify::SMTP::VERSION = '2.85';
+$SVN::Notify::SMTP::VERSION = '2.86';
 
 sub get_handle {
     my ($class, $notifier) = @_;

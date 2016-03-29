@@ -1,5 +1,8 @@
 Revision history for Perl extension SVN::Notify
 
+2.86
+      - Add version to SVN::Notify::SMTP to make PAUSE happy.
+
 2.85  2016-03-29T23:29:11Z
       - Fixed a typo, thanks to gregor herrmann of the Debian project.
       - Eliminated "Unescaped left brace in regex is deprecated" warnings on
