@@ -4,7 +4,7 @@ use strict;
 use Text::Trac;
 use SVN::Notify;
 
-$SVN::Notify::Filter::Trac::VERSION = '2.86';
+$SVN::Notify::Filter::Trac::VERSION = '2.87';
 
 =begin comment
 
