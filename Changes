@@ -1,6 +1,6 @@
 Revision history for Perl extension SVN::Notify
 
-2.86
+2.86  2016-03-29T23:35:16Z
       - Add version to SVN::Notify::SMTP to make PAUSE happy.
 
 2.85  2016-03-29T23:29:11Z
