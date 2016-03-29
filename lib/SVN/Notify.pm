@@ -1462,11 +1462,9 @@ sub output_headers {
     $self->_dbpnt( "Outputting headers") if $self->{verbose} > 2;
 
     # Q-Encoding (RFC 2047)
-    my ($subj, $from, $to) = PERL58 ? map {
-        Encode::encode( 'MIME-Q', $_ );
-    } $self->{subject}, $self->{from}, join ', ', @{ $self->{to} } : (
-        $self->{subject}, $self->{from}, join ', ', @{ $self->{to} }
-    );
+    my $subj = ( PERL58 && $self->{subject} =~ /(?:\P{ASCII}|=)/s ) ? Encode::encode( 'MIME-Q', $self->{subject} ) : $self->{subject};
+    my $from = $self->{from};
+    my $to = join ', ', @{ $self->{to} };
 
     my @headers = (
         "MIME-Version: 1.0\n",

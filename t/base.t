@@ -23,7 +23,7 @@ my $subj = "Did this, that, and the «other».";
 my $qsubj;
 if (SVN::Notify::PERL58()) {
     $subj = Encode::decode_utf8( $subj );
-    $qsubj = quotemeta Encode::encode( 'MIME-Q', $subj );
+    $qsubj = quotemeta Encode::encode( 'MIME-Q', '[111] ' . $subj );
 } else {
     $qsubj = quotemeta $subj;
 }
@@ -94,7 +94,7 @@ ok( $notifier->execute, "Notify" );
 my $email = get_output();
 
 # Check the email headers.
-like( $email, qr/Subject: \[111\] $qsubj\n/, "Check subject" );
+like( $email, qr/Subject: $qsubj\n/, "Check subject" );
 like( $email, qr/From: theory\n/, 'Check From');
 like( $email, qr/Errors-To: theory\n/, 'Check Errors-To');
 like( $email, qr/To: test\@example\.com\n/, 'Check To');
@@ -159,7 +159,7 @@ NO_BADLANG: {
 # Get the output.
 $email = get_output();
 
-like( $email, qr/Subject: \[111\] $qsubj\n/, "Check diff subject" );
+like( $email, qr/Subject: $qsubj\n/, "Check diff subject" );
 like( $email, qr/From: theory\n/, 'Check diff From');
 like( $email, qr/To: test\@example\.com\n/, 'Check diff To');
 like( $email, qr/Content-Language: en_US\n/, 'Check diff Content-Language');
@@ -195,7 +195,7 @@ NO_BADLANG: {
 # Get the output.
 $email = get_output();
 
-like( $email, qr/Subject: \[111\] $qsubj\n/, 'Check attach diff subject' );
+like( $email, qr/Subject: $qsubj\n/, 'Check attach diff subject' );
 like( $email, qr/From: theory\n/, 'Check attach diff From');
 like( $email, qr/To: test\@example\.com\n/, 'Check attach diff To');
 
@@ -289,7 +289,8 @@ ok( $notifier->execute, "Notify subject_prefix" );
 
 # Check the output.
 $email = get_output();
-like( $email, qr/Subject: \[C\] \[111\] $qsubj\n/, 'Check subject header for prefix' );
+my $qsubj_prefix = SVN::Notify::PERL58() ? quotemeta Encode::encode( 'MIME-Q', '[C] [111] ' . $subj ) : '[C] [111] ' . $subj;
+like( $email, qr/Subject: $qsubj_prefix\n/, 'Check subject header for prefix' );
 
 ##############################################################################
 # Try subject_prefix with %n.
