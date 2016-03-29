@@ -6,6 +6,11 @@ Revision history for Perl extension SVN::Notify
         Perl 5.21.
       - Fixed test failures triggered by an improvement to the encoding of
         headers by the Encode module. Thanks to Pali for the fix!
+      - Improved the encoding of the "From", "To", and "Reply-To" headers so
+        that only the phrase part is encoded, not the address itself. Thanks
+        to Pali for the corrections.
+      - Now require Email::Address to handle the proper parsing of addresses
+        for encoding into headers.
 
 2.84  2013-08-13T14:25:21Z
       - Added `--smtp-tls` to the output of `man svnnotify`.

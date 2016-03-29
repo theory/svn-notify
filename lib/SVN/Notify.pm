@@ -1462,9 +1462,27 @@ sub output_headers {
     $self->_dbpnt( "Outputting headers") if $self->{verbose} > 2;
 
     # Q-Encoding (RFC 2047)
-    my $subj = ( PERL58 && $self->{subject} =~ /(?:\P{ASCII}|=)/s ) ? Encode::encode( 'MIME-Q', $self->{subject} ) : $self->{subject};
-    my $from = $self->{from};
-    my $to = join ', ', @{ $self->{to} };
+    my $subj = PERL58 && $self->{subject} =~ /(?:\P{ASCII}|=)/s
+        ? Encode::encode( 'MIME-Q', $self->{subject} )
+        : $self->{subject};
+
+    # Q-Encode the phrase part of recipient headers.
+    require Email::Address;
+    my $norm = sub {
+        return join ', ' => map {
+            my ($addr) = Email::Address->parse($_);
+            if ($addr) {
+                if (my $phrase = $addr->phrase) {
+                    $addr->phrase(Encode::encode( 'MIME-Q', $phrase ));
+                }
+                $addr->format;
+            } else {
+                $_;
+            }
+        } @_;
+    };
+    my $from = $norm->($self->{from});
+    my $to = $norm->(@{ $self->{to} });
 
     my @headers = (
         "MIME-Version: 1.0\n",
@@ -1476,7 +1494,8 @@ sub output_headers {
         "Subject: $subj\n"
     );
 
-    push @headers, "Reply-To: $self->{reply_to}\n" if $self->{reply_to};
+    push @headers, 'Reply-To: ' . $norm->($self->{reply_to}) . "\n"
+        if $self->{reply_to};
 
     if (my $heads = $self->{add_headers}) {
         while (my ($k, $v) = each %{ $heads }) {
