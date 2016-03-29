@@ -2403,6 +2403,8 @@ sub _usage {
 
 package SVN::Notify::SMTP;
 
+$SVN::Notify::SMTP::VERSION = '2.85';
+
 sub get_handle {
     my ($class, $notifier) = @_;
 
