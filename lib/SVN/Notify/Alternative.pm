@@ -188,7 +188,7 @@ David E. Wheeler <david@justatheory.com>
 
 =head1 Copyright and License
 
-Copyright (c) 2005 Jukka Zitting and 2005-2011 David E. Wheeler. Some Rights
+Copyright (c) 2005 Jukka Zitting and 2005-2016 David E. Wheeler. Some Rights
 Reserved.
 
 This module is free software; you can redistribute it and/or modify it under
