@@ -1477,14 +1477,14 @@ sub output_headers {
                     if (my $phrase = $addr->phrase) {
                         $addr->phrase(Encode::encode( 'MIME-Q', $phrase ));
                     }
-                $addr->format;
+                    $addr->format;
                 } else {
                     $_;
                 }
             } @_;
         };
     } else {
-        join ', ' => @_;
+        $norm = sub { join ', ' => @_ };
     }
     my $from = $norm->($self->{from});
     my $to = $norm->(@{ $self->{to} });

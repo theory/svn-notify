@@ -40,12 +40,12 @@ my $build = $class->new(
         'perl'         => 5.006,
     },
     build_requires     => {
-        'Test::More'     => '0.17',
-        'Module::Build'  => '0.2701',
-        'File::Spec'     => 0,
-        'Email::Address' => '1.897',
+        'Test::More'    => '0.17',
+        'Module::Build' => '0.2701',
+        'File::Spec'    => 0,
     },
     recommends => {
+        'Email::Address'      => '1.897',
         'Pod::Usage'          => '1.33',
         'HTML::Entities'      => 0,
         'Net::SMTP::TLS'      => 0,

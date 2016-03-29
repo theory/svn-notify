@@ -289,8 +289,8 @@ ok( $notifier->execute, "Notify subject_prefix" );
 
 # Check the output.
 $email = get_output();
-my $qsubj_prefix = SVN::Notify::PERL58() ? quotemeta Encode::encode( 'MIME-Q', '[C] [111] ' . $subj ) : '[C] [111] ' . $subj;
-like( $email, qr/Subject: $qsubj_prefix\n/, 'Check subject header for prefix' );
+my $qsubj_prefix = SVN::Notify::PERL58() ? Encode::encode( 'MIME-Q', '[C] [111] ' . $subj ) : '[C] [111] ' . $subj;
+like( $email, qr/Subject: \Q$qsubj_prefix\E\n/, 'Check subject header for prefix' );
 
 ##############################################################################
 # Try subject_prefix with %n.
