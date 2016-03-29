@@ -30,9 +30,9 @@ my $subj = "DId thIs, thAt, And thE «OthEr».";
 my $qsubj;
 if (SVN::Notify::PERL58()) {
     Encode::_utf8_on( $subj );
-    $qsubj = quotemeta Encode::encode( 'MIME-Q', $subj );
+    $qsubj = quotemeta Encode::encode( 'MIME-Q', "[111] $subj" );
 } else {
-    $qsubj = quotemeta $subj;
+    $qsubj = quotemeta "[111] $subj";
 }
 
 ##############################################################################
@@ -81,7 +81,7 @@ ok $notifier->prepare, 'Prepare recipients filter checking';
 ok $notifier->execute, 'Notify recipients_mesage filter checking';
 like $email, qr/^To: tEst[@]ExAmplE[.]cOm/m, 'The recipient should be modified';
 like $email, qr/From: thEOry/m, 'The From header should be modified';
-like $email, qr/Subject: \[111\] $qsubj/m, 'The Subject should be modified';
+like $email, qr/Subject: $qsubj/m, 'The Subject should be modified';
 
 ##############################################################################
 # Metadata filter.

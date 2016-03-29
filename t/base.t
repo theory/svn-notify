@@ -23,9 +23,9 @@ my $subj = "Did this, that, and the «other».";
 my $qsubj;
 if (SVN::Notify::PERL58()) {
     $subj = Encode::decode_utf8( $subj );
-    $qsubj = quotemeta Encode::encode( 'MIME-Q', '[111] ' . $subj );
+    $qsubj = quotemeta Encode::encode( 'MIME-Q', "[111] $subj" );
 } else {
-    $qsubj = quotemeta $subj;
+    $qsubj = quotemeta "[111] $subj";
 }
 
 ##############################################################################

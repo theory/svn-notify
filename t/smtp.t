@@ -25,9 +25,9 @@ my $subj = "Did this, that, and the «other».";
 my $qsubj;
 if (SVN::Notify::PERL58()) {
     Encode::_utf8_on( $subj );
-    $qsubj = quotemeta Encode::encode( 'MIME-Q', $subj );
+    $qsubj = quotemeta Encode::encode( 'MIME-Q', "[111] $subj" );
 } else {
-    $qsubj = quotemeta $subj;
+    $qsubj = quotemeta "[111] $subj";
 }
 
 ##############################################################################
@@ -52,7 +52,7 @@ ok $smtp->{data}, 'data() should have been called';
 ok $smtp->{dataend}, 'dataend() should have been called';
 ok $smtp->{quit}, 'quit() should have been called';
 
-like $smtp->{datasend}, qr/Subject: \[111\] $qsubj\n/, 'Check subject';
+like $smtp->{datasend}, qr/Subject: $qsubj\n/, 'Check subject';
 like $smtp->{datasend}, qr/From: theory\n/, 'Check From';
 like $smtp->{datasend}, qr/To:\s+test\@example\.com,\s+try\@example\.com\n/,
     'Check To';

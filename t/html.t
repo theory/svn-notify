@@ -30,9 +30,9 @@ my $subj = "Did this, that, and the «other».";
 my $qsubj;
 if (SVN::Notify::PERL58()) {
     Encode::_utf8_on( $subj );
-    $qsubj = quotemeta Encode::encode( 'MIME-Q', $subj );
+    $qsubj = quotemeta Encode::encode( 'MIME-Q', "[111] $subj" );
 } else {
-    $qsubj = quotemeta $subj;
+    $qsubj = quotemeta "[111] $subj";
 }
 
 ##############################################################################
@@ -59,7 +59,7 @@ ok( $notifier->execute, "HTML notify" );
 my $email = get_output();
 
 # Check the email headers.
-like( $email, qr/Subject: \[111\] $qsubj\n/, 'Check HTML subject' );
+like( $email, qr/Subject: $qsubj\n/, 'Check HTML subject' );
 like( $email, qr/From: theory\n/, 'Check HTML From');
 like( $email, qr/To: test\@example\.com\n/, 'Check HTML To');
 like( $email, qr{Content-Type: text/html; charset=UTF-8\n},
@@ -133,7 +133,7 @@ ok( $notifier->execute, "HTML notify" );
 $email = get_output();
 
 # Check the email headers.
-like( $email, qr/Subject: \[111\] $qsubj\n/, 'Check HTML subject' );
+like( $email, qr/Subject: $qsubj\n/, 'Check HTML subject' );
 like( $email, qr/From: theory\n/, 'Check HTML From');
 like( $email, qr/To: test\@example\.com\n/, 'Check HTML To');
 like( $email, qr{Content-Type: text/html; charset=UTF-8\n},
@@ -159,7 +159,7 @@ NO_BADLANG: {
 # Get the output.
 $email = get_output();
 
-like( $email, qr/Subject: \[111\] $qsubj\n/, 'Check HTML subject' );
+like( $email, qr/Subject: $qsubj\n/, 'Check HTML subject' );
 like( $email, qr/From: theory\n/, 'Check HTML diff From');
 like( $email, qr/To: test\@example\.com\n/, 'Check HTML diff To');
 
@@ -214,7 +214,7 @@ ok( $notifier->execute, "Attach HTML attach diff notify" );
 # Get the output.
 $email = get_output();
 
-like( $email, qr/Subject: \[111\] $qsubj\n/,
+like( $email, qr/Subject: $qsubj\n/,
       "Check HTML attach diff subject" );
 like( $email, qr/From: theory\n/, 'Check HTML attach diff From');
 like( $email, qr/To: test\@example\.com\n/, 'Check HTML attach diff To');
