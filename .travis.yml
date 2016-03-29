@@ -8,3 +8,6 @@ perl:
   - "5.12"
   - "5.10"
   - "5.8"
+
+before_install:
+  - cpanm --installdeps . --with-recommends --quiet
