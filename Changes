@@ -4,6 +4,8 @@ Revision history for Perl extension SVN::Notify
 
 2.86  2016-03-29T23:35:16Z
       - Add version to SVN::Notify::SMTP to make PAUSE happy.
+      - Added a newline to verbose output. Thanks to @kberry for the report
+        (issue #16)!
 
 2.85  2016-03-29T23:29:11Z
       - Fixed a typo, thanks to gregor herrmann of the Debian project.

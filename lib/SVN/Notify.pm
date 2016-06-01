@@ -2375,7 +2375,7 @@ sub _read_pipe {
 # This method is used for debugging output in various verbose modes.
 ##############################################################################
 
-sub _dbpnt { print ref(shift), ': ', join ' ', @_; }
+sub _dbpnt { print ref(shift), ': ', join(' ', @_), "\n"; }
 
 ##############################################################################
 # This function is used to exit the program with an error if a parameter is
