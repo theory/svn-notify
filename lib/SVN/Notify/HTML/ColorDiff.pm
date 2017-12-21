@@ -219,7 +219,7 @@ sub _css {
             qq(font-size:10pt;padding:8px;background:#369;color:#fff;),
             qq(margin:0;}\n),
         qq(#patch .propset h4, #patch .binary h4 {margin:0;}\n),
-         qq(#patch pre {padding:0;line-height:1.2em;margin:0;}\n),
+         qq(#patch pre {padding:0;line-height:1.2em;margin:0;white-space:pre-wrap;}\n),
         qq(#patch .diff {width:100%;background:#eee;padding: 0 0 10px 0;),
             qq(overflow:auto;}\n),
         qq(#patch .propset .diff, #patch .binary .diff  {padding:10px 0;}\n),
