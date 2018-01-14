@@ -708,7 +708,9 @@ sub new {
                 $filters{$pkg} = {};
                 no strict 'refs';
                 while ( my ($k, $v) = each %{ "$pkg\::" } ) {
-                    my $code = *{$v}{CODE} or next;
+                    my $code = ref \$v eq 'GLOB' ? *{$v}{CODE}
+                             : ref  $v eq 'CODE' ? $v
+                             : *{ "$pkg\::$k" }{CODE} or next;
                     $filters{$pkg}->{$k} = $code;
                     $filts->{$k} ||= [];
                     push @{ $filts->{$k} }, $code;
