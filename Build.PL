@@ -36,7 +36,7 @@ my $build = $class->new(
     script_files       => ['bin/svnnotify'],
     configure_requires => { 'Module::Build' => '0.2701' },
     requires           => {
-        'Email::Address' => '1.897',
+        'Email::Address::XS' => '1.03',
         'Getopt::Long'   => '2.34',
         'perl'           => 5.006,
     },
