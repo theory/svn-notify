@@ -169,7 +169,7 @@ value passed to the option must be in the form of the key and the value
 separated by an equal sign. Consult the L<Getopt::Long> documentation for more
 information.
 
-Here's an example complements of Matt Doar of how to use C<to_regex_map> to do
+Here's an example compliments of Matt Doar of how to use C<to_regex_map> to do
 per-branch matching:
 
   author=`svnlook author $REPOS -r $REV`
