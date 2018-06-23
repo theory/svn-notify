@@ -56,3 +56,15 @@ GitHub
 TLS
 auth
 SMTP
+8bit
+Big5
+HTML
+RT
+SourceForge.net
+email
+meta
+rt
+i.e
+Uppercase
+e.g
+uppercase

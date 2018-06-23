@@ -468,7 +468,7 @@ sub output_file_lists {
 
   $notifier->end_body($file_handle);
 
-Closes out the body of the email by outputting the closing C<< </body> >> and
+Closes out the body of the email by emitting the closing C<< </body> >> and
 C<< </html> >> tags. Designed to be called when the body of the message is
 complete, and before any call to C<output_attached_diff()>.
 
