@@ -3,7 +3,7 @@ package SVN::Notify::Alternative;
 use strict;
 use SVN::Notify ();
 
-$SVN::Notify::Alternative::VERSION = '1.0';
+$SVN::Notify::Alternative::VERSION = '2.87';
 @SVN::Notify::Alternative::ISA = qw(SVN::Notify);
 
 __PACKAGE__->register_attributes(
