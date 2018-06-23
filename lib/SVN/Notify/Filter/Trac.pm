@@ -1,6 +1,7 @@
 package SVN::Notify::Filter::Trac;
 
 use strict;
+use warnings;
 use Text::Trac;
 use SVN::Notify;
 

@@ -1,6 +1,7 @@
 package SVN::Notify::HTML;
 
 use strict;
+use warnings;
 use HTML::Entities;
 use SVN::Notify ();
 

@@ -1,6 +1,7 @@
 package SVN::Notify;
 
 use strict;
+use warnings;
 require 5.006_000;
 use constant WIN32  => $^O eq 'MSWin32';
 use constant PERL58 => $] > 5.007_000;

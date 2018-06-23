@@ -1,6 +1,7 @@
 package SVN::Notify::Alternative;
 
 use strict;
+use warnings;
 use SVN::Notify ();
 
 $SVN::Notify::Alternative::VERSION = '2.87';
