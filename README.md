@@ -56,7 +56,7 @@ SVN::Notify has the following dependencies:
 Copyright and License
 ---------------------
 
-Copyright (c) 2004-2016 David E. Wheeler. Some Rights Reserved.
+Copyright (c) 2004-2018 David E. Wheeler. Some Rights Reserved.
 
 This module is free software; you can redistribute it and/or modify it under
 the same terms as Perl itself.
