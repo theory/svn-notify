@@ -1475,7 +1475,7 @@ sub output_headers {
         $norm = sub {
             return join ', ' => map {
                 my ($addr) = Email::Address::XS->parse($_);
-                if ($addr->is_valid()) {
+                if (defined $addr && $addr->is_valid()) {
                     if (my $phrase = $addr->phrase) {
                         $addr->phrase(Encode::encode( 'MIME-Q', $phrase ));
                     }
