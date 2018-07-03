@@ -1,5 +1,7 @@
 Revision history for Perl extension SVN::Notify
 
+2.88
+
 2.87  2018-07-03T12:00:40Z
       - Replace uses of Email::Address with Email::Address::XS due to
         deprecation of Email::Address.
