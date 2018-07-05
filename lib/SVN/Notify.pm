@@ -1,6 +1,7 @@
 package SVN::Notify;
 
 use strict;
+use warnings;
 require 5.006_000;
 use constant WIN32  => $^O eq 'MSWin32';
 use constant PERL58 => $] > 5.007_000;
@@ -1694,7 +1695,7 @@ sub output_file_lists {
 
   $notifier->end_body($file_handle);
 
-Closes out the body of the email by outputting the contents of the C<footer>
+Closes out the body of the email by emitting the contents of the C<footer>
 attribute, if any, and then a couple of newlines. Designed to be called when
 the body of the message is complete, and before any call to
 C<output_attached_diff()>.
